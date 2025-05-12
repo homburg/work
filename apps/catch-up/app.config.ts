@@ -54,6 +54,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           backgroundColor: "#ffffff",
         },
       ],
+      [
+        "expo-dev-client",
+        {
+          addGeneratedScheme: false,
+        },
+      ],
     ],
     experiments: {
       typedRoutes: true,
