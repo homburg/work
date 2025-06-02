@@ -6,11 +6,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     process.env.APP_VARIANT !== "development"
       ? {
           name: "catch-up",
-          bundleId: "dev.homburg.app.catch_up",
+          bundleId: "dev.homburg.app.catchup",
         }
       : {
           name: "🏗️ catch-up",
-          bundleId: "dev.homburg.app.catch_up.dev",
+          bundleId: "dev.homburg.app.catchup.dev",
         };
 
   return {
