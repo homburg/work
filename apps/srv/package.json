@@ -11,6 +11,10 @@
   "dependencies": {
     "@effect/platform": "^0.81.1",
     "@effect/platform-node": "^0.78.1",
+    "@opentelemetry/api-logs": "^0.201.1",
+    "@opentelemetry/instrumentation": "^0.201.1",
+    "@opentelemetry/sdk-logs": "^0.201.1",
+    "@vercel/otel": "^1.12.0",
     "effect": "^3.14.22",
     "next": "15.3.2",
     "react": "^19.0.0",
