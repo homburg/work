@@ -1,29 +1,104 @@
-# Welcome to your Expo app 👋
+# catch-up - Expo Mobile Application 📱
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A modern cross-platform mobile application built with Expo and React Native, featuring file-based routing and native platform integrations.
 
-## Get started
+## � Features
 
-1. Install dependencies
+- **Cross-Platform**: Runs on iOS, Android, and Web
+- **Expo Router**: File-based routing with nested navigation
+- **TypeScript**: Full type safety throughout the application
+- **Native Integrations**: Blur effects, haptics, symbols, and more
+- **Modern Navigation**: Bottom tabs with React Navigation
+- **Development Tools**: Hot reload, debugging, and testing setup
 
+## 🏗️ Tech Stack
+
+- **Framework**: Expo SDK 52 with React Native 0.76
+- **Language**: TypeScript
+- **Navigation**: 
+  - Expo Router 4 (file-based routing)
+  - React Navigation 7 (bottom tabs)
+- **UI Components**: 
+  - Expo Vector Icons
+  - Expo Symbols
+  - Expo Blur effects
+- **Native Features**:
+  - Haptics feedback
+  - Status bar control
+  - Deep linking
+  - Web browser integration
+- **Package Manager**: Yarn 4
+- **Testing**: Jest with Expo preset
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+
+- Yarn 4+ (configured via packageManager)
+- iOS Simulator (for iOS development)
+- Android Studio & Emulator (for Android development)
+- Expo CLI (installed automatically)
+
+### Installation & Running
+
+1. **Install dependencies**:
    ```bash
-   npm install
+   yarn install
    ```
 
-2. Start the app
-
+2. **Start the development server**:
    ```bash
-    npx expo start
+   yarn start
    ```
 
-In the output, you'll find options to open the app in a
+3. **Choose your platform**:
+   In the output, you'll find options to open the app in:
+   - **Development build** (recommended for production features)
+   - **Android emulator** (requires Android Studio)
+   - **iOS simulator** (requires Xcode on macOS)
+   - **Expo Go** (limited sandbox for quick testing)
+   - **Web browser** (for web development)
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+### Available Scripts
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+```bash
+yarn start           # Start Expo development server
+yarn android         # Run on Android emulator/device
+yarn ios            # Run on iOS simulator/device  
+yarn web            # Run in web browser
+yarn test           # Run Jest tests in watch mode
+yarn lint           # Run Expo linting
+yarn reset-project  # Reset to blank project template
+```
+
+## 🔧 Development
+
+### File-Based Routing
+
+This project uses [Expo Router](https://docs.expo.dev/router/introduction) with file-based routing. You can start developing by editing files inside the **app** directory:
+
+```
+app/
+├── (tabs)/          # Tab-based layout
+├── +not-found.tsx   # 404 page
+└── _layout.tsx      # Root layout
+```
+
+### Navigation Structure
+
+The app uses bottom tab navigation with:
+- **React Navigation 7** for tab management
+- **Expo Router** for file-based routing
+- **Deep linking** support built-in
+
+### Native Features
+
+The application includes several native integrations:
+- **Haptic feedback** for user interactions
+- **Blur effects** for modern UI
+- **System UI** controls for status bar
+- **Gesture handling** for smooth interactions
+- **WebView** for embedded web content
 
 ## Get a fresh project
 
