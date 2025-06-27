@@ -1,0 +1,19 @@
+# MCP Server Framework
+mcp>=1.0.0
+
+# OpenTelemetry
+opentelemetry-api>=1.20.0
+opentelemetry-sdk>=1.20.0
+opentelemetry-exporter-jaeger>=1.20.0
+opentelemetry-exporter-zipkin>=1.20.0
+requests>=2.31.0
+
+# Utilities
+pydantic>=2.0.0
+pyyaml>=6.0.1
+click>=8.1.0
+rich>=13.0.0
+
+# Development
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
