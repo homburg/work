@@ -1,0 +1,29 @@
+{
+  "name": "cross-repo-sync-action",
+  "version": "1.0.0",
+  "description": "Syncs and renames files or folders from your repo to a different repository and branch",
+  "main": "src/main.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "github-action",
+    "sync",
+    "cross-repo",
+    "automation",
+    "ci-cd"
+  ],
+  "author": "github-actions[bot]",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "effect": "^3.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
