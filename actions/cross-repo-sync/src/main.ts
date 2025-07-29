@@ -130,7 +130,8 @@ const copyFiles = (inputs: ActionInputs, cloneDir: string) =>
       }
       
       const destPath = `${cloneDir}/${destination}`
-      const destDir = destPath.substring(0, destPath.lastIndexOf('/'))
+      const lastSlashIndex = destPath.lastIndexOf('/')
+      const destDir = lastSlashIndex === -1 ? cloneDir : destPath.substring(0, lastSlashIndex)
       
       // Create destination directory if it doesn't exist
       yield* fs.makeDirectory(destDir, { recursive: true }).pipe(
