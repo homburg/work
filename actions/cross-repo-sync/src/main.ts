@@ -1,7 +1,8 @@
 import * as core from "@actions/core"
 import { Effect, Layer, pipe } from "effect"
-import { FileSystem, Command, CommandExecutor } from "@effect/platform"
+import { FileSystem, Command, CommandExecutor, Path } from "@effect/platform"
 import { NodeFileSystem, NodeRuntime, NodeCommandExecutor } from "@effect/platform-node"
+import * as path from "node:path"
 
 // Types for our domain
 interface ActionInputs {
@@ -127,7 +128,7 @@ const cloneRepo = (inputs: ActionInputs, tempDir: string): Effect.Effect<string,
     
     // URL-encode the token to handle special characters (@, #, +, spaces, etc.)
     const repoUrl = `https://${encodeURIComponent(inputs.personalAccessToken)}@github.com/${inputs.destinationRepo}.git`
-    const cloneDir = `${tempDir}/destination-repo`
+    const cloneDir = path.join(tempDir, "destination-repo")
     
     // Remove existing clone directory if it exists
     yield* fs.remove(cloneDir, { recursive: true }).pipe(
@@ -155,9 +156,8 @@ const copyFiles = (inputs: ActionInputs, cloneDir: string): Effect.Effect<void, 
         continue
       }
       
-      const destPath = `${cloneDir}/${destination}`
-      const lastSlashIndex = destPath.lastIndexOf('/')
-      const destDir = lastSlashIndex === -1 ? cloneDir : destPath.substring(0, lastSlashIndex)
+      const destPath = path.join(cloneDir, destination)
+      const destDir = path.dirname(destPath)
       
       // Create destination directory if it doesn't exist
       yield* fs.makeDirectory(destDir, { recursive: true }).pipe(
@@ -196,8 +196,8 @@ const copyDirectoryRecursive = (fs: FileSystem.FileSystem, source: string, dest:
     const entries = yield* fs.readDirectory(source)
     
     for (const entry of entries) {
-      const sourcePath = `${source}/${entry}`
-      const destPath = `${dest}/${entry}`
+      const sourcePath = path.join(source, entry)
+      const destPath = path.join(dest, entry)
       
       // Check if entry is a directory
       const entryInfo = yield* fs.stat(sourcePath)

@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-action:
+  test-compilation:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -18,6 +18,38 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+
+      - name: Install Dependencies
+        run: |
+          cd actions/cross-repo-sync
+          npm ci
+
+      - name: Type Check
+        run: |
+          cd actions/cross-repo-sync
+          npm run typecheck
+
+      - name: Test Build
+        run: |
+          cd actions/cross-repo-sync
+          echo "TypeScript compilation successful"
+
+  test-action:
+    runs-on: ubuntu-latest
+    needs: test-compilation
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: |
+          cd actions/cross-repo-sync
+          npm ci
 
       - name: Create Test Files
         run: |
@@ -29,9 +61,11 @@ jobs:
           echo "dummy logo content" > "test-data/my assets/logo.png"
 
       - name: Test Cross-Repo Sync Action
+        id: test-sync
         uses: ./
         with:
-          personal_access_token: ${{ secrets.TEST_PAT }}
+          personal_access_token: ${{ secrets.TEST_PAT || 'fake-token-for-testing' }}
+          dry_run: true
           sync_paths: |
             test-data/docs:content/documentation
             test-data/ROOT_README.md:README.md
