@@ -146,6 +146,12 @@ npm install
 npm run typecheck
 ```
 
+### Running Locally
+
+```bash
+npm run start
+```
+
 ### Testing Locally
 
 Use [act](https://github.com/nektos/act) to test the action locally:
@@ -157,7 +163,7 @@ act -W .github/workflows/test-action.yml
 ## Technical Details
 
 - **Framework**: Effect-TS for functional programming and error handling
-- **Runtime**: Node.js with `--experimental-strip-types` for native TypeScript support
+- **Runtime**: tsx for TypeScript execution without build step
 - **Action Type**: Composite action for maximum flexibility
 - **Git Operations**: Automated clone, commit, and push operations
 
