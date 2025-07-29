@@ -1,8 +1,7 @@
 import * as core from "@actions/core"
 import { Effect, Layer, pipe } from "effect"
-import { FileSystem } from "@effect/platform"
-import { NodeFileSystem, NodeRuntime } from "@effect/platform-node"
-import { execSync } from "child_process"
+import { FileSystem, Command, CommandExecutor } from "@effect/platform"
+import { NodeFileSystem, NodeRuntime, NodeCommandExecutor } from "@effect/platform-node"
 
 // Types for our domain
 interface ActionInputs {
@@ -17,18 +16,18 @@ interface GitConfig {
   readonly userEmail: string
 }
 
-// Helper function for executing git commands
-const executeCommand = (command: string, cwd?: string): Effect.Effect<string, Error> =>
-  Effect.try({
-    try: () => {
-      const result = execSync(command, { 
-        cwd, 
-        encoding: "utf-8",
-        stdio: ["pipe", "pipe", "pipe"]
-      })
-      return result.toString().trim()
-    },
-    catch: (error) => new Error(`Command failed: ${command}\n${String(error)}`)
+// Helper function for executing git commands using Effect Command
+const executeCommand = (command: string, args: ReadonlyArray<string> = [], cwd?: string): Effect.Effect<string, Error, CommandExecutor.CommandExecutor> =>
+  Effect.gen(function* () {
+    const cmd = Command.make(command, ...args)
+    const cmdWithCwd = cwd ? cmd.pipe(Command.workingDirectory(cwd)) : cmd
+    
+    const result = yield* cmdWithCwd.pipe(
+      Command.string,
+      Effect.mapError((error) => new Error(`Command failed: ${command} ${args.join(' ')}\n${String(error)}`))
+    )
+    
+    return result.trim()
   })
 
 // Parse action inputs
@@ -109,14 +108,14 @@ const parseInputs = Effect.gen(function* () {
 })
 
 // Configure git user
-const configureGit = (config: GitConfig) =>
+const configureGit = (config: GitConfig): Effect.Effect<void, Error, CommandExecutor.CommandExecutor> =>
   Effect.gen(function* () {
-    yield* executeCommand(`git config --global user.name "${config.userName}"`)
-    yield* executeCommand(`git config --global user.email "${config.userEmail}"`)
+    yield* executeCommand("git", ["config", "--global", "user.name", config.userName])
+    yield* executeCommand("git", ["config", "--global", "user.email", config.userEmail])
   })
 
 // Clone destination repository
-const cloneRepo = (inputs: ActionInputs, tempDir: string) =>
+const cloneRepo = (inputs: ActionInputs, tempDir: string): Effect.Effect<string, Error, FileSystem.FileSystem | CommandExecutor.CommandExecutor> =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem
     
@@ -135,13 +134,13 @@ const cloneRepo = (inputs: ActionInputs, tempDir: string) =>
       Effect.ignore
     )
     
-    yield* executeCommand(`git clone "${repoUrl}" "${cloneDir}"`)
+    yield* executeCommand("git", ["clone", repoUrl, cloneDir])
     
     return cloneDir
   })
 
 // Copy files according to sync paths
-const copyFiles = (inputs: ActionInputs, cloneDir: string) =>
+const copyFiles = (inputs: ActionInputs, cloneDir: string): Effect.Effect<void, Error, FileSystem.FileSystem> =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem
     
@@ -213,10 +212,10 @@ const copyDirectoryRecursive = (fs: FileSystem.FileSystem, source: string, dest:
   })
 
 // Check for changes and commit/push if needed
-const commitAndPush = (cloneDir: string) =>
+const commitAndPush = (cloneDir: string): Effect.Effect<string, Error, CommandExecutor.CommandExecutor> =>
   Effect.gen(function* () {
     // Check if there are any changes
-    const status = yield* executeCommand("git status --porcelain", cloneDir)
+    const status = yield* executeCommand("git", ["status", "--porcelain"], cloneDir)
     
     if (!status.trim()) {
       core.info("No changes detected, skipping commit and push")
@@ -224,17 +223,17 @@ const commitAndPush = (cloneDir: string) =>
     }
     
     // Add all changes
-    yield* executeCommand("git add .", cloneDir)
+    yield* executeCommand("git", ["add", "."], cloneDir)
     
     // Commit changes
     const commitMessage = "chore: Sync files from source repository"
-    yield* executeCommand(`git commit -m "${commitMessage}"`, cloneDir)
+    yield* executeCommand("git", ["commit", "-m", commitMessage], cloneDir)
     
     // Push changes
-    yield* executeCommand("git push origin main", cloneDir)
+    yield* executeCommand("git", ["push", "origin", "main"], cloneDir)
     
     // Get the commit hash
-    const commitHash = yield* executeCommand("git rev-parse HEAD", cloneDir)
+    const commitHash = yield* executeCommand("git", ["rev-parse", "HEAD"], cloneDir)
     
     core.info(`Successfully pushed changes with commit hash: ${commitHash}`)
     return commitHash
@@ -286,10 +285,12 @@ const program = Effect.gen(function* () {
 })
 
 // Run the program
-pipe(
-  program,
-  Effect.provide(NodeFileSystem.layer),
-  Effect.runPromise
+const layers = Layer.mergeAll(NodeFileSystem.layer, NodeCommandExecutor.layer)
+
+Effect.runPromise(
+  program.pipe(
+    Effect.provide(layers)
+  ) as Effect.Effect<void, Error, never>
 ).catch((error: unknown) => {
   core.setFailed(`Action failed: ${String(error)}`)
   process.exit(1)
