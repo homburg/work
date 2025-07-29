@@ -164,6 +164,7 @@ act -W .github/workflows/test-action.yml
 ## Technical Details
 
 - **Framework**: Effect-TS for functional programming and error handling
+- **File Operations**: Effect Platform FileSystem for type-safe file operations
 - **Runtime**: tsx for TypeScript execution without build step
 - **Action Type**: Composite action for maximum flexibility
 - **Git Operations**: Automated clone, commit, and push operations

@@ -1,8 +1,8 @@
 import * as core from "@actions/core"
-import { Effect, Layer, pipe, Context } from "effect"
+import { Effect, Layer, pipe } from "effect"
+import { FileSystem } from "@effect/platform"
+import { NodeFileSystem, NodeRuntime } from "@effect/platform-node"
 import { execSync } from "child_process"
-import { existsSync, mkdirSync, rmSync } from "fs"
-import { dirname, join } from "path"
 
 // Types for our domain
 interface ActionInputs {
@@ -16,12 +16,19 @@ interface GitConfig {
   readonly userEmail: string
 }
 
-// Service for executing shell commands
-interface CommandService {
-  readonly execute: (command: string, cwd?: string) => Effect.Effect<string, Error>
-}
-
-const CommandService = Context.GenericTag<CommandService>("CommandService")
+// Helper function for executing git commands
+const executeCommand = (command: string, cwd?: string): Effect.Effect<string, Error> =>
+  Effect.try({
+    try: () => {
+      const result = execSync(command, { 
+        cwd, 
+        encoding: "utf-8",
+        stdio: ["pipe", "pipe", "pipe"]
+      })
+      return result.toString().trim()
+    },
+    catch: (error) => new Error(`Command failed: ${command}\n${String(error)}`)
+  })
 
 // Parse action inputs
 const parseInputs = Effect.gen(function* () {
@@ -78,31 +85,31 @@ const parseInputs = Effect.gen(function* () {
 // Configure git user
 const configureGit = (config: GitConfig) =>
   Effect.gen(function* () {
-    const commandService = yield* CommandService
-    
-    yield* commandService.execute(`git config --global user.name "${config.userName}"`)
-    yield* commandService.execute(`git config --global user.email "${config.userEmail}"`)
+    yield* executeCommand(`git config --global user.name "${config.userName}"`)
+    yield* executeCommand(`git config --global user.email "${config.userEmail}"`)
   })
 
 // Clone destination repository
 const cloneRepo = (inputs: ActionInputs, tempDir: string) =>
   Effect.gen(function* () {
-    const commandService = yield* CommandService
+    const fs = yield* FileSystem.FileSystem
     
     // Create temp directory if it doesn't exist
-    if (!existsSync(tempDir)) {
-      mkdirSync(tempDir, { recursive: true })
-    }
+    yield* fs.makeDirectory(tempDir, { recursive: true }).pipe(
+      Effect.mapError((error) => new Error(`Failed to create temp directory: ${String(error)}`)),
+      Effect.ignore
+    )
     
     const repoUrl = `https://${inputs.personalAccessToken}@github.com/${inputs.destinationRepo}.git`
-    const cloneDir = join(tempDir, "destination-repo")
+    const cloneDir = `${tempDir}/destination-repo`
     
     // Remove existing clone directory if it exists
-    if (existsSync(cloneDir)) {
-      rmSync(cloneDir, { recursive: true, force: true })
-    }
+    yield* fs.remove(cloneDir, { recursive: true }).pipe(
+      Effect.mapError((error) => new Error(`Failed to remove existing directory: ${String(error)}`)),
+      Effect.ignore
+    )
     
-    yield* commandService.execute("git", ["clone", repoUrl, cloneDir])
+    yield* executeCommand(`git clone "${repoUrl}" "${cloneDir}"`)
     
     return cloneDir
   })
@@ -110,37 +117,79 @@ const cloneRepo = (inputs: ActionInputs, tempDir: string) =>
 // Copy files according to sync paths
 const copyFiles = (inputs: ActionInputs, cloneDir: string) =>
   Effect.gen(function* () {
-    const commandService = yield* CommandService
+    const fs = yield* FileSystem.FileSystem
     
     for (const [source, destination] of inputs.syncPaths) {
       // Check if source exists
-      if (!existsSync(source)) {
+      const sourceExists = yield* fs.exists(source).pipe(
+        Effect.mapError((error) => new Error(`Failed to check if source exists: ${String(error)}`))
+      )
+      if (!sourceExists) {
         core.warning(`Source path does not exist: ${source}`)
         continue
       }
       
-      const destPath = join(cloneDir, destination)
-      const destDir = dirname(destPath)
+      const destPath = `${cloneDir}/${destination}`
+      const destDir = destPath.substring(0, destPath.lastIndexOf('/'))
       
       // Create destination directory if it doesn't exist
-      if (!existsSync(destDir)) {
-        mkdirSync(destDir, { recursive: true })
+      yield* fs.makeDirectory(destDir, { recursive: true }).pipe(
+        Effect.mapError((error) => new Error(`Failed to create destination directory: ${String(error)}`)),
+        Effect.ignore
+      )
+      
+      // Check if source is a directory or file
+      const sourceInfo = yield* fs.stat(source).pipe(
+        Effect.mapError((error) => new Error(`Failed to stat source file: ${String(error)}`))
+      )
+      
+      if (sourceInfo.type === "Directory") {
+        // Copy directory recursively
+        yield* copyDirectoryRecursive(fs, source, destPath).pipe(
+          Effect.mapError((error) => new Error(`Failed to copy directory ${source}: ${String(error)}`))
+        )
+      } else {
+        // Copy single file
+        yield* fs.copy(source, destPath).pipe(
+          Effect.mapError((error) => new Error(`Failed to copy file ${source}: ${String(error)}`))
+        )
       }
       
-      // Copy the file or directory
-      yield* commandService.execute(`cp -r "${source}" "${destPath}"`)
-      
       core.info(`Copied ${source} -> ${destination}`)
+    }
+  })
+
+// Helper function to copy directory recursively
+const copyDirectoryRecursive = (fs: FileSystem.FileSystem, source: string, dest: string): Effect.Effect<void, any> =>
+  Effect.gen(function* () {
+    // Create destination directory
+    yield* fs.makeDirectory(dest, { recursive: true })
+    
+    // Read source directory contents
+    const entries = yield* fs.readDirectory(source)
+    
+    for (const entry of entries) {
+      const sourcePath = `${source}/${entry}`
+      const destPath = `${dest}/${entry}`
+      
+      // Check if entry is a directory
+      const entryInfo = yield* fs.stat(sourcePath)
+      
+      if (entryInfo.type === "Directory") {
+        // Recursively copy subdirectory
+        yield* copyDirectoryRecursive(fs, sourcePath, destPath)
+      } else {
+        // Copy file
+        yield* fs.copy(sourcePath, destPath)
+      }
     }
   })
 
 // Check for changes and commit/push if needed
 const commitAndPush = (cloneDir: string) =>
   Effect.gen(function* () {
-    const commandService = yield* CommandService
-    
     // Check if there are any changes
-    const status = yield* commandService.execute("git status --porcelain", cloneDir)
+    const status = yield* executeCommand("git status --porcelain", cloneDir)
     
     if (!status.trim()) {
       core.info("No changes detected, skipping commit and push")
@@ -148,17 +197,17 @@ const commitAndPush = (cloneDir: string) =>
     }
     
     // Add all changes
-    yield* commandService.execute("git add .", cloneDir)
+    yield* executeCommand("git add .", cloneDir)
     
     // Commit changes
     const commitMessage = "chore: Sync files from source repository"
-    yield* commandService.execute(`git commit -m "${commitMessage}"`, cloneDir)
+    yield* executeCommand(`git commit -m "${commitMessage}"`, cloneDir)
     
     // Push changes
-    yield* commandService.execute("git push origin main", cloneDir)
+    yield* executeCommand("git push origin main", cloneDir)
     
     // Get the commit hash
-    const commitHash = yield* commandService.execute("git rev-parse HEAD", cloneDir)
+    const commitHash = yield* executeCommand("git rev-parse HEAD", cloneDir)
     
     core.info(`Successfully pushed changes with commit hash: ${commitHash}`)
     return commitHash
@@ -193,36 +242,19 @@ const program = Effect.gen(function* () {
   core.setOutput("commit_hash", commitHash)
   
   // Cleanup
-  if (existsSync(tempDir)) {
-    rmSync(tempDir, { recursive: true, force: true })
-  }
+  const fs = yield* FileSystem.FileSystem
+  yield* fs.remove(tempDir, { recursive: true }).pipe(
+    Effect.mapError((error) => new Error(`Failed to cleanup temp directory: ${String(error)}`)),
+    Effect.ignore
+  )
   
   core.info("Cross-repo sync completed successfully")
 })
 
-// Create the command service layer
-const CommandServiceLive = Layer.succeed(
-  CommandService,
-  CommandService.of({
-    execute: (command: string, cwd?: string) =>
-      Effect.try({
-        try: () => {
-          const result = execSync(command, { 
-            cwd, 
-            encoding: "utf-8",
-            stdio: ["pipe", "pipe", "pipe"]
-          })
-          return result.toString().trim()
-        },
-        catch: (error) => new Error(`Command failed: ${command}\n${String(error)}`)
-      })
-  })
-)
-
 // Run the program
 pipe(
   program,
-  Effect.provide(CommandServiceLive),
+  Effect.provide(NodeFileSystem.layer),
   Effect.runPromise
 ).catch((error: unknown) => {
   core.setFailed(`Action failed: ${String(error)}`)
