@@ -15,6 +15,7 @@ A GitHub Action that syncs and renames files or folders from your repository to 
 - Path rewriting and restructuring
 - Selective sync with multi-line path mappings
 - Built with Effect-TS and TypeScript
+- Comprehensive test suite with CI/CD integration
 
 **Usage:**
 ```yaml

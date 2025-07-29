@@ -178,11 +178,15 @@ npm run start
 
 **Option 2: Using act for local testing**
 ```bash
-act -W .github/workflows/test-action.yml
+# Run the test workflow from the repository root
+act -W .github/workflows/test-cross-repo-sync.yml
 ```
 
 **Option 3: Manual testing**
 ```bash
+# Navigate to the action directory
+cd actions/cross-repo-sync
+
 # Set environment variables
 export INPUT_PERSONAL_ACCESS_TOKEN="your-token"
 export INPUT_SYNC_PATHS="README.md"
