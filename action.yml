@@ -27,9 +27,6 @@ runs:
     - name: Install Dependencies
       run: npm install
       shell: bash
-    - name: Build TypeScript
-      run: npm run build
-      shell: bash
     - name: Run Action Logic
-      run: node ${{ github.action_path }}/dist/main.js
+      run: npx tsx ${{ github.action_path }}/src/main.ts
       shell: bash
