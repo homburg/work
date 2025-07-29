@@ -195,6 +195,7 @@ npm run start
 
 - **Framework**: Effect-TS for functional programming and error handling
 - **File Operations**: Effect Platform FileSystem for type-safe file operations
+- **Command Execution**: Effect Platform Command API for type-safe shell command execution
 - **Runtime**: tsx for TypeScript execution without build step
 - **Action Type**: Composite action for maximum flexibility
 - **Git Operations**: Automated clone, commit, and push operations
