@@ -4,7 +4,9 @@
   "description": "Syncs and renames files or folders from your repo to a different repository and branch",
   "main": "src/main.ts",
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/main.js"
   },
   "keywords": [
     "github-action",
