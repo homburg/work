@@ -102,7 +102,7 @@ const cloneRepo = (inputs: ActionInputs, tempDir: string) =>
       rmSync(cloneDir, { recursive: true, force: true })
     }
     
-    yield* commandService.execute(`git clone "${repoUrl}" "${cloneDir}"`)
+    yield* commandService.execute("git", ["clone", repoUrl, cloneDir])
     
     return cloneDir
   })
