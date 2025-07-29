@@ -100,6 +100,8 @@ You need a Personal Access Token (PAT) with appropriate scopes:
 
 > 💡 **Best Practice:** Use fine-grained tokens with minimal necessary permissions and set appropriate expiration dates.
 
+> 🔒 **Token Security:** Tokens are automatically URL-encoded and masked in logs to prevent exposure of special characters and sensitive data.
+
 ### Node.js 20+
 
 This action requires Node.js 20 or later.
@@ -199,6 +201,7 @@ npm run start
 - **Runtime**: tsx for TypeScript execution without build step
 - **Action Type**: Composite action for maximum flexibility
 - **Git Operations**: Automated clone, commit, and push operations
+- **Security**: URL-encoded tokens, input validation, and path safety checks
 
 ## License
 
