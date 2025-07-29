@@ -84,14 +84,21 @@ jobs:
 
 ### Personal Access Token
 
-You need a Personal Access Token (PAT) with `repo` scope:
+You need a Personal Access Token (PAT) with appropriate scopes:
 
-1. Go to GitHub Settings → Developer Settings → Personal Access Tokens
-2. Generate a new token with `repo` scope
+**Required Scopes:**
+- `repo` - Full control of private repositories
+- `workflow` - Update GitHub Action workflows (only if syncing workflow files)
+
+**Setup Steps:**
+1. Go to GitHub Settings → Developer Settings → Personal Access Tokens → Fine-grained tokens
+2. Generate a new token with the required scopes
 3. Add it as a secret in your repository settings
 4. Use it in the `personal_access_token` input
 
-> ⚠️ The default `GITHUB_TOKEN` will **not** work for pushing to other repositories.
+> ⚠️ **Security Note:** The default `GITHUB_TOKEN` will **not** work for pushing to other repositories. A PAT is required for cross-repo operations.
+
+> 💡 **Best Practice:** Use fine-grained tokens with minimal necessary permissions and set appropriate expiration dates.
 
 ### Node.js 20+
 
@@ -155,10 +162,33 @@ npm run start
 
 ### Testing Locally
 
-Use [act](https://github.com/nektos/act) to test the action locally:
+**Option 1: Using dry-run mode**
+```yaml
+- uses: your-username/your-repo/actions/cross-repo-sync@main
+  with:
+    personal_access_token: ${{ secrets.PAT }}
+    dry_run: true
+    sync_paths: |
+      docs:content/documentation
+      README.md
+    destination_repo: 'target-org/target-repo'
+```
 
+**Option 2: Using act for local testing**
 ```bash
 act -W .github/workflows/test-action.yml
+```
+
+**Option 3: Manual testing**
+```bash
+# Set environment variables
+export INPUT_PERSONAL_ACCESS_TOKEN="your-token"
+export INPUT_SYNC_PATHS="README.md"
+export INPUT_DESTINATION_REPO="test-org/test-repo"
+export INPUT_DRY_RUN="true"
+
+# Run the action
+npm run start
 ```
 
 ## Technical Details
