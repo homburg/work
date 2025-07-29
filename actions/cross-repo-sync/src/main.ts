@@ -284,14 +284,17 @@ const program = Effect.gen(function* () {
   core.info("✅ Cross-repo sync completed successfully")
 })
 
-// Run the program
+// Run the program using NodeRuntime.runMain with proper error handling
 const layers = Layer.mergeAll(NodeFileSystem.layer, NodeCommandExecutor.layer)
 
-Effect.runPromise(
-  program.pipe(
-    Effect.provide(layers)
-  ) as Effect.Effect<void, Error, never>
-).catch((error: unknown) => {
-  core.setFailed(`Action failed: ${String(error)}`)
-  process.exit(1)
-})
+const main = program.pipe(
+  Effect.provide(layers),
+  Effect.catchAllCause((cause) => 
+    Effect.gen(function* () {
+      core.setFailed(`Action failed: ${cause}`)
+      yield* Effect.fail(new Error(`Action failed: ${cause}`))
+    })
+  )
+)
+
+NodeRuntime.runMain(main as Effect.Effect<void, Error, never>)
