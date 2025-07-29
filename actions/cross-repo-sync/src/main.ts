@@ -9,6 +9,7 @@ interface ActionInputs {
   readonly personalAccessToken: string
   readonly syncPaths: ReadonlyArray<readonly [string, string]>
   readonly destinationRepo: string
+  readonly dryRun: boolean
 }
 
 interface GitConfig {
@@ -35,6 +36,10 @@ const parseInputs = Effect.gen(function* () {
   const personalAccessToken = core.getInput("personal_access_token", { required: true })
   const syncPathsInput = core.getInput("sync_paths", { required: true })
   const destinationRepo = core.getInput("destination_repo", { required: true })
+  const dryRun = core.getInput("dry_run", { required: false }) === "true"
+
+  // Mask sensitive token in logs
+  core.setSecret(personalAccessToken)
 
   if (!personalAccessToken) {
     return yield* Effect.fail(new Error("personal_access_token is required"))
@@ -42,6 +47,11 @@ const parseInputs = Effect.gen(function* () {
   
   if (!destinationRepo) {
     return yield* Effect.fail(new Error("destination_repo is required"))
+  }
+
+  // Validate repository format (owner/repo)
+  if (!/^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/.test(destinationRepo)) {
+    return yield* Effect.fail(new Error(`Invalid repository format: ${destinationRepo}. Expected format: owner/repo`))
   }
 
   if (!syncPathsInput.trim()) {
@@ -58,7 +68,15 @@ const parseInputs = Effect.gen(function* () {
     const colonIndex = trimmedLine.indexOf(":")
     if (colonIndex === -1) {
       // No destination specified, copy to root
-      syncPaths.push([trimmedLine, trimmedLine])
+      const cleanSource = trimmedLine.replace(/^"(.*)"$/, "$1")
+      
+      // Validate path safety
+      if (cleanSource.includes("..") || cleanSource.startsWith("/")) {
+        core.warning(`Potentially unsafe path detected and skipped: ${cleanSource}`)
+        continue
+      }
+      
+      syncPaths.push([cleanSource, cleanSource])
     } else {
       const source = trimmedLine.slice(0, colonIndex).trim()
       const destination = trimmedLine.slice(colonIndex + 1).trim()
@@ -66,6 +84,13 @@ const parseInputs = Effect.gen(function* () {
       // Handle quoted paths
       const cleanSource = source.replace(/^"(.*)"$/, "$1")
       const cleanDestination = destination.replace(/^"(.*)"$/, "$1")
+      
+      // Validate path safety
+      if (cleanSource.includes("..") || cleanSource.startsWith("/") || 
+          cleanDestination.includes("..") || cleanDestination.startsWith("/")) {
+        core.warning(`Potentially unsafe path detected and skipped: ${cleanSource} -> ${cleanDestination}`)
+        continue
+      }
       
       syncPaths.push([cleanSource, cleanDestination])
     }
@@ -78,7 +103,8 @@ const parseInputs = Effect.gen(function* () {
   return {
     personalAccessToken,
     syncPaths,
-    destinationRepo
+    destinationRepo,
+    dryRun
   } satisfies ActionInputs
 })
 
@@ -218,8 +244,15 @@ const commitAndPush = (cloneDir: string) =>
 const program = Effect.gen(function* () {
   const inputs = yield* parseInputs
   
-  core.info(`Starting sync to ${inputs.destinationRepo}`)
-  core.info(`Sync paths: ${inputs.syncPaths.map(([s, d]) => `${s} -> ${d}`).join(", ")}`)
+  core.info(`🚀 Starting cross-repo sync to ${inputs.destinationRepo}${inputs.dryRun ? " (DRY RUN)" : ""}`)
+  core.info(`📁 Found ${inputs.syncPaths.length} sync path(s):`)
+  inputs.syncPaths.forEach(([s, d], index) => {
+    core.info(`   ${index + 1}. ${s} -> ${d}`)
+  })
+  
+  if (inputs.dryRun) {
+    core.info("🧪 Running in dry-run mode - no actual changes will be made")
+  }
   
   const tempDir = "/tmp/cross-repo-sync"
   const gitConfig: GitConfig = {
@@ -249,7 +282,7 @@ const program = Effect.gen(function* () {
     Effect.ignore
   )
   
-  core.info("Cross-repo sync completed successfully")
+  core.info("✅ Cross-repo sync completed successfully")
 })
 
 // Run the program

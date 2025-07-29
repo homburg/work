@@ -8,14 +8,18 @@ branding:
 
 inputs:
   personal_access_token:
-    description: 'A Personal Access Token (PAT) with repo scope to allow pushing to the destination repository. The default GITHUB_TOKEN will not work for pushing to other repos.'
+    description: 'A Personal Access Token (PAT) with repo scope to allow pushing to the destination repository. The default GITHUB_TOKEN will not work for pushing to other repos. Required scopes: repo, workflow (if syncing workflow files).'
     required: true
   sync_paths:
-    description: 'A multi-line string of source and destination mappings. Use a colon (:) to separate the source from the destination (e.g., src/docs:content/docs). Each mapping must be on its own line. If no destination is given (e.g., README.md), the source is copied to the root of the destination repo.'
+    description: 'A multi-line string of source and destination mappings. Use a colon (:) to separate the source from the destination (e.g., src/docs:content/docs). Each mapping must be on its own line. If no destination is given (e.g., README.md), the source is copied to the root of the destination repo. Supports quoted paths for spaces.'
     required: true
   destination_repo:
-    description: 'The target repository in owner/repo format.'
+    description: 'The target repository in owner/repo format. Example: microsoft/vscode'
     required: true
+  dry_run:
+    description: 'Run in dry-run mode without making actual changes. Useful for testing.'
+    required: false
+    default: 'false'
 
 outputs:
   commit_hash:
