@@ -125,7 +125,8 @@ const cloneRepo = (inputs: ActionInputs, tempDir: string): Effect.Effect<string,
       Effect.ignore
     )
     
-    const repoUrl = `https://${inputs.personalAccessToken}@github.com/${inputs.destinationRepo}.git`
+    // URL-encode the token to handle special characters (@, #, +, spaces, etc.)
+    const repoUrl = `https://${encodeURIComponent(inputs.personalAccessToken)}@github.com/${inputs.destinationRepo}.git`
     const cloneDir = `${tempDir}/destination-repo`
     
     // Remove existing clone directory if it exists
