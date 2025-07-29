@@ -1,0 +1,32 @@
+name: 'Cross-Repo Sync'
+description: 'Syncs and renames files or folders from your repo to a different repository and branch'
+author: 'github-actions[bot]'
+
+branding:
+  icon: 'git-merge'
+  color: 'blue'
+
+inputs:
+  personal_access_token:
+    description: 'A Personal Access Token (PAT) with repo scope to allow pushing to the destination repository. The default GITHUB_TOKEN will not work for pushing to other repos.'
+    required: true
+  sync_paths:
+    description: 'A multi-line string of source and destination mappings. Use a colon (:) to separate the source from the destination (e.g., src/docs:content/docs). Each mapping must be on its own line. If no destination is given (e.g., README.md), the source is copied to the root of the destination repo.'
+    required: true
+  destination_repo:
+    description: 'The target repository in owner/repo format.'
+    required: true
+
+outputs:
+  commit_hash:
+    description: 'The full git hash of the new commit in the destination repository. Empty if no changes were pushed.'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Install Dependencies
+      run: npm install
+      shell: bash
+    - name: Run Action Logic
+      run: node --experimental-strip-types ${{ github.action_path }}/src/main.ts
+      shell: bash
