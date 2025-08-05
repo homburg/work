@@ -1,6 +1,7 @@
 import * as core from "@actions/core"
 import { Effect, Layer, pipe } from "effect"
-import { FileSystem, Command, CommandExecutor, Path } from "@effect/platform"
+import { Command, CommandExecutor, Path } from "@effect/platform"
+import { FileSystem } from "@effect/platform/FileSystem"
 import { NodeFileSystem, NodeRuntime, NodeCommandExecutor } from "@effect/platform-node"
 import * as path from "node:path"
 
@@ -116,9 +117,9 @@ const configureGit = (config: GitConfig): Effect.Effect<void, Error, CommandExec
   })
 
 // Clone destination repository
-const cloneRepo = (inputs: ActionInputs, tempDir: string): Effect.Effect<string, Error, FileSystem.FileSystem | CommandExecutor.CommandExecutor> =>
+const cloneRepo = (inputs: ActionInputs, tempDir: string): Effect.Effect<string, Error, FileSystem | CommandExecutor.CommandExecutor> =>
   Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem
+    const fs = yield* FileSystem
     
     // Create temp directory if it doesn't exist
     yield* fs.makeDirectory(tempDir, { recursive: true }).pipe(
@@ -142,9 +143,9 @@ const cloneRepo = (inputs: ActionInputs, tempDir: string): Effect.Effect<string,
   })
 
 // Copy files according to sync paths
-const copyFiles = (inputs: ActionInputs, cloneDir: string): Effect.Effect<void, Error, FileSystem.FileSystem> =>
+const copyFiles = (inputs: ActionInputs, cloneDir: string): Effect.Effect<void, Error, FileSystem> =>
   Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem
+    const fs = yield* FileSystem
     
     for (const [source, destination] of inputs.syncPaths) {
       // Check if source exists
@@ -187,7 +188,7 @@ const copyFiles = (inputs: ActionInputs, cloneDir: string): Effect.Effect<void, 
   })
 
 // Helper function to copy directory recursively
-const copyDirectoryRecursive = (fs: FileSystem.FileSystem, source: string, dest: string): Effect.Effect<void, any> =>
+const copyDirectoryRecursive = (fs: FileSystem, source: string, dest: string): Effect.Effect<void, any> =>
   Effect.gen(function* () {
     // Create destination directory
     yield* fs.makeDirectory(dest, { recursive: true })
@@ -276,7 +277,7 @@ const program = Effect.gen(function* () {
   core.setOutput("commit_hash", commitHash)
   
   // Cleanup
-  const fs = yield* FileSystem.FileSystem
+  const fs = yield* FileSystem
   yield* fs.remove(tempDir, { recursive: true }).pipe(
     Effect.mapError((error) => new Error(`Failed to cleanup temp directory: ${String(error)}`)),
     Effect.ignore
@@ -285,17 +286,15 @@ const program = Effect.gen(function* () {
   core.info("✅ Cross-repo sync completed successfully")
 })
 
-// Run the program using NodeRuntime.runMain with proper error handling
-const layers = Layer.mergeAll(NodeFileSystem.layer, NodeCommandExecutor.layer)
-
-const main = program.pipe(
-  Effect.provide(layers),
-  Effect.catchAllCause((cause) => 
-    Effect.gen(function* () {
-      core.setFailed(`Action failed: ${cause}`)
-      yield* Effect.fail(new Error(`Action failed: ${cause}`))
-    })
+// Run the program
+NodeRuntime.runMain(
+  program.pipe(
+    Effect.provide(NodeFileSystem.layer),
+    Effect.provide(NodeCommandExecutor.layer),
+    Effect.tapErrorCause((cause) => 
+      Effect.sync(() => {
+        core.setFailed(`Action failed: ${cause}`)
+      })
+    )
   )
 )
-
-NodeRuntime.runMain(main as Effect.Effect<void, Error, never>)
