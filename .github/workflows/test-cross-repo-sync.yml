@@ -1,14 +1,14 @@
-name: 'Test Cross-Repo Sync Action'
+name: "Test Cross-Repo Sync Action"
 
 on:
   push:
-    branches: [ main ]
-    paths: 
-      - 'actions/cross-repo-sync/**'
-  pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'actions/cross-repo-sync/**'
+      - "actions/cross-repo-sync/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "actions/cross-repo-sync/**"
   workflow_dispatch:
 
 jobs:
@@ -21,22 +21,18 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "22"
 
       - name: Install Dependencies
+        working-directory: actions/cross-repo-sync
         run: |
-          cd actions/cross-repo-sync
-          npm ci
+          corepack enable
+          yarn
 
       - name: Type Check
+        working-directory: actions/cross-repo-sync
         run: |
-          cd actions/cross-repo-sync
-          npm run typecheck
-
-      - name: Test Build
-        run: |
-          cd actions/cross-repo-sync
-          echo "TypeScript compilation successful"
+          yarn typecheck
 
   test-action:
     runs-on: ubuntu-latest
@@ -48,12 +44,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "22"
 
       - name: Install Dependencies
+        working-directory: actions/cross-repo-sync
         run: |
-          cd actions/cross-repo-sync
-          npm ci
+          corepack enable
+          yarn
 
       - name: Create Test Files
         run: |
@@ -74,7 +71,7 @@ jobs:
             test-data/docs:content/documentation
             test-data/ROOT_README.md:README.md
             "test-data/my assets/logo.png":"images/new logo.png"
-          destination_repo: 'test-org/test-destination-repo'
+          destination_repo: "test-org/test-destination-repo"
 
       - name: Verify Output
         run: |
