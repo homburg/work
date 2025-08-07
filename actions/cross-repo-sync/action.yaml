@@ -28,9 +28,27 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Install Dependencies
-      run: npm install
-      shell: bash
-    - name: Run Action Logic
-      run: npx tsx ${{ github.action_path }}/src/main.ts
-      shell: bash
+  - name: Debug
+    shell: bash
+    run: |
+      echo "**** env ****"
+      env
+      echo "**** env end ****"
+
+      echo
+      echo 
+
+      echo "Inputs:"
+      echo "  personal_access_token: ${{ inputs.personal_access_token }}"
+      echo "  sync_paths: ${{ inputs.sync_paths }}"
+      echo "  destination_repo: ${{ inputs.destination_repo }}"
+      echo "  dry_run: ${{ inputs.dry_run }}"
+
+  - name: Install Dependencies
+    working-directory: ${{ github.action_path }}
+    run: yarn
+    shell: bash
+
+  - name: Run Action Logic
+    run: node --experimental-strip-types ${{ github.action_path }}/src/main.ts
+    shell: bash
