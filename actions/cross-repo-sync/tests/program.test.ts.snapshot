@@ -1,0 +1,121 @@
+exports[`program > should run 1`] = `
+[
+  {
+    "name": "parse_inputs",
+    "kind": 0,
+    "status": {
+      "code": 1
+    },
+    "attributes": {},
+    "links": [],
+    "events": [],
+    "ended": true
+  },
+  {
+    "name": "clone_repo",
+    "kind": 0,
+    "status": {
+      "code": 1
+    },
+    "attributes": {
+      "repo": "test-owner/test-destination-repo",
+      "dir": "/tmp/cross-repo-sync/destination_repo"
+    },
+    "links": [],
+    "events": [],
+    "ended": true
+  },
+  {
+    "name": "clone_repo",
+    "kind": 0,
+    "status": {
+      "code": 1
+    },
+    "attributes": {
+      "repo": "test-owner/test-source-repo",
+      "dir": "/tmp/cross-repo-sync/source_repo"
+    },
+    "links": [],
+    "events": [],
+    "ended": true
+  },
+  {
+    "name": "move_paths",
+    "kind": 0,
+    "status": {
+      "code": 1
+    },
+    "attributes": {
+      "source_clone_dir": "/tmp/cross-repo-sync/source_repo",
+      "destination_clone_dir": "/tmp/cross-repo-sync/target"
+    },
+    "links": [],
+    "events": [],
+    "ended": true
+  },
+  {
+    "name": "commit_and_push",
+    "kind": 0,
+    "status": {
+      "code": 1
+    },
+    "attributes": {},
+    "links": [],
+    "events": [],
+    "ended": true
+  },
+  {
+    "name": "program",
+    "kind": 0,
+    "status": {
+      "code": 1
+    },
+    "attributes": {
+      "personal_access_token": "test-personal-access-token",
+      "sync_paths": "[\\n  [\\n    \\"test-sync-paths\\",\\n    \\"test-sync-paths\\"\\n  ]\\n]",
+      "destination_repo": "test-owner/test-destination-repo",
+      "dry_run": false,
+      "source_repo": "test-owner/test-source-repo"
+    },
+    "links": [],
+    "events": [],
+    "ended": true
+  }
+]
+`;
+
+exports[`program > should run 2`] = `
+{
+  "_id": "Exit",
+  "_tag": "Success"
+}
+`;
+
+exports[`program > should run 3`] = `
+{
+  "tmp": {
+    "cross-repo-sync": {
+      "destination_repo": {
+        "test-sync-paths": {
+          "test-file": "test-file from https://test-personal-access-token@github.com/test-owner/test-destination-repo.git"
+        }
+      },
+      "source_repo": {
+        ".git": {
+          "HEAD": "test-HEAD",
+          "config": "origin: https://test-personal-access-token@github.com/test-owner/test-source-repo.git"
+        }
+      },
+      "target": {
+        ".git": {
+          "HEAD": "test-HEAD",
+          "config": "origin: https://test-personal-access-token@github.com/test-owner/test-destination-repo.git"
+        },
+        "test-sync-paths": {
+          "test-file": "test-file from https://test-personal-access-token@github.com/test-owner/test-source-repo.git"
+        }
+      }
+    }
+  }
+}
+`;
