@@ -107,3 +107,19 @@ resources:
           link: .html_url
           permission: .permission
           notification_setting: .notification_setting
+- kind: folder
+  selector:
+    query: "true"
+    folders:
+    # Specify the repositories and folders to include under this relative path
+    - path: apps/* # Relative path to the folders within the repositories
+      repos:
+      # List of repositories to include folders from
+      - work
+  port:
+    entity:
+      mappings:
+        identifier: ".folder.name"
+        title: ".folder.name"
+        blueprint: '"service"'
+        relations: {}
