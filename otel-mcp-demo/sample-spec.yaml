@@ -1,0 +1,49 @@
+name: "ecommerce_checkout"
+description: "Complete e-commerce checkout process with performance constraints"
+
+# Maximum total duration for the entire checkout flow
+max_total_duration_ms: 3000
+
+# Expected spans in the trace
+expected_spans:
+  - operation_name: "checkout.validate_cart"
+    service_name: "cart-service"
+    max_duration_ms: 100
+    required_tags:
+      user_id: "*"
+      cart_items: "*"
+    
+  - operation_name: "payment.process"
+    service_name: "payment-service"
+    max_duration_ms: 2000
+    required_tags:
+      amount: "*"
+      method: "*"
+    
+  - operation_name: "inventory.reserve"
+    service_name: "inventory-service"
+    max_duration_ms: 500
+    required_tags:
+      items: "*"
+    
+  - operation_name: "order.create"
+    service_name: "order-service"
+    max_duration_ms: 200
+    required_tags:
+      order_id: "*"
+
+# Optional: Error conditions to check for
+error_conditions:
+  - span_name: "payment.process"
+    status: "error"
+    description: "Payment processing failures"
+  
+  - span_name: "inventory.reserve"
+    status: "error"
+    description: "Inventory unavailable"
+
+# Optional: Performance thresholds
+performance_constraints:
+  p95_duration_ms: 2500
+  p99_duration_ms: 4000
+  error_rate_threshold: 0.01
