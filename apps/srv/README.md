@@ -1,24 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# srv - Next.js Web Application
 
-## Getting Started
+A modern Next.js web application showcasing functional programming with Effect and enterprise-grade observability with OpenTelemetry.
 
-First, run the development server:
+## 🚀 Features
+
+- **Next.js 15**: Latest version with App Router and Turbopack
+- **Effect Library**: Functional programming with composable effects
+- **OpenTelemetry**: Comprehensive observability and tracing
+- **TailwindCSS 4**: Latest utility-first CSS framework
+- **TypeScript**: Full type safety throughout the application
+- **Modern Development**: ESLint and hot reload with Turbopack
+
+## 🏗️ Tech Stack
+
+- **Framework**: Next.js 15 with App Router
+- **Language**: TypeScript 5
+- **Styling**: TailwindCSS 4 with PostCSS
+- **State Management**: Effect library for functional programming
+- **Observability**: 
+  - OpenTelemetry API & SDK
+  - Vercel OTel integration
+  - Comprehensive logging and tracing
+- **Package Manager**: Yarn 4
+- **Development**: Turbopack for fast builds
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+ 
+- Yarn 4+ (configured via packageManager)
+
+### Installation & Running
+
+1. **Install dependencies**:
+   ```bash
+   yarn install
+   ```
+
+2. **Start the development server**:
+   ```bash
+   yarn dev
+   ```
+
+3. **Open your browser**:
+   Navigate to [http://localhost:3000](http://localhost:3000) to see the application.
+
+### Available Scripts
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+yarn dev      # Start development server with Turbopack
+yarn build    # Build for production
+yarn start    # Start production server
+yarn lint     # Run ESLint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🔧 Development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file thanks to Turbopack's fast refresh.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Effect Library Integration
+
+This project uses the Effect library for functional programming:
+- **@effect/platform**: Cross-platform effects
+- **@effect/platform-node**: Node.js specific effects
+- Effect provides composable, type-safe error handling and async operations
+
+### OpenTelemetry Setup
+
+The application includes comprehensive observability:
+- **Automatic instrumentation** for Next.js requests
+- **Custom logging** with structured logs
+- **Distributed tracing** ready for production monitoring
+- **Vercel integration** for seamless deployment observability
+
+### Styling
+
+This project uses TailwindCSS 4 with PostCSS for styling. The configuration supports:
+- Modern CSS features
+- Utility-first approach
+- Responsive design
+- Dark mode support (configurable)
 
 ## Learn More
 
