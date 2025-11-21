@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -eou pipefail
+
+export EMBRACE_API_TOKEN
+EMBRACE_API_TOKEN="$(op read "op://Private/Catch-up app Embrace.io api token/password")"
+
+yarn expo $@

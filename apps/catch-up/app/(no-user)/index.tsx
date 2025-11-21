@@ -1,6 +1,7 @@
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useTheme } from "@/hooks/useTheme";
+import { useQuery } from "@tanstack/react-query";
 import { PropsWithChildren, ReactNode } from "react";
 import { FC } from "react";
 import {
@@ -15,6 +16,33 @@ import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function NoUserIndexScreen() {
+  const query = useQuery({
+    queryKey: ["hello.ts.net"],
+    queryFn: async () => {
+      return Promise.all([
+        fetch("https://hello.ts.net/"),
+        fetch("https://hombook-air-2024.fawn-yo.ts.net/"),
+      ]);
+    },
+  });
+
+  console.log(query);
+
+  const dump = {
+    status: query.status,
+    error: query.error,
+    data: query.data
+      ? query.data.map((response) => ({
+          type: response.type,
+          ok: response.ok,
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+          url: response.url,
+        }))
+      : query.data,
+  };
+
   return (
     <Layout title={<Title>No User</Title>}>
       <Form
@@ -22,11 +50,20 @@ export default function NoUserIndexScreen() {
           <>
             <ThemedTextInput placeholder="Enter your email" />
             <ThemedTextInput placeholder="Enter your password" />
+            <ThemedText style={{ fontSize: 7, lineHeight: 10 }}>
+              {JSON.stringify(dump, null, 2)}
+            </ThemedText>
           </>
         }
         actions={
           <>
-            <ThemedButton title="Login" />
+            <ThemedButton
+              title="Login"
+              onPress={() => {
+                console.log("Login pressed");
+                query.refetch();
+              }}
+            />
             <ThemedButton title="Register" />
           </>
         }
