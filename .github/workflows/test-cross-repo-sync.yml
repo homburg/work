@@ -1,0 +1,83 @@
+name: "Test Cross-Repo Sync Action"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "actions/cross-repo-sync/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "actions/cross-repo-sync/**"
+  workflow_dispatch:
+
+jobs:
+  test-compilation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Dependencies
+        working-directory: actions/cross-repo-sync
+        run: |
+          corepack enable
+          yarn
+
+      - name: Type Check
+        working-directory: actions/cross-repo-sync
+        run: |
+          yarn typecheck
+
+  test-action:
+    runs-on: ubuntu-latest
+    needs: test-compilation
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Dependencies
+        working-directory: actions/cross-repo-sync
+        run: |
+          corepack enable
+          yarn
+
+      - name: Create Test Files
+        run: |
+          mkdir -p test-data/docs
+          echo "# Test Documentation" > test-data/docs/README.md
+          echo "This is a test file for cross-repo sync." > test-data/docs/guide.md
+          echo "# Root README" > test-data/ROOT_README.md
+          mkdir -p "test-data/my assets"
+          echo "dummy logo content" > "test-data/my assets/logo.png"
+
+      - name: Test Cross-Repo Sync Action
+        id: test-sync
+        uses: ./actions/cross-repo-sync
+        with:
+          personal_access_token: ${{ secrets.TEST_PAT || 'fake-token-for-testing' }}
+          dry_run: true
+          sync_paths: |
+            test-data/docs:content/documentation
+            test-data/ROOT_README.md:README.md
+            "test-data/my assets/logo.png":"images/new logo.png"
+          destination_repo: "test-org/test-destination-repo"
+
+      - name: Verify Output
+        run: |
+          echo "Action completed. Check the destination repository for synced files."
+          if [ -n "${{ steps.test-sync.outputs.commit_hash }}" ]; then
+            echo "Commit hash: ${{ steps.test-sync.outputs.commit_hash }}"
+          else
+            echo "No changes were committed (files may already be in sync)"
+          fi
