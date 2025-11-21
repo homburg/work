@@ -1,4 +1,4 @@
-import { Effect } from "effect";
+import { Data, Effect } from "effect";
 import { FileSystem } from "@effect/platform/FileSystem";
 import { Core } from "./Core.ts";
 import { Git, type GitRepo } from "./Git.ts";
@@ -18,46 +18,62 @@ interface GitConfig {
   readonly email: string;
 }
 
+class EmptyInputError extends Data.TaggedError("EmptyInputError")<{
+  name: string;
+}> {}
+class InvalidRepositoryFormatError extends Data.TaggedError(
+  "InvalidRepositoryFormatError"
+)<{
+  repo: string;
+}> {}
+
 // Parse action inputs
 const parse_inputs = Effect.withSpan("parse_inputs")(
   Effect.gen(function* () {
     const core = yield* Core;
-    const personal_access_token = core.get_input("personal_access_token", {
-      required: true,
+
+    const {
+      personal_access_token,
+      sync_paths_input,
+      source_repo,
+      destination_repo,
+    } = yield* Effect.all({
+      personal_access_token: core.get_required_input("personal_access_token"),
+      sync_paths_input: core.get_required_input("sync_paths"),
+      source_repo: core.get_required_input("source_repo"),
+      destination_repo: core.get_required_input("destination_repo"),
     });
-    const sync_paths_input = core.get_input("sync_paths", { required: true });
-    const source_repo = core.get_input("source_repo", { required: true });
-    const destination_repo = core.get_input("destination_repo", {
-      required: true,
-    });
-    const dry_run = core.get_input("dry_run", { required: false }) === "true";
+
+    const dry_run = core.get_input("dry_run") === "true";
 
     // Mask sensitive token in logs
     core.set_secret(personal_access_token);
 
     if (!personal_access_token) {
-      return yield* Effect.fail(new Error("personal_access_token is required"));
+      return yield* Effect.fail(
+        new EmptyInputError({ name: "personal_access_token" })
+      );
     }
 
     if (!destination_repo) {
-      return yield* Effect.fail(new Error("destination_repo is required"));
+      return yield* Effect.fail(
+        new EmptyInputError({ name: "destination_repo" })
+      );
     }
 
     if (!source_repo) {
-      return yield* Effect.fail(new Error("source_repo is required"));
+      return yield* Effect.fail(new EmptyInputError({ name: "source_repo" }));
     }
 
     // Validate repository format (owner/repo)
     if (!/^[a-zA-Z0-9._-]+\/[a-zA-Z0-9._-]+$/.test(destination_repo)) {
       return yield* Effect.fail(
-        new Error(
-          `Invalid repository format: "${destination_repo}". Expected format: "owner/repo"`
-        )
+        new InvalidRepositoryFormatError({ repo: destination_repo })
       );
     }
 
     if (!sync_paths_input.trim()) {
-      return yield* Effect.fail(new Error("sync_paths is required"));
+      return yield* Effect.fail(new EmptyInputError({ name: "sync_paths" }));
     }
 
     // Parse sync paths
@@ -107,7 +123,7 @@ const parse_inputs = Effect.withSpan("parse_inputs")(
     }
 
     if (sync_paths.length === 0) {
-      return yield* Effect.fail(new Error("No valid sync paths found"));
+      return yield* Effect.fail(new EmptyInputError({ name: "sync_paths" }));
     }
 
     return {
@@ -131,7 +147,7 @@ const configureGit = (config: GitConfig) =>
   });
 
 // Clone destination repository
-const clone_repo = ({
+const clone_repo = Effect.fn("clone_repo")(function* ({
   access_token,
   repo,
   dir,
@@ -139,88 +155,79 @@ const clone_repo = ({
   access_token: string;
   repo: string;
   dir: string;
-}) =>
-  Effect.withSpan("clone_repo", {
-    attributes: {
-      repo,
-      dir,
-    },
-  })(
-    Effect.gen(function* () {
-      // URL-encode the token to handle special characters (@, #, +, spaces, etc.)
-      const repo_url = `https://${encodeURIComponent(
-        access_token
-      )}@github.com/${repo}.git`;
+}) {
+  yield* Effect.annotateCurrentSpan({
+    repo,
+    dir,
+  });
 
-      const git = yield* Git;
+  // URL-encode the token to handle special characters (@, #, +, spaces, etc.)
+  const repo_url = `https://${encodeURIComponent(
+    access_token
+  )}@github.com/${repo}.git`;
 
-      return yield* git.clone(repo_url, dir);
-    })
-  );
+  const git = yield* Git;
+
+  return yield* git.clone(repo_url, dir);
+});
 
 // Copy files according to sync paths
-const move_paths = (
+const move_paths = Effect.fn("move_paths")(function* (
   inputs: ActionInputs,
   source_clone_dir: string,
   destination_clone_dir: string
-) =>
-  Effect.withSpan("move_paths", {
-    attributes: {
-      source_clone_dir,
-      destination_clone_dir,
-    },
-  })(
-    Effect.gen(function* () {
-      const fs = yield* FileSystem;
-      const path = yield* Path.Path;
+) {
+  yield* Effect.annotateCurrentSpan({
+    source_clone_dir,
+    destination_clone_dir,
+  });
 
-      for (const [source, destination] of inputs.sync_paths) {
-        const source_path = path.join(source_clone_dir, source);
-        const destination_path = path.join(destination_clone_dir, destination);
+  const fs = yield* FileSystem;
+  const path = yield* Path.Path;
 
-        const destination_dir_path = path.dirname(destination_path);
+  for (const [source, destination] of inputs.sync_paths) {
+    const source_path = path.join(source_clone_dir, source);
+    const destination_path = path.join(destination_clone_dir, destination);
 
-        // Create destination containingdirectory if it doesn't exist
-        yield* fs.makeDirectory(destination_dir_path, {
-          recursive: true,
-        });
+    const destination_dir_path = path.dirname(destination_path);
 
-        // Copy single file
-        yield* fs.rename(source_path, destination_path);
-      }
-    })
-  );
+    // Create destination containingdirectory if it doesn't exist
+    yield* fs.makeDirectory(destination_dir_path, {
+      recursive: true,
+    });
+
+    // Copy single file
+    yield* fs.rename(source_path, destination_path);
+  }
+});
 
 // Check for changes and commit/push if needed
-const commit_and_push = (repo: GitRepo) =>
-  Effect.withSpan("commit_and_push")(
-    Effect.gen(function* () {
-      const core = yield* Core;
+const commit_and_push = Effect.fn("commit_and_push")(function* (repo: GitRepo) {
+  const core = yield* Core;
 
-      const status = yield* repo.status();
+  const status = yield* repo.status();
 
-      if (!status.trim()) {
-        core.info("No changes detected, skipping commit and push");
-        return "";
-      }
+  if (!status.trim()) {
+    core.info("No changes detected, skipping commit and push");
+    return "";
+  }
 
-      // Add all changes
-      yield* repo.add(["."]);
+  // Add all changes
+  yield* repo.add(["."]);
 
-      // Commit changes
-      const commit_message = "chore: Sync files from source repository";
-      yield* repo.commit(commit_message);
+  // Commit changes
+  const commit_message = "chore: Sync files from source repository";
+  yield* repo.commit(commit_message);
 
-      // Push changes
-      yield* repo.push();
+  // Push changes
+  yield* repo.push();
 
-      // Get the commit hash
-      const commit_hash = yield* repo.rev_parse("HEAD");
+  // Get the commit hash
+  const commit_hash = yield* repo.rev_parse("HEAD");
 
-      core.info(`Successfully pushed changes with commit hash: ${commit_hash}`);
-      return commit_hash;
-    })
-  );
+  core.info(`Successfully pushed changes with commit hash: ${commit_hash}`);
+  return commit_hash;
+});
 
 // Main program
 export const program = Effect.withSpan("program")(

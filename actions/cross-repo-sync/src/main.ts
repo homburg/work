@@ -5,15 +5,25 @@ import { program } from "./program.ts";
 import { NodeSdk } from "@effect/opentelemetry";
 import { ConsoleSpanExporter } from "@opentelemetry/sdk-trace-base";
 import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
-import { Core } from "./Core.ts";
+import { Core, MissingInputError } from "./Core.ts";
 import { Git, type GitRepo } from "./Git.ts";
 import { Command, CommandExecutor } from "@effect/platform";
 import { workingDirectory } from "@effect/platform/Command";
 
 const context = Context.empty().pipe(
   Context.add(Core, {
-    get_input: (name, options) => {
-      return githubActions.getInput(name, options);
+    get_input: (name) => {
+      return githubActions.getInput(name);
+    },
+    get_required_input: (name) => {
+      return Effect.try({
+        try: () => {
+          return githubActions.getInput(name);
+        },
+        catch: (error) => {
+          return new MissingInputError({ name });
+        },
+      });
     },
     set_secret: (secret) => githubActions.setSecret(secret),
     set_output: (name, value) => githubActions.setOutput(name, value),

@@ -129,21 +129,29 @@ describe("program", () => {
     });
 
     const TestCore = Core.of({
-      get_input(name, options) {
+      get_input(name) {
         switch (name) {
-          case "personal_access_token":
-            return "test-personal-access-token";
-          case "sync_paths":
-            return "test-sync-paths";
-          case "source_repo":
-            return "test-owner/test-source-repo";
-          case "destination_repo":
-            return "test-owner/test-destination-repo";
           case "dry_run":
             return "";
           default:
             throw new Error(`Unknown input: ${name}`);
         }
+      },
+      get_required_input(name) {
+        return Effect.sync(() => {
+          switch (name) {
+            case "personal_access_token":
+              return "test-personal-access-token";
+            case "sync_paths":
+              return "test-sync-paths";
+            case "source_repo":
+              return "test-owner/test-source-repo";
+            case "destination_repo":
+              return "test-owner/test-destination-repo";
+            default:
+              throw new Error(`Unknown input: ${name}`);
+          }
+        });
       },
       set_secret(secret) {
         console.log("core setSecret", secret);
@@ -188,7 +196,7 @@ describe("program", () => {
 
     t.assert.snapshot(toSnapshotSync(fs));
 
-    assert.ok(Exit.isSuccess(result), "Program should succeed");
+    assert.ok(Exit.isSuccess(result), "Program should succeed, got " + result);
   });
 });
 
