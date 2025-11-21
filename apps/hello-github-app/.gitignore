@@ -1,0 +1,16 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Production
+.output
+.nitro
+.vinxi
+dist
+
+# Development
+.env
+.env.*
+!*.example
+*.log
