@@ -489,10 +489,29 @@ const clouds=[];
 }
 
 // ================= characters =================
+// sculpted pup torso: deep chest, narrow waist, tucked belly, rounded haunches (not a barrel).
+// Built from a unit sphere (radius 1, so the anim rig's r=0.5 swap leaves it alone); cream chest/belly via vertex colours.
+const pupBodyMat=new THREE.MeshLambertMaterial({color:0xffffff,vertexColors:true});
+const pupBodyCache={};
+function pupBodyGeo(fur){
+  if(pupBodyCache[fur])return pupBodyCache[fur];
+  const g=new THREE.SphereGeometry(1,32,24),p=g.attributes.position,L=0.66;
+  // profile along the body, u=-1 rump .. u=+1 chest: half-width, top line, bottom line
+  const U=[-1,-0.6,-0.15,0.3,0.7,1],W=[0.3,0.33,0.25,0.34,0.34,0.3],T=[1.08,1.13,1.12,1.17,1.2,1.18],B=[0.66,0.6,0.7,0.5,0.46,0.56];
+  const f=(A,u)=>{for(let i=1;i<U.length;i++)if(u<=U[i]){const k=(u-U[i-1])/(U[i]-U[i-1]),e=k*k*(3-2*k);return A[i-1]+(A[i]-A[i-1])*e}return A[A.length-1]};
+  const fc=new THREE.Color(fur),cr=new THREE.Color(0xfff1dc),col=[];
+  for(let i=0;i<p.count;i++){
+    const x=p.getX(i),y=p.getY(i),u=p.getZ(i),t=f(T,u),b=f(B,u);
+    p.setXYZ(i,x*f(W,u),(t+b)/2+y*(t-b)/2,u*L);
+    const cream=(y<-0.42&&u>-0.55)||(u>0.62&&y<0.35);
+    const c=cream?cr:fc;col.push(c.r,c.g,c.b);
+  }
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.computeVertexNormals();
+  return pupBodyCache[fur]=g;
+}
 function makePup(fur,gear,hat){
   const g=new THREE.Group(),M=c=>mat(c),S=(r,w=14,h=10)=>new THREE.SphereGeometry(r,w,h);
-  const body=mesh(S(0.5),M(fur),0,0.78,0,g);body.scale.set(0.95,0.85,1.35);
-  const belly=mesh(S(0.4),M(0xfff1dc),0,0.66,0.12,g);belly.scale.set(0.8,0.7,1.2);
+  const body=mesh(pupBodyGeo(fur),pupBodyMat,0,0,0,g);
   const head=new THREE.Group();head.position.set(0,1.32,0.55);g.add(head);
   mesh(S(0.44),M(fur),0,0,0,head);
   const sn=mesh(S(0.22),M(0xfff1dc),0,-0.1,0.33,head);sn.scale.set(1.1,0.8,1.2);
