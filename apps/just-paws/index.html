@@ -219,7 +219,17 @@ function mesh(geo,m,x=0,y=0,z=0,parent=scene){const o=new THREE.Mesh(geo,typeof 
 function canvasTex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.anisotropy=4;return t}
 const winTex=canvasTex(64,64,(g)=>{g.fillStyle='#fff';g.fillRect(0,0,64,64);g.fillStyle='#e8e2d6';g.fillRect(0,56,64,8);g.fillStyle='#4f6f96';g.fillRect(18,14,28,30);g.fillStyle='#8fb3d9';g.fillRect(21,17,10,11);g.fillStyle='#fff';g.fillRect(31,14,2,30);g.fillRect(18,28,28,2)});
 winTex.wrapS=winTex.wrapT=THREE.RepeatWrapping;
-function wallMat(color,w,h){const t=winTex.clone();t.needsUpdate=true;t.repeat.set(Math.max(1,Math.round(w/5)),Math.max(1,Math.round(h/5)));return new THREE.MeshLambertMaterial({color,map:t})}
+const brickTex=canvasTex(128,128,(g)=>{
+  const rnd=mulberry32(77);g.fillStyle='#f3eee6';g.fillRect(0,0,128,128);
+  const bh=8,bw=22;
+  for(let r=0;r<16;r++){const off=(r%2)*bw/2;for(let x=-bw;x<128+bw;x+=bw){const v=Math.round(206+rnd()*30);g.fillStyle=`rgb(${v},${v-8},${v-14})`;g.fillRect(x+off+1.2,r*bh+1.2,bw-2.4,bh-2.4)}}
+  g.fillStyle='#e8e2d6';g.fillRect(0,112,128,16);
+  g.fillStyle='#fff8ee';g.fillRect(32,24,64,64);g.fillRect(28,86,72,6);
+  g.fillStyle='#4f6f96';g.fillRect(36,28,56,56);g.fillStyle='#8fb3d9';g.fillRect(42,34,20,22);
+  g.fillStyle='#fff8ee';g.fillRect(62,28,4,56);g.fillRect(36,54,56,4)});
+brickTex.wrapS=brickTex.wrapT=THREE.RepeatWrapping;
+const BRICK=new Set([0xbc4b51,0xe07a5f,0xf4a259,0xf2d0a4]);
+function wallMat(color,w,h){const t=(BRICK.has(color)?brickTex:winTex).clone();t.needsUpdate=true;t.repeat.set(Math.max(1,Math.round(w/5)),Math.max(1,Math.round(h/5)));return new THREE.MeshLambertMaterial({color,map:t})}
 function signMesh(text,bg,fg,w,h){
   const t=canvasTex(512,128,(g,W,H)=>{g.fillStyle=bg;g.beginPath();if(g.roundRect)g.roundRect(4,4,W-8,H-8,26);else g.rect(4,4,W-8,H-8);g.fill();g.strokeStyle=fg;g.lineWidth=6;g.stroke();g.fillStyle=fg;g.textAlign='center';g.textBaseline='middle';let fs=72;g.font=fs+'px "Lilita One", "Arial Rounded MT Bold", sans-serif';while(g.measureText(text).width>W-50&&fs>20){fs-=4;g.font=fs+'px "Lilita One", sans-serif'}g.fillText(text,W/2,H/2+4)});
   const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshLambertMaterial({map:t,transparent:true}));return m;

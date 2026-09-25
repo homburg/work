@@ -106,6 +106,13 @@ function init(THREE, scene, opts){
         leg.add(up); knee.add(lo);
       }
       if(paw){ knee.add(paw); paw.position.y += 0.27; }
+      // haunch/shoulder: a soft fur bulge at the top of the leg so it grows out of the body
+      if(cyl){
+        const front = leg.position.z > 0;
+        const hb = new THREE.Mesh(new THREE.SphereGeometry(front ? 0.15 : 0.17, 14, 10), cyl.material);
+        hb.position.set(0, front ? -0.06 : -0.04, front ? 0 : -0.02); hb.scale.set(1, 1.35, front ? 1.1 : 1.3);
+        hb.castShadow = true; hb.receiveShadow = true; leg.add(hb);
+      }
       knees.push(knee);
     }
 
