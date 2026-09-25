@@ -134,6 +134,7 @@ body.touch #hint{bottom:auto;top:calc(34% + env(safe-area-inset-top,0px));font-s
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="animations.js"></script>
 <script>
 (async function(){
 'use strict';
@@ -483,6 +484,7 @@ for(const s of [-1,1]){
   mesh(new THREE.CylinderGeometry(0.13,0.16,0.55,10),0x9aa3b5,s*0.22,1.1,-0.42,pup.g);
   const f=new THREE.Mesh(new THREE.ConeGeometry(0.14,0.8,10),new THREE.MeshBasicMaterial({color:0xffa82e,transparent:true,opacity:0.9}));f.rotation.x=Math.PI;f.position.set(s*0.22,0.44,-0.42);f.visible=false;pup.g.add(f);jetFx.push(f);
 }
+const ANIM=JPAnim.init(THREE,scene);ANIM.rigPup(pup);
 // parachute
 const chute=new THREE.Group();pup.g.add(chute);chute.visible=false;
 {
@@ -496,7 +498,7 @@ const chute=new THREE.Group();pup.g.add(chute);chute.visible=false;
 // NPC pups at HQ
 const npcs=[];
 [[0xe8413c,0xe8413c,0xe8413c],[0xf5d33b,0xf5a623,0xf5a623],[0xd9b38c,0xff7eb6,0xff7eb6],[0x6b6b6b,0x3aa35b,0x3aa35b],[0xf5f0e6,0x2aa8a8,0x2aa8a8]].forEach((c,i)=>{
-  const p=makePup(c[0],c[1],c[2]);const x=LOOK.x+10+i*4.5,z=LOOK.z-14-(i%2)*2;p.g.position.set(x,ground(x,z),z);p.g.rotation.y=Math.PI+R(-0.3,0.3);scene.add(p.g);npcs.push({p,phase:R(0,6)});
+  const p=makePup(c[0],c[1],c[2]);ANIM.rigPup(p);const x=LOOK.x+10+i*4.5,z=LOOK.z-14-(i%2)*2;p.g.position.set(x,ground(x,z),z);p.g.rotation.y=Math.PI+R(-0.3,0.3);scene.add(p.g);npcs.push({p,phase:R(0,6)});
 });
 
 // ================= car =================
@@ -512,9 +514,10 @@ const car={g:new THREE.Group(),pos:new V3(176,0,102),heading:Math.atan2(-22,-38)
   const paw=new THREE.Mesh(new THREE.PlaneGeometry(1.2,1.2),new THREE.MeshLambertMaterial({map:pawTex,transparent:true}));paw.rotation.x=-Math.PI/2;paw.position.set(0,1.41,1.3);g.add(paw);
   for(const s of [-1,1]){mesh(new THREE.BoxGeometry(0.3,0.25,0.1),new THREE.MeshBasicMaterial({color:0xfff7c2}),s*0.8,1.05,2.21,g)}
   for(const [x,z] of [[-1.2,1.4],[1.2,1.4],[-1.2,-1.4],[1.2,-1.4]]){const w=new THREE.Group();w.position.set(x,0.55,z);g.add(w);const t=mesh(new THREE.CylinderGeometry(0.55,0.55,0.45,14),0x222222,0,0,0,w);t.rotation.z=Math.PI/2;mesh(new THREE.CylinderGeometry(0.28,0.28,0.47,10),0xdddddd,0,0,0,w).rotation.z=Math.PI/2;car.wheels.push(w)}
-  const drv=makePup(0xc68a4c,0x2e5fb8,0x2e5fb8);drv.g.scale.setScalar(0.9);drv.g.position.set(0,0.9,-0.5);g.add(drv.g);drv.g.visible=false;car.driver=drv;
+  const drv=makePup(0xc68a4c,0x2e5fb8,0x2e5fb8);ANIM.rigPup(drv);drv.g.scale.setScalar(0.9);drv.g.position.set(0,0.9,-0.5);g.add(drv.g);drv.g.visible=false;car.driver=drv;
   scene.add(g);
 }
+ANIM.rigCar(car);
 const CAR_HOME={x:176,z:102,h:Math.atan2(-22,-38)};
 car.pos.y=ground(car.pos.x,car.pos.z);
 
@@ -547,7 +550,7 @@ const PAD={x:LOOK.x+26,z:LOOK.z-22};
   for(const a of [0,Math.PI/2]){const b=mesh(new THREE.BoxGeometry(9.5,0.07,0.45),0x3d4458,0,0.05,0,rot);b.rotation.y=a}
   const paw=new THREE.Mesh(new THREE.PlaneGeometry(1.3,1.3),new THREE.MeshLambertMaterial({map:pawTex,transparent:true}));
   for(const s of [-1,1]){const p=paw.clone();p.position.set(s*1.62,2.0,-0.4);p.rotation.y=s*Math.PI/2;g.add(p)}
-  const pl=makePup(0xc68a4c,0x2e5fb8,0x2e5fb8);pl.g.scale.setScalar(0.85);pl.g.position.set(0,1.3,0.5);g.add(pl.g);pl.g.visible=false;heli.pilot=pl;
+  const pl=makePup(0xc68a4c,0x2e5fb8,0x2e5fb8);ANIM.rigPup(pl);pl.g.scale.setScalar(0.85);pl.g.position.set(0,1.3,0.5);g.add(pl.g);pl.g.visible=false;heli.pilot=pl;
   g.rotation.order='YXZ';scene.add(g);
 }
 function resetHeli(){heli.pos.set(PAD.x,PAD.y,PAD.z);heli.vel.set(0,0,0);heli.yaw=Math.atan2(TOWN.x-PAD.x,TOWN.z-PAD.z);heli.landed=true}
@@ -956,7 +959,7 @@ function updateCar(dt,inp){
   const hf=ground(car.pos.x+fx*1.8,car.pos.z+fz*1.8),hb=ground(car.pos.x-fx*1.8,car.pos.z-fz*1.8);
   const tp=car.onGround?Math.atan2(hf-hb,3.6):clamp(car.vy*0.03,-0.5,0.5);
   car.g.rotation.x=lerp(car.g.rotation.x,-tp,Math.min(1,8*dt));
-  for(const w of car.wheels)w.children.forEach(c=>c.rotation.x+=car.speed*dt/0.55);
+  for(const w of car.wheels)w.children.forEach(c=>c.rotation.x+=car.speed*dt/0.55);ANIM.car(car,dt,inp,nowT);
   // ram stuff
   const spd=Math.abs(car.speed),c=tc.set(car.pos.x,car.pos.y+1,car.pos.z);
   if(spd>4)for(const p of props)if(p.state==='rest'&&p.pos.distanceTo(c)<p.r+2.2)knock(p,new V3(fx*car.speed*1.15+R(-3,3),6+spd*0.35,fz*car.speed*1.15+R(-3,3)));
@@ -1081,23 +1084,15 @@ function update(dt,t){
   pup.g.position.copy(P.pos);pup.g.rotation.order='YXZ';
   pup.g.rotation.y=P.face;
   const hs=Math.hypot(P.vel.x,P.vel.z);
-  if(P.mode==='ground'){P.walkT+=dt*hs*1.1;const a=Math.sin(P.walkT)*Math.min(1,hs/5)*0.8;pup.legs[0].rotation.x=a;pup.legs[3].rotation.x=a;pup.legs[1].rotation.x=-a;pup.legs[2].rotation.x=-a;pup.g.rotation.x=0}
-  else if(P.mode==='wing'){pup.g.rotation.x=-P.wingPitch*0.9+0.9;pup.legs.forEach((l,i)=>l.rotation.x=i<2?-1.2:1.2)}
-  else if(P.mode==='chute'){pup.g.rotation.x=0;pup.legs.forEach(l=>l.rotation.x=Math.sin(t*6)*0.3)}
-  else if(P.mode==='grapple'){pup.g.rotation.x=0.5;pup.legs.forEach((l,i)=>l.rotation.x=i<2?-0.9:0.9)}
-  else if(P.mode==='swim'){P.walkT+=dt*8;pup.legs.forEach((l,i)=>l.rotation.x=Math.sin(P.walkT+i)*0.9);pup.g.rotation.x=0}
-  else if(P.mode==='jet'){pup.g.rotation.x=0.25;pup.legs.forEach((l,i)=>l.rotation.x=Math.sin(t*9+i)*0.25+0.3)}
-  else{pup.g.rotation.x=0;pup.legs.forEach((l,i)=>l.rotation.x=i<2?-0.5:0.6)}
   for(const f of jetFx){f.visible=P.mode==='jet';f.scale.set(1,0.7+Math.random()*0.6,1)}
-  pup.tail.rotation.z=Math.sin(t*14)*0.5;
-  if(P.mode==='chute')chute.rotation.x=-pup.g.rotation.x;
+  ANIM.pup(pup,P,dt,t,{chute});
   // rope
   if(P.mode==='grapple'||ropeFlash>0){
     ropeFlash-=dt;const a=ropeGeo.attributes.position;const e=P.mode==='grapple'?P.hook:ropeEnd;
     a.setXYZ(0,P.pos.x,P.pos.y+1.2,P.pos.z);a.setXYZ(1,e.x,e.y,e.z);a.needsUpdate=true;rope.visible=true;hookBall.visible=true;hookBall.position.copy(e);
   }else{rope.visible=false;hookBall.visible=false}
   carVisual();
-  if(P.mode!=='heli'&&(!heli.landed||heli.spin>0.01))updateHeli(dt,{x:0,y:0},false);heliVisual(dt);
+  if(P.mode!=='heli'&&(!heli.landed||heli.spin>0.01))updateHeli(dt,{x:0,y:0},false);heliVisual(dt);ANIM.heli(heli,dt,t,P.mode==='heli');
   const blink=Math.floor(t*6)%2;car.lights[0].material.emissive.setHex(blink?0xff2020:0x330000);car.lights[1].material.emissive.setHex(blink?0x000033:0x2050ff);
   // props
   for(const p of props){
@@ -1120,8 +1115,11 @@ function update(dt,t){
   }
   // particles
   for(const q of parts){if(q.life<=0)continue;q.life-=dt;q.vel.y-=20*dt;q.m.position.addScaledVector(q.vel,dt);q.m.rotation.x+=dt*5;if(q.life<=0)q.m.visible=false}
+  for(const b of bots)ANIM.bot(b,dt,t);
+  for(const c of chickens)ANIM.chicken(c,dt,t);
   // npcs
   for(const n of npcs){n.p.tail.rotation.z=Math.sin(t*12+n.phase)*0.6;n.p.head.rotation.y=clamp(Math.atan2(P.pos.x-n.p.g.position.x,P.pos.z-n.p.g.position.z)-n.p.g.rotation.y,-0.8,0.8)*0.6}
+  for(const n of npcs)ANIM.npc(n.p,dt,t,P.pos);
 }
 function ambient(dt,t){
   for(const c of clouds){c.position.x+=dt*3;if(c.position.x>700)c.position.x=-700}
@@ -1201,7 +1199,7 @@ function frame(now){
     if(F){camera.position.set(...F.cam);camera.lookAt(...F.look);if(F.fov){camera.fov=F.fov;camera.updateProjectionMatrix()}}
     else{const a=t*0.08;camera.position.set(LOOK.x+Math.sin(a)*80,LG+45,LOOK.z+Math.cos(a)*80);camera.lookAt(LOOK.x-20,LG+15,LOOK.z-20)}
     for(const b of bots)if(b.alive){b.t+=dt;b.pos.set(b.home.x,b.home.y+Math.sin(b.t*1.3+b.phase)*0.6,b.home.z);b.g.rotation.y=Math.atan2(camera.position.x-b.pos.x,camera.position.z-b.pos.z)}
-    pup.g.position.copy(P.pos);pup.g.rotation.y=P.face;carVisual();heliVisual(dt);pup.tail.rotation.z=Math.sin(t*14)*0.5;
+    pup.g.position.copy(P.pos);pup.g.rotation.y=P.face;carVisual();heliVisual(dt);if(F)pup.tail.rotation.z=Math.sin(t*14)*0.5;else{ANIM.pup(pup,P,dt,t,{chute});for(const n of npcs)ANIM.npc(n.p,dt,t,P.pos)}
     for(const b of bots)b.prop.rotation.y+=dt*22;
     if(F)placeLights(...F.look);else placeLights(LOOK.x,LG,LOOK.z);
   }

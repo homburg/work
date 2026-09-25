@@ -9,11 +9,13 @@ Play: https://claude.ai/artifact/5UT89YJF74HdhmNKqgFBeL (private Claude Artifact
 - Pup Cruiser (car with ramps) and Pup Copter (helicopter on the pad east of the Lookout)
 - Adventure Bay: Lookout (Pup HQ), town hall, bridge, lighthouse, mountain, beach
 - Toon renderer: cel shading, screen-space ink outlines, sky dome, colour grading. Three looks: Golden Hour (default), Saturday Morning, Pastel Toy (switch with V or the ◐ button)
+- Squash-and-stretch pup rig (trot/gallop, landings, chute/wingsuit poses), car suspension, copter hover
 - Keyboard/mouse and touch controls
 
 ## Files
 - `index.html`: the whole game in one file. three.js r128 is loaded from cdnjs.
   It is the Artifact source, so it has no `<!doctype>`/`<html>`/`<head>`/`<body>` tags; the Artifact publisher adds them.
+- `animations.js`: character and vehicle animation module (`window.JPAnim`), loaded with `<script src="animations.js">` and published as a supporting file next to the page. Hooks are the `ANIM.*` calls in `index.html`.
 - `tests/physics.test.js`: headless Playwright test (roofs, jetpack, helicopter, parachute). It steps the simulation with `JP.dbg.step(n)`.
 
 ## Run locally

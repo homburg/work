@@ -21,6 +21,7 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
   page.on('pageerror', e => errors.push(e.message));
   await page.route('**fonts.g*/**', r => r.abort());
   await page.route('http://just-paws.test/', r => r.fulfill({ body: html, contentType: 'text/html' }));
+  await page.route('http://just-paws.test/animations.js', r => r.fulfill({ body: fs.readFileSync(path.join(__dirname, '..', 'animations.js'), 'utf8'), contentType: 'application/javascript' }));
   await page.goto('http://just-paws.test/', { waitUntil: 'domcontentloaded', timeout: 90000 });
   await page.waitForFunction(() => window.JP && window.JP.dbg, null, { timeout: 60000 });
   await page.click('#start');
