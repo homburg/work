@@ -35,7 +35,7 @@ function init(THREE, scene, opts){
     const g = new THREE.IcosahedronGeometry(0.2, 1);
     const m = new THREE.MeshLambertMaterial({ color: opts.dustColor || 0xf6ead0 });
     for(let i = 0; i < 48; i++){
-      const o = new THREE.Mesh(g, m); o.visible = false; o.castShadow = false; o.receiveShadow = false;
+      const o = new THREE.Mesh(g, m); o.visible = false; o.castShadow = false; o.receiveShadow = false; o.userData.dynamic = true;
       scene.add(o); puffs.push({ o, v: new V3(), life: 0, max: 1, s: 1 });
     }
   }

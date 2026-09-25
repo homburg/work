@@ -16,7 +16,8 @@ Play: https://claude.ai/artifact/5UT89YJF74HdhmNKqgFBeL (private Claude Artifact
 - `index.html`: the whole game in one file. three.js r128 is loaded from cdnjs.
   It is the Artifact source, so it has no `<!doctype>`/`<html>`/`<head>`/`<body>` tags; the Artifact publisher adds them.
 - `animations.js`: character and vehicle animation module (`window.JPAnim`), loaded with `<script src="animations.js">` and published as a supporting file next to the page. Hooks are the `ANIM.*` calls in `index.html`.
-- `tests/physics.test.js`: headless Playwright test (roofs, jetpack, helicopter, parachute). It steps the simulation with `JP.dbg.step(n)`.
+- `perf.js`: performance module (`window.JPPerf`): merges static meshes and rigid groups (fewer draw calls), shadow map every other frame, dynamic resolution. Also a supporting file. Meshes that move or hide later need `userData.noMerge = true` or a place in the exclude list.
+- `tests/physics.test.js`: headless Playwright test (roofs, jetpack, helicopter, parachute, props, Kitty-Bots, chickens, look switching). It steps the simulation with `JP.dbg.step(n)`.
 
 ## Run locally
 ```bash
@@ -28,4 +29,4 @@ The page works without the wrapper tags, but browsers render it in quirks mode; 
 ## Debug hooks
 - `JP.setStyle('golden' | 'bold' | 'pastel')`
 - `JP.shot({cam, look, fov, pup, car, bot})`: fixed camera for concept shots (before pressing Start)
-- `JP.dbg`: `{P, heli, roofH, roofs, step(n)}`
+- `JP.dbg`: `{P, heli, car, props, bots, chickens, S, roofH, roofs, step(n)}`

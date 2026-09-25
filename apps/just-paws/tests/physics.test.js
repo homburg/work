@@ -21,7 +21,8 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
   page.on('pageerror', e => errors.push(e.message));
   await page.route('**fonts.g*/**', r => r.abort());
   await page.route('http://just-paws.test/', r => r.fulfill({ body: html, contentType: 'text/html' }));
-  await page.route('http://just-paws.test/animations.js', r => r.fulfill({ body: fs.readFileSync(path.join(__dirname, '..', 'animations.js'), 'utf8'), contentType: 'application/javascript' }));
+  for (const f of ['animations.js', 'perf.js'])
+    await page.route('http://just-paws.test/' + f, r => r.fulfill({ body: fs.readFileSync(path.join(__dirname, '..', f), 'utf8'), contentType: 'application/javascript' }));
   await page.goto('http://just-paws.test/', { waitUntil: 'domcontentloaded', timeout: 90000 });
   await page.waitForFunction(() => window.JP && window.JP.dbg, null, { timeout: 60000 });
   await page.click('#start');
@@ -39,6 +40,17 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     out.heli = { mode: P.mode, climbed: H.pos.y - hy };
     key('keydown', 'KeyE'); key('keyup', 'KeyE'); d.step(20); key('keydown', 'Space'); key('keyup', 'Space'); d.step(30);
     out.bail = { mode: P.mode };
+    // gameplay after mesh merging: entities still resolvable from their meshes, things still move
+    const meshesOf = g => { const a = []; g.traverse(o => { if (o.isMesh) a.push(o); }); return a; };
+    out.ents = [...d.bots, ...d.props].every(e => meshesOf(e.g).every(m => m.userData.ent === e));
+    const prop = d.props[0], p0 = prop.pos.clone();
+    P.mode = 'air'; P.pos.set(p0.x - 2.5, p0.y - 0.5, p0.z); P.vel.set(14, 2, 0); d.step(20); d.step(40);
+    out.prop = { moved: prop.pos.distanceTo(p0), knocked: prop.knocked };
+    const bot = d.bots[0]; P.pos.set(bot.pos.x, bot.pos.y - 0.7, bot.pos.z); P.vel.set(0, 0, 0); P.mode = 'air'; d.step(2);
+    out.bot = { busted: d.S.bots, alive: bot.alive };
+    const ch = d.chickens[0]; P.pos.set(ch.pos.x, ch.pos.y - 0.7, ch.pos.z); d.step(2);
+    out.chicken = { rescued: ch.rescued, count: d.S.chick };
+    for (let i = 0; i < 3; i++) { key('keydown', 'KeyV'); key('keyup', 'KeyV'); d.step(2); }
     return out;
   });
   await browser.close();
@@ -49,6 +61,10 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     ['jetpack climbs and burns fuel', r.jet.mode === 'jet' && r.jet.climbed > 5 && r.jet.fuel < 100, r.jet],
     ['helicopter lifts off', r.heli.mode === 'heli' && r.heli.climbed > 10, r.heli],
     ['bail out + parachute', r.bail.mode === 'chute', r.bail],
+    ['merged meshes keep their entity', r.ents, r.ents],
+    ['props get knocked', r.prop.knocked && r.prop.moved > 0.5, r.prop],
+    ['kitty-bot busted by touch', r.bot.busted >= 1 && !r.bot.alive, r.bot],
+    ['chicken rescued by touch', r.chicken.rescued && r.chicken.count === 1, r.chicken],
   ];
   let fail = 0;
   for (const [name, ok, info] of checks) { console.log(`${ok ? 'PASS' : 'FAIL'} ${name}`, ok ? '' : JSON.stringify(info)); if (!ok) fail++; }

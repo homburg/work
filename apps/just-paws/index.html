@@ -135,6 +135,7 @@ body.touch #hint{bottom:auto;top:calc(34% + env(safe-area-inset-top,0px));font-s
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="animations.js"></script>
+<script src="perf.js"></script>
 <script>
 (async function(){
 'use strict';
@@ -1089,6 +1090,7 @@ function makeRT(){
 }
 makeRT();addEventListener('resize',makeRT);
 function draw(){
+  renderer.shadowMap.needsUpdate=PERF.shadowNow();
   renderer.setRenderTarget(rtC);renderer.render(scene,camera);
   const hidden=[];for(const o of noInk)if(o&&o.visible){o.visible=false;hidden.push(o)}
   const bg=scene.background,fog=scene.fog;scene.overrideMaterial=normalMat;scene.background=normalBg;scene.fog=null;
@@ -1100,8 +1102,12 @@ const startStyle=(location.hash||'').slice(1);let styleName='golden';
 const styleLabels={bold:'Saturday Morning',golden:'Golden Hour',pastel:'Pastel Toy'};
 function cycleStyle(){const k=Object.keys(STYLES);styleName=k[(k.indexOf(styleName)+1)%k.length];setStyle(styleName);toast(styleLabels[styleName],'look switched (V / ◐)')}
 if(STYLES[startStyle])styleName=startStyle;setStyle(styleName);
+const PERF=JPPerf.init(THREE,renderer,{toonMats,maxPR:Math.min(devicePixelRatio,isTouch?1.25:1.5),onResize:pr=>{renderer.setPixelRatio(pr);resize();makeRT()}});
+renderer.shadowMap.autoUpdate=false;
+PERF.mergeStatic(scene,[...noInk,...flags,...radar,...chickens.map(c=>c.ring),hookBall]);
+for(const p of props)PERF.mergeGroup(p.g);for(const b of bots)PERF.mergeGroup(b.g,[b.prop]);for(const c of clouds)PERF.mergeGroup(c);
 // hooks for concept shots
-const JP=window.JP={setStyle,fixed:null,world:{LG,LOOK,TOWN,BX},dbg:{P,heli,roofH,roofs:roofGeo,step(n){for(let i=0;i<n;i++){nowT+=1/60;update(1/60,nowT)}}},
+const JP=window.JP={setStyle,fixed:null,world:{LG,LOOK,TOWN,BX},dbg:{P,heli,car,props,bots,chickens,S,roofH,roofs:roofGeo,step(n){for(let i=0;i<n;i++){nowT+=1/60;update(1/60,nowT)}}},
   shot(o){
     JP.fixed=o;
     if(o.pup){P.pos.set(...o.pup.pos);P.face=o.pup.face??0;chute.visible=o.pup.mode==='chute';pup.wings.visible=o.pup.mode==='wing';pup.g.rotation.x=o.pup.mode==='wing'?0.75:0;
@@ -1238,7 +1244,7 @@ function frame(now){
     for(const b of bots)b.prop.rotation.y+=dt*22;
     if(F)placeLights(...F.look);else placeLights(LOOK.x,LG,LOOK.z);
   }
-  draw();
+  draw();PERF.frame(now);
   requestAnimationFrame(frame);
 }
 if(isTouch){document.body.classList.add('touch');$('keysDesk').hidden=true;$('keysTouch').hidden=false}
