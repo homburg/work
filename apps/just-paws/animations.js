@@ -79,6 +79,18 @@ function init(THREE, scene, opts){
     g.add(sq); sq.add(rot);
     for(const c of kids){ rot.add(c); c.position.y -= CY; }
 
+    // smoother body + chest patch: the low-poly spheres intersected in a jagged cream blotch,
+    // very visible once the pup sits or leans back
+    for(const c of rot.children){
+      const gp = c.geometry && c.geometry.type === 'SphereGeometry' && c.geometry.parameters;
+      if(!gp) continue;
+      if(gp.radius === 0.5){ c.geometry = new THREE.SphereGeometry(0.5, 24, 18); }
+      else if(gp.radius === 0.4){
+        c.geometry = new THREE.SphereGeometry(0.4, 24, 18);
+        c.position.set(0, 0.6 - CY, 0.2); c.scale.set(0.74, 0.62, 1.12);
+      }
+    }
+
     // knees: split each leg cylinder into upper + lower (lower carries the paw)
     const knees = [];
     for(const leg of pup.legs){
@@ -228,7 +240,7 @@ function init(THREE, scene, opts){
           + a.gallop * 0.13 * Math.max(0, Math.sin(TAU * a.phase + 0.6));
       pitch = clamp(-a.acc * 0.008, -0.22, 0.22) + a.gallop * 0.14 * Math.sin(TAU * a.phase + 1.2) + run * 0.05;
       roll = clamp(a.yawRate * hs * 0.012, -0.3, 0.3);
-      pitch = lerp(pitch, -0.42, a.sit); bob -= a.sit * 0.2;
+      pitch = lerp(pitch, -0.32, a.sit); bob -= a.sit * 0.17;
       headX = run * 0.04 * Math.sin(ph2 - 0.8) - a.gallop * 0.12 + a.sit * 0.35;
       headY = clamp(a.yawRate * 0.12, -0.5, 0.5);
       // idle life: look around, breathe
@@ -394,8 +406,8 @@ function init(THREE, scene, opts){
     }
     const s = clamp(sstep(a.squash, Math.sin(t * 2.4 + a.tailPh) * 0.02, 4.2, 0.32, dt), -0.4, 0.4);
     a.sq.scale.set(1 - s * 0.45, 1 + s, 1 - s * 0.45);
-    a.sq.position.y = a.hop - a.sit * 0.2;
-    a.rot.rotation.x = sstep(a.pitch, -0.42 * a.sit - (a.hop > 0 ? a.hopV * 0.04 : 0), 4, 0.6, dt);
+    a.sq.position.y = a.hop - a.sit * 0.17;
+    a.rot.rotation.x = sstep(a.pitch, -0.32 * a.sit - (a.hop > 0 ? a.hopV * 0.04 : 0), 4, 0.6, dt);
     a.rot.rotation.z = 0;
     // head: keep the game's yaw tracking, add a curious tilt
     p.head.rotation.x = 0.3 * a.sit - 0.1 * a.excite;
