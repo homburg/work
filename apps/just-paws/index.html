@@ -448,11 +448,33 @@ chickSpots[chickSpots.length-1].name='mountain peak';
   pines.forEach((s,i)=>{o.position.set(s[0],s[1]-0.3,s[2]);o.rotation.y=R(0,6);o.scale.setScalar(R(0.8,1.3));o.updateMatrix();pm.setMatrixAt(i,o.matrix);pm.setColorAt(i,c.setHSL(R(0.36,0.42),R(0.35,0.5),R(0.26,0.34)))});
   for(const m of [trunks,bm,pm]){m.castShadow=true;m.receiveShadow=true;scene.add(m)}
 }
+// far scenery: islands and ranges across the sea, so the horizon has layers that haze away
+{
+  const fr=mulberry32(4242),F=(a,b)=>a+(b-a)*fr();
+  const geos=[],col=new THREE.Color();
+  const add=(g,x,y,z,sx,sy,sz,c)=>{g=g.toNonIndexed();g.scale(sx,sy,sz);g.rotateY(F(0,6.28));g.translate(x,y,z);const n=g.attributes.position.count,cc=new Float32Array(n*3);col.set(c);for(let i=0;i<n;i++){const k=0.85+0.15*fr();cc[i*3]=col.r*k;cc[i*3+1]=col.g*k;cc[i*3+2]=col.b*k}g.setAttribute('color',new THREE.BufferAttribute(cc,3));geos.push(g)};
+  for(let i=0;i<26;i++){const a=F(0,6.28),d=F(700,1500),x=Math.sin(a)*d,z=Math.cos(a)*d,h=F(30,120),w=F(70,200);
+    add(new THREE.IcosahedronGeometry(1,1),x,-6,z,w,h,w*F(0.6,1.1),pick2(fr,[0x5f9a52,0x6e8f5a,0x7aa35a,0x8a9a7a]));
+    if(fr()<0.6)add(new THREE.IcosahedronGeometry(1,1),x+F(-90,90),-6,z+F(-90,90),w*0.6,h*F(0.5,1.3),w*0.5,0x6f9f5c);
+    add(new THREE.CylinderGeometry(1,1,1,9),x,-5.5,z,w*1.05,1,w*1.05,0xf0dca0)}
+  for(let i=0;i<9;i++){const x=F(-1500,1500),z=F(-1900,-1500),h=F(200,340),w=F(260,420);add(new THREE.ConeGeometry(1,1,9,1),x,h/2-10,z,w,h,w*0.7,0x7f8f9a);add(new THREE.ConeGeometry(1,1,9,1),x,h*0.86-10,z,w*0.28,h*0.3,w*0.2,0xf6fbff)}
+  const merged=mergeGeos(geos);
+  const far=new THREE.Mesh(merged,Object.assign(new THREE.MeshLambertMaterial({vertexColors:true}),{userData:{flat:true}}));far.matrixAutoUpdate=false;scene.add(far);
+}
+function pick2(r,a){return a[Math.floor(r()*a.length)]}
+function mergeGeos(list){
+  let n=0;for(const g of list)n+=g.attributes.position.count;
+  const pos=new Float32Array(n*3),col=new Float32Array(n*3);let o=0;
+  for(const g of list){pos.set(g.attributes.position.array,o*3);col.set(g.attributes.color.array,o*3);o+=g.attributes.position.count}
+  const m=new THREE.BufferGeometry();m.setAttribute('position',new THREE.BufferAttribute(pos,3));m.setAttribute('color',new THREE.BufferAttribute(col,3));m.computeVertexNormals();return m;
+}
 const clouds=[];
 {
   const cm=new THREE.MeshLambertMaterial({color:0xffffff,emissive:0x8a9aa8,fog:false});
   const sg=new THREE.IcosahedronGeometry(1,1);
   for(let i=0;i<22;i++){const g=new THREE.Group();const n=3+Math.floor(R(0,4));for(let k=0;k<n;k++){const s=new THREE.Mesh(sg,cm);s.position.set(k*9-n*4.5,R(-2,3),R(-5,5));s.scale.set(R(9,14),R(5,8),R(7,11));g.add(s)}g.position.set(R(-600,600),R(150,210),R(-600,600));scene.add(g);clouds.push(g)}
+  const cr=mulberry32(777),C=(a,b)=>a+(b-a)*cr();
+  for(let i=0;i<26;i++){const g=new THREE.Group();const n=4+Math.floor(C(0,4));for(let k=0;k<n;k++){const s=new THREE.Mesh(sg,cm);s.position.set(k*14-n*7,C(-3,4),C(-8,8));s.scale.set(C(14,22),C(7,11),C(10,16));g.add(s)}const a=C(0,6.28),d=C(750,1500);g.position.set(Math.sin(a)*d,C(70,170),Math.cos(a)*d);g.userData.far=true;scene.add(g);clouds.push(g)}
 }
 
 // ================= characters =================
@@ -970,13 +992,13 @@ function carVisual(){car.g.position.copy(car.pos);car.g.rotation.y=car.heading;c
 
 // ================= cartoon style: toon materials, sky, lighting, ink post =================
 const STYLES={
-  bold:{sunDir:[0.45,0.82,0.36],sun:0xfff1d2,sunI:1.0,keep:0.3,back:0x9fc8ff,backI:0.18,hemiSky:0xd6ecff,hemiGround:0x7aa35a,hemiI:0.6,
+  bold:{hazeD:0.0013,hazeH:80,sunDir:[0.45,0.82,0.36],sun:0xfff1d2,sunI:1.0,keep:0.3,back:0x9fc8ff,backI:0.18,hemiSky:0xd6ecff,hemiGround:0x7aa35a,hemiI:0.6,
     skyTop:0x2a86ff,skyHor:0xc9eeff,sunGlow:0xfff4c8,fogN:280,fogF:980,bands:[110,255],ink:[0.08,0.06,0.16],inkMix:0.0,inkW:1.3,
     sat:1.22,warm:0.0,contrast:1.06,lift:0.0,vig:0.16},
-  golden:{sunDir:[-0.72,0.3,0.62],sun:0xffb870,sunI:1.15,keep:0.42,back:0x8f9cff,backI:0.3,hemiSky:0xb4c4ff,hemiGround:0xb89478,hemiI:0.78,
+  golden:{hazeD:0.0019,hazeH:70,sunDir:[-0.72,0.3,0.62],sun:0xffb870,sunI:1.15,keep:0.42,back:0x8f9cff,backI:0.3,hemiSky:0xb4c4ff,hemiGround:0xb89478,hemiI:0.78,
     skyTop:0x4a6fd0,skyHor:0xffc796,sunGlow:0xffd08a,fogN:200,fogF:820,bands:[150,205,255],ink:[0.2,0.08,0.12],inkMix:0.6,inkW:1.2,
     sat:1.1,warm:0.05,contrast:1.0,lift:0.03,vig:0.2},
-  pastel:{sunDir:[0.3,0.9,0.5],sun:0xfff6ea,sunI:0.75,keep:0.5,back:0xffc4e6,backI:0.2,hemiSky:0xf2f4ff,hemiGround:0xb6d4a6,hemiI:0.95,
+  pastel:{hazeD:0.0021,hazeH:70,sunDir:[0.3,0.9,0.5],sun:0xfff6ea,sunI:0.75,keep:0.5,back:0xffc4e6,backI:0.2,hemiSky:0xf2f4ff,hemiGround:0xb6d4a6,hemiI:0.95,
     skyTop:0x8cc8ff,skyHor:0xffe4f1,sunGlow:0xffffff,fogN:220,fogF:900,bands:[175,255],ink:[0.3,0.25,0.4],inkMix:0.75,inkW:1.0,
     sat:0.92,warm:0.02,contrast:0.96,lift:0.06,vig:0.1},
 };
@@ -1008,7 +1030,7 @@ function setStyle(name){
   sun.color.set(s.sun);sun.intensity=s.sunI*(1-s.keep);sunSoft.color.set(s.sun);sunSoft.intensity=s.sunI*s.keep;backLight.color.set(s.back);backLight.intensity=s.backI;
   hemi.color.set(s.hemiSky);hemi.groundColor.set(s.hemiGround);hemi.intensity=s.hemiI;
   skyU.top.value.set(s.skyTop);skyU.hor.value.set(s.skyHor);skyU.glow.value.set(s.sunGlow);skyU.sunDir.value.copy(sunDir);
-  scene.fog.color.set(s.skyHor);scene.fog.near=s.fogN;scene.fog.far=s.fogF;scene.background=new THREE.Color(s.skyHor);
+  scene.fog.color.set(s.skyHor);scene.fog.near=1600;scene.fog.far=2400;postU.haze.value.set(s.skyHor);postU.hazeTop.value.set(s.skyTop);postU.glow.value.set(s.sunGlow);postU.sunDir.value.copy(sunDir);postU.hazeD.value=s.hazeD;postU.hazeH.value=s.hazeH;scene.background=new THREE.Color(s.skyHor);
   const data=new Uint8Array(s.bands.length*4);s.bands.forEach((v,i)=>data.set([v,v,v,255],i*4));
   const g=new THREE.DataTexture(data,s.bands.length,1,THREE.RGBAFormat);g.minFilter=g.magFilter=THREE.NearestFilter;g.generateMipmaps=false;g.needsUpdate=true;
   for(const m of toonMats){m.gradientMap=g;m.needsUpdate=true}
@@ -1019,26 +1041,39 @@ function placeLights(tx,ty,tz){
   sun.position.set(tx+sunDir.x*160,ty+sunDir.y*160,tz+sunDir.z*160);sun.target.position.set(tx,ty,tz);sunSoft.position.copy(sun.position);sunSoft.target.position.set(tx,ty,tz);
   backLight.position.set(tx-sunDir.x*100,ty+40,tz-sunDir.z*100);backLight.target.position.set(tx,ty,tz);
   sky.position.copy(camera.position);
+  camera.updateMatrixWorld();postU.projInv.value.copy(camera.projectionMatrixInverse);postU.camWorld.value.copy(camera.matrixWorld);postU.camPos.value.copy(camera.position);
 }
 // post-process
 const postU={tC:{value:null},tD:{value:null},tN:{value:null},res:{value:new THREE.Vector2(1,1)},near:{value:camera.near},far:{value:camera.far},
-  ink:{value:new V3()},inkMix:{value:0},inkW:{value:1},sat:{value:1},warm:{value:0},contrast:{value:1},lift:{value:0},vig:{value:0}};
+  ink:{value:new V3()},inkMix:{value:0},inkW:{value:1},sat:{value:1},warm:{value:0},contrast:{value:1},lift:{value:0},vig:{value:0},
+  projInv:{value:new THREE.Matrix4()},camWorld:{value:new THREE.Matrix4()},camPos:{value:new V3()},sunDir:{value:new V3(0,1,0)},haze:{value:new THREE.Color()},glow:{value:new THREE.Color()},hazeD:{value:0.0015},hazeH:{value:80},hazeTop:{value:new THREE.Color()}};
 const postScene=new THREE.Scene(),postCam=new THREE.OrthographicCamera(-1,1,1,-1,0,1);
 postScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2,2),new THREE.ShaderMaterial({uniforms:postU,depthTest:false,depthWrite:false,
   vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}',
-  fragmentShader:`uniform sampler2D tC,tD,tN;uniform vec2 res;uniform float near,far,inkMix,inkW,sat,warm,contrast,lift,vig;uniform vec3 ink;varying vec2 vUv;
+  fragmentShader:`uniform sampler2D tC,tD,tN;uniform vec2 res;uniform float near,far,inkMix,inkW,sat,warm,contrast,lift,vig,hazeD,hazeH;uniform vec3 ink,camPos,sunDir,haze,glow,hazeTop;uniform mat4 projInv,camWorld;varying vec2 vUv;
   float lin(float d){float z=d*2.-1.;return 2.*near*far/(far+near-z*(far-near));}
   float iz(vec2 uv){return 1./lin(texture2D(tD,uv).x);}
   vec3 nrm(vec2 uv){return texture2D(tN,uv).xyz*2.-1.;}
   void main(){
     vec2 px=inkW/res;vec3 col=texture2D(tC,vUv).rgb;
+    // aerial perspective: distance haze thinned with altitude, lit by the sun near its direction
+    float rd=texture2D(tD,vUv).x,f=0.;vec3 hc=haze;
+    if(rd<0.99999){
+      vec4 vp=projInv*vec4(vUv*2.-1.,rd*2.-1.,1.);vp.xyz/=vp.w;
+      vec3 wp=(camWorld*vec4(vp.xyz,1.)).xyz;
+      float hAvg=max(0.,(camPos.y+wp.y)*0.5);
+      f=1.-exp(-length(vp.xyz)*hazeD*exp(-hAvg/hazeH));
+      hc=mix(mix(haze,hazeTop,0.32),haze,f*f);
+      hc=mix(hc,glow,pow(max(dot(normalize(wp-camPos),normalize(sunDir)),0.),6.)*0.5);
+    }
     float c=iz(vUv),dl=iz(vUv-vec2(px.x,0.)),dr=iz(vUv+vec2(px.x,0.)),du=iz(vUv+vec2(0.,px.y)),dd=iz(vUv-vec2(0.,px.y));
     float eD=smoothstep(0.02,0.06,abs(dl+dr+du+dd-4.*c)/c);
     float eD2=smoothstep(0.08,0.2,max(max(abs(dl-c),abs(dr-c)),max(abs(du-c),abs(dd-c)))/c);
     vec3 n=nrm(vUv);float m=min(min(dot(n,nrm(vUv-vec2(px.x,0.))),dot(n,nrm(vUv+vec2(px.x,0.)))),min(dot(n,nrm(vUv+vec2(0.,px.y))),dot(n,nrm(vUv-vec2(0.,px.y)))));
     float eN=smoothstep(0.3,0.55,1.-m);
     float dist=1./c;float e=max(max(eD,eD2),eN)*(1.-smoothstep(160.,520.,dist));
-    vec3 ic=mix(ink,col*0.28,inkMix);col=mix(col,ic,e*0.92);
+    e*=1.-f;vec3 ic=mix(ink,col*0.28,inkMix);col=mix(col,ic,e*0.92);
+    float l0=dot(col,vec3(.299,.587,.114));col=mix(col,vec3(l0),f*0.3);col=mix(col,hc,f);
     float l=dot(col,vec3(.299,.587,.114));col=mix(vec3(l),col,sat);col=(col-.5)*contrast+.5;
     col+=vec3(warm,warm*.3,-warm*.7);col=lift+col*(1.-lift);
     vec2 q=vUv-.5;col*=1.-vig*dot(q,q)*2.2;
@@ -1122,7 +1157,7 @@ function update(dt,t){
   for(const n of npcs)ANIM.npc(n.p,dt,t,P.pos);
 }
 function ambient(dt,t){
-  for(const c of clouds){c.position.x+=dt*3;if(c.position.x>700)c.position.x=-700}
+  for(const c of clouds){if(c.userData.far)continue;c.position.x+=dt*3;if(c.position.x>700)c.position.x=-700}
   if(lhBeam)lhBeam.rotation.y+=dt*0.8;
   for(const f of flags)f.rotation.y=Math.sin(t*3)*0.25;
   for(const r of radar)r.rotation.z+=dt*0.6;
