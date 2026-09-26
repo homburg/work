@@ -26,3 +26,6 @@ Sound themes (switch with N or the ♫ button), all Kenney CC0:
 Copter rotor loop:
   heli-loop.wav "Helicopter Sounds" by aquinn (CC0), 4 s cut from 10.0-14.3 s, crossfaded into a seamless loop
                 https://opengameart.org/content/helicopter-sounds
+
+Copter crash:
+  boom.mp3      Kenney Sci-Fi Sounds lowFrequency_explosion_000 mixed with explosionCrunch_003 (CC0)

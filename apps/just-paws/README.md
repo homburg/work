@@ -7,6 +7,8 @@ Play: https://claude.ai/artifact/5UT89YJF74HdhmNKqgFBeL (private Claude Artifact
 ## What's in it
 - Scout the pup: run, grappling hook (hook + parachute = slingshot), parachute, wingsuit, jetpack
 - Pup Cruiser (car with ramps) and Pup Copter (helicopter on the pad east of the Lookout)
+- Digger (gravko) at the dig site north of town: tracks turn on the spot, Space/Shift (UP/DOWN, A/B) moves the arm, F (SCOOP, X) scoops crates, barrels or dirt and tips them out
+- Call in a ride (B, the 🪂 button or D-pad ◀ ▶): Pup Cruiser, Pup Copter, speedboat or digger drops in by parachute next to you, red smoke marks the spot; the boat lands on the nearest water
 - Adventure Bay: Lookout (Pup HQ), town hall, bridge, lighthouse, mountain, beach
 - Toon renderer: cel shading, screen-space ink outlines, sky dome, colour grading. Three looks: Golden Hour (default), Saturday Morning, Pastel Toy (switch with V or the ◐ button)
 - Squash-and-stretch pup rig (trot/gallop, landings, chute/wingsuit poses), car suspension, copter hover
