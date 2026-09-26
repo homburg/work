@@ -36,6 +36,7 @@ body.touch #mode{left:calc(16px + env(safe-area-inset-left,0px));transform:none;
 #corner button{width:40px;height:40px;border-radius:12px;border:2px solid rgba(255,255,255,.2);background:var(--navy-a);color:var(--cream);font:800 18px 'Baloo 2',system-ui,sans-serif;cursor:pointer}
 #under{inset:0;z-index:1;background:radial-gradient(ellipse at 50% 0%,rgba(120,220,255,.18),rgba(10,70,130,.38))}
 #corner button.on,#corner button.new{background:var(--gold);color:var(--navy)}
+#ver{right:calc(6px + env(safe-area-inset-right));bottom:calc(3px + env(safe-area-inset-bottom));font-size:10px;letter-spacing:.04em;color:#fff;opacity:.55;text-shadow:0 1px 2px rgba(22,36,74,.6);pointer-events:none;font-variant-numeric:tabular-nums}
 #cross{left:50%;top:60%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;border:2px solid transparent;transition:border-color .15s,transform .15s}
 #cross::after{content:"";position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:50%;background:rgba(255,255,255,.5);box-shadow:0 0 0 1px rgba(22,36,74,.2)}
 #cross.ok{border-color:rgba(255,201,60,.7)}
@@ -110,6 +111,7 @@ body.touch #mode{left:calc(16px + env(safe-area-inset-left,0px));transform:none;
 </div>
 <canvas id="map" class="hud" width="300" height="300" data-i18n-title="tMap"></canvas>
 <div id="bigmap" hidden><div id="bigCard"><div id="bigHead"><span data-i18n="mapT">ADVENTURE BAY</span><small id="bigHint"></small></div><canvas id="bigC"></canvas><div id="bigLeg" data-i18n="mapLeg"></div></div></div>
+<div id="ver" class="hud" hidden></div>
 <div id="corner" class="hud"><button id="bOrder" data-i18n-title="tOrder">🪂</button><button id="bRespawn" data-i18n-title="tRespawn">↺</button><button id="bMute" data-i18n-title="tMute">♪</button><button id="bStyle" data-i18n-title="tStyle">◐</button><button id="bSnd" data-i18n-title="tSnd">♫</button><button id="bFull" data-i18n-title="tFull">⛶</button><button id="bReload" data-i18n-title="tReload">⟳</button><button id="bLang" data-i18n-title="tLang" style="font-size:13px">EN</button></div>
 <div id="cross" class="hud"></div>
 <div id="under" class="hud" hidden></div>
@@ -1712,7 +1714,7 @@ const JP=window.JP={setStyle,fixed:null,world:{LG,LOOK,TOWN,BX},dbg:{P,cam,camer
       pup.legs.forEach((l,i)=>l.rotation.x=o.pup.mode==='chute'?0.3*(i%2?1:-1):o.pup.mode==='wing'?(i<2?-1.2:1.2):0)}
     if(o.car){car.pos.set(...o.car.pos);car.heading=o.car.heading??0}
     if(o.bot){const b=bots[0];b.home.set(...o.bot)}
-    for(const k of ['intro','stats','map','corner','cross','mode','hint','toast'])$(k).hidden=true;
+    for(const k of ['intro','stats','map','corner','cross','mode','hint','toast','ver'])$(k).hidden=true;
   }};
 
 // ================= loop =================
@@ -2212,8 +2214,10 @@ $('fresh').addEventListener('click',()=>{try{localStorage.removeItem(SAVE_KEY)}c
 setInterval(saveGame,3000);
 $('bReload').addEventListener('click',()=>{saveGame();const u=new URL(location.href);u.searchParams.set('v',Date.now().toString(36));location.replace(u.href)});
 // watch for a new deploy (worker.js /version = hash of the page) and light up the reload button
-{let tag=null;const chk=()=>{if(document.hidden)return;fetch('/version',{cache:'no-store'}).then(r=>r.ok?r.text():null).then(e=>{if(!e||e.length>40)return;
-  if(tag===null)tag=e;else if(e!==tag&&!$('bReload').classList.contains('new')){$('bReload').classList.add('new');if(S.running)toast(T('update'),T('update2'))}}).catch(()=>{})};
+// the first answer is this page's release: shown small in the bottom corner as deploy date/time + page hash
+{let tag=null;const chk=()=>{if(document.hidden)return;fetch('/version',{cache:'no-store'}).then(r=>r.ok?r.text():null).then(e=>{if(!e||e.length>60)return;
+  if(tag===null){tag=e;const [h,at]=e.split(' '),d=at&&new Date(at),p=n=>String(n).padStart(2,'0');
+    $('ver').textContent='v '+(d&&!isNaN(d)?d.getDate()+'/'+(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes())+' · ':'')+h.slice(0,6);$('ver').hidden=false}else if(e!==tag&&!$('bReload').classList.contains('new')){$('bReload').classList.add('new');if(S.running)toast(T('update'),T('update2'))}}).catch(()=>{})};
   if(/workers\.dev$/.test(location.hostname)){chk();setInterval(chk,60000)}}
 addEventListener('pagehide',saveGame);document.addEventListener('visibilitychange',()=>{if(document.hidden)saveGame()});
 JP.dbg.saveGame=saveGame;JP.dbg.loadGame=loadGame;

@@ -60,8 +60,10 @@ export default {
       // short hash of the deployed page, so open games can tell a new version is out
       const page = await env.ASSETS.fetch(new Request(new URL('/', url)));
       const hash = new Uint8Array(await crypto.subtle.digest('SHA-1', await page.arrayBuffer()));
+      // plus when this release was deployed (Workers version metadata), shown small in the game's corner
       const v = [...hash.slice(0, 6)].map((b) => b.toString(16).padStart(2, '0')).join('');
-      return new Response(v, { headers: { 'content-type': 'text/plain', 'cache-control': 'no-store' } });
+      const at = env.CF_VERSION_METADATA && env.CF_VERSION_METADATA.timestamp;
+      return new Response(at ? v + ' ' + at : v, { headers: { 'content-type': 'text/plain', 'cache-control': 'no-store' } });
     }
     return env.ASSETS.fetch(request);
   },
