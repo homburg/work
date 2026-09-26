@@ -1411,15 +1411,26 @@ const mapBg=document.createElement('canvas');mapBg.width=mapBg.height=150;
   g.fillStyle='#e8413c';g.fillRect((LOOK.x/MW+1)*75-2.5,(LOOK.z/MW+1)*75-2.5,5,5)}
 function drawMap(){
   const W=map.width,s=W/150,px=P.pos.x,pz=P.pos.z,zoom=2.2;
-  mctx.save();mctx.clearRect(0,0,W,W);mctx.translate(W/2,W/2);mctx.rotate(Math.PI+cam.yaw);mctx.scale(-1,1);
+  mctx.save();mctx.clearRect(0,0,W,W);mctx.translate(W/2,W/2);mctx.rotate(Math.PI+cam.yaw);   // camera forward points up on the map, screen right stays right
   const k=W/(2*MW)*zoom;
   mctx.drawImage(mapBg,-(px/MW+1)*75*s*zoom,-(pz/MW+1)*75*s*zoom,150*s*zoom,150*s*zoom);
-  const dot=(x,z,c,r)=>{mctx.fillStyle=c;mctx.beginPath();mctx.arc((x-px)*k,(z-pz)*k,r*s,0,7);mctx.fill()};
-  for(const c of chickens)if(!c.rescued){mctx.strokeStyle='#16244a';mctx.lineWidth=2*s;dot(c.pos.x,c.pos.z,'#ffe14d',4.5);mctx.beginPath();mctx.arc((c.pos.x-px)*k,(c.pos.z-pz)*k,4.5*s,0,7);mctx.stroke()}
-  for(const b of bots)if(b.alive)dot(b.pos.x,b.pos.z,'#7b4bd6',3);
-  if(P.mode!=='car')dot(car.pos.x,car.pos.z,'#2e5fb8',3.5);
-  if(P.mode!=='heli')dot(heli.pos.x,heli.pos.z,'#ff7eb6',4);
   mctx.restore();
+  // waypoints: small upright pictograms; important ones stick to the map edge when off-map
+  const th=Math.PI+cam.yaw,co=Math.cos(th),si=Math.sin(th),edge=W/2-11*s;
+  const pin=(x,z,icon,size,keep,ring)=>{
+    const u=(x-px)*k,v=(z-pz)*k;let X=co*u-si*v,Y=si*u+co*v;
+    const m=Math.max(Math.abs(X),Math.abs(Y));if(m>edge){if(!keep)return;X*=edge/m;Y*=edge/m}
+    X+=W/2;Y+=W/2;const r=size*0.62*s;
+    mctx.fillStyle=ring||'rgba(255,248,232,.92)';mctx.strokeStyle='#16244a';mctx.lineWidth=1.5*s;
+    mctx.beginPath();mctx.arc(X,Y,r,0,7);mctx.fill();mctx.stroke();
+    mctx.font=`${size*s}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;mctx.fillText(icon,X,Y+size*0.06*s);
+  };
+  mctx.textAlign='center';mctx.textBaseline='middle';
+  pin(LOOK.x,LOOK.z,'🏠',14,true,'#ffd7d5');
+  for(const b of bots)if(b.alive)pin(b.pos.x,b.pos.z,'🤖',11,false,'#e3d6ff');
+  if(P.mode!=='car')pin(car.pos.x,car.pos.z,'🚓',13,true,'#d6e6ff');
+  if(P.mode!=='heli')pin(heli.pos.x,heli.pos.z,'🚁',13,true,'#ffd9ec');
+  for(const c of chickens)if(!c.rescued)pin(c.pos.x,c.pos.z,'🐔',14,true,'#ffe14d');
   mctx.fillStyle='#fff';mctx.strokeStyle='#16244a';mctx.lineWidth=2*s;mctx.beginPath();mctx.moveTo(W/2,W/2-7*s);mctx.lineTo(W/2+5*s,W/2+5*s);mctx.lineTo(W/2-5*s,W/2+5*s);mctx.closePath();mctx.fill();mctx.stroke();
 }
 let lastHint='',lastMode='',lastJump='';
