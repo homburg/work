@@ -26,6 +26,7 @@ body.touch #hint{bottom:auto;top:calc(34% + env(safe-area-inset-top,0px));font-s
 #map{top:calc(10px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));width:150px;height:150px;border-radius:18px;border:3px solid var(--navy);box-shadow:0 3px 0 rgba(0,0,0,.2);background:#2fa8dc}
 #corner{top:calc(170px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));display:flex;gap:6px;pointer-events:auto}
 #corner button{width:40px;height:40px;border-radius:12px;border:2px solid rgba(255,255,255,.2);background:var(--navy-a);color:var(--cream);font:800 18px 'Baloo 2',system-ui,sans-serif;cursor:pointer}
+#corner button.on{background:var(--gold);color:var(--navy)}
 #cross{left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:3px solid rgba(255,255,255,.75);box-shadow:0 0 0 2px rgba(22,36,74,.35)}
 #cross::after{content:"";position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:#fff}
 #cross.ok{border-color:var(--gold);transform:scale(1.15)}
@@ -80,7 +81,7 @@ body.touch #hint{bottom:auto;top:calc(34% + env(safe-area-inset-top,0px));font-s
   </div>
 </div>
 <canvas id="map" class="hud" width="300" height="300"></canvas>
-<div id="corner" class="hud"><button id="bRespawn" title="Back to Pup HQ (R)" aria-label="Back to Pup HQ">↺</button><button id="bMute" title="Sound (M)" aria-label="Toggle sound">♪</button><button id="bStyle" title="Switch look (V)" aria-label="Switch visual style">◐</button></div>
+<div id="corner" class="hud"><button id="bRespawn" title="Back to Pup HQ (R)" aria-label="Back to Pup HQ">↺</button><button id="bMute" title="Sound (M)" aria-label="Toggle sound">♪</button><button id="bStyle" title="Switch look (V)" aria-label="Switch visual style">◐</button><button id="bFull" title="Fullscreen" aria-label="Toggle fullscreen">⛶</button></div>
 <div id="cross" class="hud"></div>
 <div id="hint" class="hud" hidden></div>
 <div id="toast" class="hud"></div>
@@ -768,6 +769,13 @@ btn('tJump',()=>{if(P.mode==='heli')hold.up=true;else actJump()});btn('tHook',()
 btn('tJet',()=>{hold.jet=true});
 for(const [id,k] of [['tJump','up'],['tWing','down'],['tJet','jet']])for(const ev of ['pointerup','pointercancel','pointerleave'])$(id).addEventListener(ev,()=>{hold[k]=false});btn('tCar',()=>actCar());
 $('bRespawn').addEventListener('click',()=>respawn());$('bStyle').addEventListener('click',()=>cycleStyle());$('bMute').addEventListener('click',()=>toggleMute());
+// fullscreen: hidden where the browser (or an embedding iframe) doesn't allow it, e.g. iPhone Safari
+{const d=document,el=d.documentElement,bf=$('bFull');
+ const can=d.fullscreenEnabled||d.webkitFullscreenEnabled,cur=()=>d.fullscreenElement||d.webkitFullscreenElement;
+ if(!can)bf.hidden=true;
+ bf.addEventListener('click',()=>{if(cur())(d.exitFullscreen||d.webkitExitFullscreen).call(d);else{const r=(el.requestFullscreen||el.webkitRequestFullscreen).call(el,{navigationUI:'hide'});if(r&&r.catch)r.catch(()=>toast('Fullscreen','not allowed here'))}});
+ const sync=()=>{bf.classList.toggle('on',!!cur());bf.setAttribute('aria-pressed',!!cur())};
+ d.addEventListener('fullscreenchange',sync);d.addEventListener('webkitfullscreenchange',sync);}
 function toggleMute(){muted=!muted;$('bMute').textContent=muted?'✕':'♪';if(engine)engine.g.gain.value=0}
 function moveInput(){
   if(joy.id!==null)return{x:joy.x,y:joy.y,mag:Math.hypot(joy.x,joy.y)};
