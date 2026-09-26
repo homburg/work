@@ -8,6 +8,7 @@
     "directory": ".",
     "binding": "ASSETS"
   },
+  "version_metadata": { "binding": "CF_VERSION_METADATA" },
   "durable_objects": {
     "bindings": [{ "name": "ROOM", "class_name": "Room" }]
   },
