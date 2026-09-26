@@ -58,6 +58,18 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     out.shipSync = { off: Math.hypot(Sh.pos.x - tx, Sh.pos.z - tz), dy: Math.abs(Sh.baseY - ty), dyaw: Math.abs(Math.atan2(Math.sin(Sh.yaw - tyaw), Math.cos(Sh.yaw - tyaw))) };
     P.mode = 'air'; P.pos.set(Sh.pos.x, Sh.pos.y + Sh.deckY + 1, Sh.pos.z); P.vel.set(0, 0, 0); d.mpPeer({ id: 'captain', s: [tx, ty, tz, 0, 12, 0, 0, 0, tyaw, 0] }, true); d.step(5);
     key('keydown', 'KeyE'); key('keyup', 'KeyE'); out.shipSync.mode = P.mode;
+    // online: another player's car, sent 15x a second with uneven network delay, moves evenly on our screen
+    P.mode = 'air'; const M = d.MP, x0 = d.car.pos.x + 40, z0 = d.car.pos.z, send = [], spd = [], turn = [];
+    for (let i = 0, j = 7; i <= 45; i++) { j = (j * 9301 + 49297) % 233280; const t = i / 15; send.push({ at: 0.05 + t + 0.04 * j / 233280, k: t * 1000, s: [x0 + 20 * t, 2, z0, 0, 7, 20, 0, 0, 0.6 * t, 0] }); }
+    let last = null, lastYaw = null;
+    for (let f = 0; f <= 180; f++) {
+      M.clock = f / 60; while (send.length && send[0].at <= M.clock) { const m = send.shift(); d.mpPeer({ id: 'racer', n: 'Tom', c: 1, s: m.s }, true, m.k / 1000); }
+      d.mpUpdate(1 / 60, M.clock); const q = M.peers.get('racer'); if (!q) continue; const g = q.veh.car.g;
+      if (f > 40) { spd.push((g.position.x - last) * 60); turn.push((g.rotation.y - lastYaw) * 60); }
+      last = g.position.x; lastYaw = g.rotation.y;
+    }
+    M.clock = null;
+    out.mpSmooth = { minSpeed: Math.min(...spd), maxSpeed: Math.max(...spd), minTurn: Math.min(...turn), maxTurn: Math.max(...turn) };
     return out;
   });
   await browser.close();
@@ -72,9 +84,10 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     ['props get knocked', r.prop.knocked && r.prop.moved > 0.5, r.prop],
     ['kitty-bot busted by touch', r.bot.busted >= 1 && !r.bot.alive, r.bot],
     ['chicken rescued by touch', r.chicken.rescued && r.chicken.count === 1, r.chicken],
+    ['online car moves smoothly', r.mpSmooth.minSpeed > 17 && r.mpSmooth.maxSpeed < 23 && r.mpSmooth.minTurn > 0.5 && r.mpSmooth.maxTurn < 0.7, r.mpSmooth],
     ['airship follows the online captain', r.shipSync.off < 3 && r.shipSync.dy < 2 && r.shipSync.dyaw < 0.2 && r.shipSync.mode !== 'ship', r.shipSync],
   ];
   let fail = 0;
-  for (const [name, ok, info] of checks) { console.log(`${ok ? 'PASS' : 'FAIL'} ${name}`, ok ? '' : JSON.stringify(info)); if (!ok) fail++; }
+  for (const [name, ok, info] of checks) { console.log(`${ok ? 'PASS' : 'FAIL'} ${name}`, ok && !process.env.V ? '' : JSON.stringify(info)); if (!ok) fail++; }
   process.exit(fail ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });
