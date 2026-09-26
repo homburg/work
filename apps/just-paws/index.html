@@ -1411,7 +1411,7 @@ const mapBg=document.createElement('canvas');mapBg.width=mapBg.height=150;
   g.fillStyle='#e8413c';g.fillRect((LOOK.x/MW+1)*75-2.5,(LOOK.z/MW+1)*75-2.5,5,5)}
 function drawMap(){
   const W=map.width,s=W/150,px=P.pos.x,pz=P.pos.z,zoom=2.2;
-  mctx.save();mctx.clearRect(0,0,W,W);mctx.translate(W/2,W/2);mctx.rotate(Math.PI+cam.yaw);mctx.scale(-1,1);
+  mctx.save();mctx.clearRect(0,0,W,W);mctx.translate(W/2,W/2);mctx.rotate(Math.PI+cam.yaw);   // camera forward points up on the map, screen right stays right
   const k=W/(2*MW)*zoom;
   mctx.drawImage(mapBg,-(px/MW+1)*75*s*zoom,-(pz/MW+1)*75*s*zoom,150*s*zoom,150*s*zoom);
   const dot=(x,z,c,r)=>{mctx.fillStyle=c;mctx.beginPath();mctx.arc((x-px)*k,(z-pz)*k,r*s,0,7);mctx.fill()};
