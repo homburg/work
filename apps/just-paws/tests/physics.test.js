@@ -89,6 +89,17 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     out.shipSync = { off: Math.hypot(Sh.pos.x - tx, Sh.pos.z - tz), dy: Math.abs(Sh.baseY - ty), dyaw: Math.abs(Math.atan2(Math.sin(Sh.yaw - tyaw), Math.cos(Sh.yaw - tyaw))) };
     P.mode = 'air'; P.pos.set(Sh.pos.x, Sh.pos.y + Sh.deckY + 1, Sh.pos.z); P.vel.set(0, 0, 0); d.mpPeer({ id: 'captain', s: [tx, ty, tz, 0, 12, 0, 0, 0, tyaw, 0] }, true); d.step(5);
     key('keydown', 'KeyE'); key('keyup', 'KeyE'); out.shipSync.mode = P.mode;
+    // big map: Tab unfolds it, K folds it, tapping the minimap unfolds it, tapping the big map folds it
+    const bm = () => !document.getElementById('bigmap').hidden;
+    out.bigMap = {};
+    key('keydown', 'Tab'); key('keyup', 'Tab'); d.step(2); out.bigMap.tab = bm();
+    const bc = document.getElementById('bigC'), px = bc.getContext('2d').getImageData(bc.width >> 1, bc.height >> 1, 1, 1).data;
+    out.bigMap.drawn = bc.width > 100 && px[3] === 255;
+    key('keydown', 'KeyK'); key('keyup', 'KeyK'); out.bigMap.k = bm();
+    document.getElementById('map').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); out.bigMap.tap = bm();
+    document.getElementById('bigmap').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); out.bigMap.tapClose = bm();
+    // bedtime: the Kitty-Bots are lying down asleep, not hovering
+    out.bed = Object.assign(d.bedtime(), { botsDown: d.bots.every(b => !b.alive || (b.sleepY !== undefined && Math.abs(b.pos.y - b.sleepY) < 0.1)) });
     return out;
   });
   await browser.close();
@@ -108,6 +119,8 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     ['call in the digger', r.digDrop.why === '' && r.digDrop.dist < 45 && r.digDrop.left === 0, r.digDrop],
     ['chicken rescued by touch', r.chicken.rescued && r.chicken.count === 1, r.chicken],
     ['digger drives, scoops, lifts and tips', r.dig.mode === 'dig' && r.dig.drove > 3 && r.dig.loaded === 1 && r.dig.lifted > 3 && r.dig.tipped && r.dig.dirt && r.dig.out !== 'dig', r.dig],
+    ['big map folds out and back', r.bigMap.tab && r.bigMap.drawn && !r.bigMap.k && r.bigMap.tap && !r.bigMap.tapClose, r.bigMap],
+    ['bedtime: Kitty-Bots asleep on the ground', r.bed.on && r.bed.botsDown, r.bed],
     ['airship follows the online captain', r.shipSync.off < 3 && r.shipSync.dy < 2 && r.shipSync.dyaw < 0.2 && r.shipSync.mode !== 'ship', r.shipSync],
   ];
   let fail = 0;

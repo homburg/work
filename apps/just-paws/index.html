@@ -25,11 +25,19 @@ body.touch #mode{left:calc(16px + env(safe-area-inset-left,0px));transform:none;
 #mode{top:auto;bottom:calc(14px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%)}
 #mode .pill{font-size:13px;letter-spacing:.06em;text-transform:uppercase}
 #map{top:calc(10px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));width:150px;height:150px;border-radius:18px;border:3px solid var(--navy);box-shadow:0 3px 0 rgba(0,0,0,.2);background:#2fa8dc}
+#map{pointer-events:auto;cursor:pointer}
+#bigmap{position:fixed;inset:0;z-index:4;display:grid;place-items:center;background:rgba(22,36,74,.55);cursor:pointer}
+#bigCard{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 14px;border-radius:22px;background:var(--cream);border:4px solid var(--navy);box-shadow:0 6px 0 var(--navy);color:var(--navy)}
+#bigHead{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;font-family:'Lilita One',sans-serif;font-size:24px;letter-spacing:.04em}
+#bigHead small{font:800 13px 'Baloo 2',system-ui,sans-serif;opacity:.7}
+#bigC{border-radius:14px;border:3px solid var(--navy);background:#2fa8dc;display:block}
+#bigLeg{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px;font-weight:800;font-size:13px;max-width:100%}
 #corner{top:calc(170px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));display:flex;gap:6px;pointer-events:auto}
 #corner button{width:40px;height:40px;border-radius:12px;border:2px solid rgba(255,255,255,.2);background:var(--navy-a);color:var(--cream);font:800 18px 'Baloo 2',system-ui,sans-serif;cursor:pointer}
 #under{inset:0;z-index:1;background:radial-gradient(ellipse at 50% 0%,rgba(120,220,255,.18),rgba(10,70,130,.38))}
 #corner button.on,#corner button.new{background:var(--gold);color:var(--navy)}
-#cross{left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;border:2px solid transparent;transition:border-color .15s,transform .15s}
+#ver{right:calc(6px + env(safe-area-inset-right));bottom:calc(3px + env(safe-area-inset-bottom));font-size:10px;letter-spacing:.04em;color:#fff;opacity:.55;text-shadow:0 1px 2px rgba(22,36,74,.6);pointer-events:none;font-variant-numeric:tabular-nums}
+#cross{left:50%;top:60%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;border:2px solid transparent;transition:border-color .15s,transform .15s}
 #cross::after{content:"";position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:50%;background:rgba(255,255,255,.5);box-shadow:0 0 0 1px rgba(22,36,74,.2)}
 #cross.ok{border-color:rgba(255,201,60,.7)}
 #cross.ok::after{background:var(--gold)}
@@ -101,7 +109,9 @@ body.touch #mode{left:calc(16px + env(safe-area-inset-left,0px));transform:none;
   </div>
   <div id="hint" hidden></div>
 </div>
-<canvas id="map" class="hud" width="300" height="300"></canvas>
+<canvas id="map" class="hud" width="300" height="300" data-i18n-title="tMap"></canvas>
+<div id="bigmap" hidden><div id="bigCard"><div id="bigHead"><span data-i18n="mapT">ADVENTURE BAY</span><small id="bigHint"></small></div><canvas id="bigC"></canvas><div id="bigLeg" data-i18n="mapLeg"></div></div></div>
+<div id="ver" class="hud" hidden></div>
 <div id="corner" class="hud"><button id="bOrder" data-i18n-title="tOrder">🪂</button><button id="bRespawn" data-i18n-title="tRespawn">↺</button><button id="bMute" data-i18n-title="tMute">♪</button><button id="bStyle" data-i18n-title="tStyle">◐</button><button id="bSnd" data-i18n-title="tSnd">♫</button><button id="bFull" data-i18n-title="tFull">⛶</button><button id="bReload" data-i18n-title="tReload">⟳</button><button id="bLang" data-i18n-title="tLang" style="font-size:13px">EN</button></div>
 <div id="cross" class="hud"></div>
 <div id="under" class="hud" hidden></div>
@@ -186,9 +196,9 @@ en:{hudChick:'CHICKENS',night:'Good night! 🌙',night2:'all the animals are asl
  joyhint:'◀ DRAG HERE TO MOVE<br>DRAG RIGHT SIDE TO LOOK ▶',
  introTag:'Mayor Grumbleton has flooded Adventure Bay with Kitty-Bots, and the town chickens have fled to the highest rooftops. Grab your gear pack, Scout the cat.',
  introList:'<li>Rescue <b>6 chickens</b> stuck up high (follow the yellow beams).</li><li>Bust all <b>Kitty-Bots</b>: hook them, ram them or fly into them.</li><li>Knock stuff over for <b>chaos points</b>.</li>',
- keysDesk:'<kbd>B</kbd><span>Call in a ride: car, copter, boat or digger by parachute</span><kbd>T · X</kbd><span>Tether two things together · cut all tethers</span><kbd>WASD</kbd><span>Run (Shift to sprint) · drive</span><kbd>Mouse</kbd><span>Look (click to lock the mouse)</span><kbd>Click / F</kbd><span>Grappling hook at the crosshair</span><kbd>Space</kbd><span>Jump, then parachute, then wingsuit</span><kbd>Q · C</kbd><span>Wingsuit on/off · cut parachute</span><kbd>Hold J</kbd><span>Jetpack (refuels on the ground)</span><kbd>E</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (Space up, Shift down)</span><kbd>W / S</kbd><span>In the air: dive / climb · A D turn</span><kbd>J · C</kbd><span>In the water: water jets · dive (Space up)</span>',
- keysTouch:'<kbd>🪂</kbd><span>Call in a ride: car, copter, boat or digger by parachute</span><kbd>TETHER</kbd><span>Aim at two things to tie them together (tap at the sky to cut all)</span><kbd>Left thumb</kbd><span>Move · drive · steer in the air</span><kbd>Right thumb</kbd><span>Drag to look and aim</span><kbd>HOOK</kbd><span>Grappling hook at the crosshair</span><kbd>JUMP</kbd><span>Jump, then parachute, then wingsuit</span><kbd>JET</kbd><span>Hold for jetpack (refuels on the ground)</span><kbd>CAR</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (hold UP / DOWN)</span><kbd>JET · DIVE</kbd><span>In the water: water jets · dive</span>',
- keysPad:'<kbd>D-pad ◀ · ▶</kbd><span>Call in a ride: car, copter, boat or digger by parachute</span><kbd>D-pad ▲ · ▼</kbd><span>Tether two things together · cut all tethers</span><kbd>Left stick</kbd><span>Move · drive · steer (click to sprint)</span><kbd>Right stick</kbd><span>Look and aim</span><kbd>A / ✕</kbd><span>Jump, then parachute, then wingsuit</span><kbd>X / □ · RT</kbd><span>Grappling hook at the crosshair</span><kbd>B / ○</kbd><span>Wingsuit on/off</span><kbd>Hold LT</kbd><span>Jetpack</span><kbd>Y / △</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (RT up, LT down)</span><kbd>RB · Start</kbd><span>Cut parachute · back to Pup HQ</span><kbd>LT · B</kbd><span>In the water: water jets · dive (A up)</span>',
+ keysDesk:'<kbd>Tab · K</kbd><span>Big map (or click the minimap)</span><kbd>B</kbd><span>Call in a ride: car, copter, boat or digger by parachute</span><kbd>T · X</kbd><span>Tether two things together · cut all tethers</span><kbd>WASD</kbd><span>Run (Shift to sprint) · drive</span><kbd>Mouse</kbd><span>Look (click to lock the mouse)</span><kbd>Click / F</kbd><span>Grappling hook at the crosshair</span><kbd>Space</kbd><span>Jump, then parachute, then wingsuit</span><kbd>Q · C</kbd><span>Wingsuit on/off · cut parachute</span><kbd>Hold J</kbd><span>Jetpack (refuels on the ground)</span><kbd>E</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (Space up, Shift down)</span><kbd>W / S</kbd><span>In the air: dive / climb · A D turn</span><kbd>J · C</kbd><span>In the water: water jets · dive (Space up)</span>',
+ keysTouch:'<kbd>Minimap</kbd><span>Tap it for the big map</span><kbd>🪂</kbd><span>Call in a ride: car, copter, boat or digger by parachute</span><kbd>TETHER</kbd><span>Aim at two things to tie them together (tap at the sky to cut all)</span><kbd>Left thumb</kbd><span>Move · drive · steer in the air</span><kbd>Right thumb</kbd><span>Drag to look and aim</span><kbd>HOOK</kbd><span>Grappling hook at the crosshair</span><kbd>JUMP</kbd><span>Jump, then parachute, then wingsuit</span><kbd>JET</kbd><span>Hold for jetpack (refuels on the ground)</span><kbd>CAR</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (hold UP / DOWN)</span><kbd>JET · DIVE</kbd><span>In the water: water jets · dive</span>',
+ keysPad:'<kbd>− / Select</kbd><span>Big map</span><kbd>D-pad ◀ · ▶</kbd><span>Call in a ride: car, copter, boat or digger by parachute</span><kbd>D-pad ▲ · ▼</kbd><span>Tether two things together · cut all tethers</span><kbd>Left stick</kbd><span>Move · drive · steer (click to sprint)</span><kbd>Right stick</kbd><span>Look and aim</span><kbd>A / ✕</kbd><span>Jump, then parachute, then wingsuit</span><kbd>X / □ · RT</kbd><span>Grappling hook at the crosshair</span><kbd>B / ○</kbd><span>Wingsuit on/off</span><kbd>Hold LT</kbd><span>Jetpack</span><kbd>Y / △</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (RT up, LT down)</span><kbd>RB · Start</kbd><span>Cut parachute · back to Pup HQ</span><kbd>LT · B</kbd><span>In the water: water jets · dive (A up)</span>',
  start:'Start the rescue',fine:'A fan-made prototype. Hook + parachute = slingshot. Sounds: Kenney.nl & OpenGameArt (CC0).',
  winTag:'Every chicken is safe and Grumbleton\'s Kitty-Bots are scrap. Chaos score: <b id="winChaos">0</b>.',keep:'Keep playing',b_TETHER:'TETHER',teth1:'Tether hooked',teth1b:'now aim at the second thing',teth2:'Tethered!',teth2b:'watch them pull together',tethCut:'Tethers cut',tethMiss:'Nothing to tether there',hudOnline:'ONLINE',joined:'joined the bay',left:'left the bay',cont:'Continue the rescue',fresh:'Start over',welcome:'Welcome back!',welcome2:'your rescue was saved',
  m_ground:'On paws',m_air:'Airborne',m_chute:'Parachute',m_wing:'Wingsuit',m_grapple:'Grappling',m_swim:'Paddling',m_car:'Pup Cruiser',m_heli:'Pup Copter',m_jet:'Jetpack',m_dive:'Diving',m_boat:'Speedboat',m_ride:'Passenger',m_ship:'Sky Whale',h_shipT:'Left thumb: fly · UP / DOWN: height · CAR: leave the wheel',h_shipK:'W / S: throttle · A D: turn · Space / Shift: up / down · E: leave the wheel',h_shipP:'Left stick: fly · RT up · LT down · Y: leave the wheel',shipTake:'Captain on deck!',shipBusy:'is steering',shipBusy2:'enjoy the ride on deck',shipTake2T:'the Sky Whale is yours',shipTake2K:'the Sky Whale is yours',shipTake2P:'the Sky Whale is yours',shipNear:'',
@@ -216,15 +226,17 @@ en:{hudChick:'CHICKENS',night:'Good night! 🌙',night2:'all the animals are asl
  h_diveT:'UP / DIVE · JET: water jets',h_diveK:'Space up · C down · hold J: water jets',h_diveP:'A up · B down · hold LT: water jets',splashIn:'Splash!',jets:'Water jets!',
  tOrder:'Call in a ride (B)',orderTitle:'Call in a ride',orderHintT:'tap a ride and it drops in by parachute',orderHintK:'number keys or ← → and Enter · Esc: close',orderHintP:'◀ ▶ choose · A: order · B: back',
  inIt:'you are in it',onWay:'on its way!',noWater:'no water nearby',noLand:'no room here',dropOn2:'on its way: look for the red smoke',dropped:'Delivered!',callInT:'or tap 🪂 to call one in',callInK:'or press B to call one in',callInP:'or D-pad ◀ ▶ to call one in',
+ tMap:'Big map (Tab)',mapT:'ADVENTURE BAY',mapCloseK:'Tab · K · Esc: close',mapCloseT:'tap to close',mapCloseP:'− or A: close',
+ mapLeg:'<span>➤ You</span><span>🐔 Chickens</span><span>🤖 Kitty-Bots</span><span>🏠 Pup HQ</span><span>🚓 Cruiser</span><span>🚁 Copter</span><span>🚤 Boat</span><span>🚜 Digger</span><span>🎈 Sky Whale</span><span>😺 Friends</span>',
  b_DIVE:'DIVE',b_JUMP:'JUMP',b_CHUTE:'CHUTE',b_WINGS:'WINGS',b_HOP:'HOP',b_UP:'UP',b_DOWN:'DOWN',b_FOLD:'FOLD',b_JET:'JET',b_CAR:'CAR',b_HOOK:'HOOK'},
 da:{hudChick:'HØNS',night:'Godnat! 🌙',night2:'alle dyrene sover. Sssh…',nightIntro:'🌙 Sovetid: alle dyrene har lagt sig til at sove. List rundt og sig godnat. Står du stille, falder Scout også i søvn.',hudBots:'KATTEBOTTER',hudChaos:'KAOS',
  tRespawn:'Tilbage til Hvalpe-HQ (R)',tMute:'Lyd (M)',tStyle:'Skift stil (V)',tReload:'Hent opdateringer (genindlæs)',update:'Ny version klar!',update2:'tryk ⟳ for at hente den',tSnd:'Lydtema (N)',snd_real:'Rigtige lyde',snd_toy:'Legetøjskassen',snd_space:'Rumlyde',snd_retro:'Retro-bip',sndSwitched:'lydtema',tFull:'Fuld skærm',tLang:'English',
  joyhint:'◀ TRÆK HER FOR AT GÅ<br>TRÆK I HØJRE SIDE FOR AT KIGGE ▶',
  introTag:'Borgmester Brokkenborg har fyldt Adventure Bay med kattebotter, og byens høns er flygtet op på de højeste tage. Tag din udstyrstaske på, katten Scout.',
  introList:'<li>Red <b>6 høns</b>, der sidder højt oppe (følg de gule lysstråler).</li><li>Stop alle <b>kattebotter</b>: fang dem med krogen, ram dem eller flyv ind i dem.</li><li>Vælt ting for at få <b>kaospoint</b>.</li>',
- keysDesk:'<kbd>B</kbd><span>Bestil transport: bil, kopter, båd eller gravko med faldskærm</span><kbd>T · X</kbd><span>Bind to ting sammen · klip alle tethers</span><kbd>WASD</kbd><span>Løb (Shift for at spurte) · kør</span><kbd>Mus</kbd><span>Kig (klik for at låse musen)</span><kbd>Klik / F</kbd><span>Gribekrog mod sigtekornet</span><kbd>Mellemrum</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>Q · C</kbd><span>Wingsuit til/fra · slip faldskærmen</span><kbd>Hold J</kbd><span>Jetpack (tankes op på jorden)</span><kbd>E</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (Mellemrum op, Shift ned)</span><kbd>W / S</kbd><span>I luften: dyk / stig · A D drej</span><kbd>J · C</kbd><span>I vandet: vand-jets · dyk (Mellemrum op)</span>',
- keysTouch:'<kbd>🪂</kbd><span>Bestil transport: bil, kopter, båd eller gravko med faldskærm</span><kbd>TETHER</kbd><span>Sigt på to ting for at binde dem sammen (tryk mod himlen for at klippe alle)</span><kbd>Venstre tommel</kbd><span>Gå · kør · styr i luften</span><kbd>Højre tommel</kbd><span>Træk for at kigge og sigte</span><kbd>KROG</kbd><span>Gribekrog mod sigtekornet</span><kbd>HOP</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>JET</kbd><span>Hold for jetpack (tankes op på jorden)</span><kbd>BIL</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (hold OP / NED)</span><kbd>JET · DYK</kbd><span>I vandet: vand-jets · dyk</span>',
- keysPad:'<kbd>D-pad ◀ · ▶</kbd><span>Bestil transport: bil, kopter, båd eller gravko med faldskærm</span><kbd>D-pad ▲ · ▼</kbd><span>Bind to ting sammen · klip alle tethers</span><kbd>Venstre stik</kbd><span>Gå · kør · styr (tryk ind for at spurte)</span><kbd>Højre stik</kbd><span>Kig og sigt</span><kbd>A / ✕</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>X / □ · RT</kbd><span>Gribekrog mod sigtekornet</span><kbd>B / ○</kbd><span>Wingsuit til/fra</span><kbd>Hold LT</kbd><span>Jetpack</span><kbd>Y / △</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (RT op, LT ned)</span><kbd>RB · Start</kbd><span>Slip faldskærmen · tilbage til Hvalpe-HQ</span><kbd>LT · B</kbd><span>I vandet: vand-jets · dyk (A op)</span>',
+ keysDesk:'<kbd>Tab · K</kbd><span>Stort kort (eller klik på minikortet)</span><kbd>B</kbd><span>Bestil transport: bil, kopter, båd eller gravko med faldskærm</span><kbd>T · X</kbd><span>Bind to ting sammen · klip alle tethers</span><kbd>WASD</kbd><span>Løb (Shift for at spurte) · kør</span><kbd>Mus</kbd><span>Kig (klik for at låse musen)</span><kbd>Klik / F</kbd><span>Gribekrog mod sigtekornet</span><kbd>Mellemrum</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>Q · C</kbd><span>Wingsuit til/fra · slip faldskærmen</span><kbd>Hold J</kbd><span>Jetpack (tankes op på jorden)</span><kbd>E</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (Mellemrum op, Shift ned)</span><kbd>W / S</kbd><span>I luften: dyk / stig · A D drej</span><kbd>J · C</kbd><span>I vandet: vand-jets · dyk (Mellemrum op)</span>',
+ keysTouch:'<kbd>Minikort</kbd><span>Tryk på det for at folde kortet ud</span><kbd>🪂</kbd><span>Bestil transport: bil, kopter, båd eller gravko med faldskærm</span><kbd>TETHER</kbd><span>Sigt på to ting for at binde dem sammen (tryk mod himlen for at klippe alle)</span><kbd>Venstre tommel</kbd><span>Gå · kør · styr i luften</span><kbd>Højre tommel</kbd><span>Træk for at kigge og sigte</span><kbd>KROG</kbd><span>Gribekrog mod sigtekornet</span><kbd>HOP</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>JET</kbd><span>Hold for jetpack (tankes op på jorden)</span><kbd>BIL</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (hold OP / NED)</span><kbd>JET · DYK</kbd><span>I vandet: vand-jets · dyk</span>',
+ keysPad:'<kbd>− / Select</kbd><span>Stort kort</span><kbd>D-pad ◀ · ▶</kbd><span>Bestil transport: bil, kopter, båd eller gravko med faldskærm</span><kbd>D-pad ▲ · ▼</kbd><span>Bind to ting sammen · klip alle tethers</span><kbd>Venstre stik</kbd><span>Gå · kør · styr (tryk ind for at spurte)</span><kbd>Højre stik</kbd><span>Kig og sigt</span><kbd>A / ✕</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>X / □ · RT</kbd><span>Gribekrog mod sigtekornet</span><kbd>B / ○</kbd><span>Wingsuit til/fra</span><kbd>Hold LT</kbd><span>Jetpack</span><kbd>Y / △</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (RT op, LT ned)</span><kbd>RB · Start</kbd><span>Slip faldskærmen · tilbage til Hvalpe-HQ</span><kbd>LT · B</kbd><span>I vandet: vand-jets · dyk (A op)</span>',
  start:'Start redningen',fine:'En fan-lavet prototype. Krog + faldskærm = slangebøsse. Lyde: Kenney.nl & OpenGameArt (CC0).',
  winTag:'Alle høns er i sikkerhed, og Brokkenborgs kattebotter er skrot. Kaospoint: <b id="winChaos">0</b>.',keep:'Spil videre',b_TETHER:'TETHER',teth1:'Tether sat fast',teth1b:'sigt nu på den anden ting',teth2:'Bundet sammen!',teth2b:'se dem trække sammen',tethCut:'Tethers klippet',tethMiss:'Intet at binde fast der',hudOnline:'ONLINE',joined:'kom til byen',left:'tog hjem',cont:'Fortsæt redningen',fresh:'Start forfra',welcome:'Velkommen tilbage!',welcome2:'din redning blev gemt',
  m_ground:'På poterne',m_air:'I luften',m_chute:'Faldskærm',m_wing:'Wingsuit',m_grapple:'Gribekrog',m_swim:'Svømmer',m_car:'Hvalpebilen',m_heli:'Hvalpekopteren',m_jet:'Jetpack',m_dive:'Dykker',m_boat:'Speedbåden',m_ride:'Passager',m_ship:'Himmelhvalen',h_shipT:'Venstre tommel: flyv · OP / NED: højde · BIL: slip rattet',h_shipK:'W / S: fart · A D: drej · Mellemrum / Shift: op / ned · E: slip rattet',h_shipP:'Venstre stik: flyv · RT op · LT ned · Y: slip rattet',shipTake:'Kaptajn om bord!',shipBusy:'styrer',shipBusy2:'nyd turen på dækket',shipTake2T:'Himmelhvalen er din',shipTake2K:'Himmelhvalen er din',shipTake2P:'Himmelhvalen er din',shipNear:'',
@@ -252,6 +264,8 @@ da:{hudChick:'HØNS',night:'Godnat! 🌙',night2:'alle dyrene sover. Sssh…',ni
  h_diveT:'OP / DYK · JET: vand-jets',h_diveK:'Mellemrum op · C ned · hold J: vand-jets',h_diveP:'A op · B ned · hold LT: vand-jets',
  tOrder:'Bestil transport (B)',orderTitle:'Bestil transport',orderHintT:'tryk på en, så kommer den med faldskærm',orderHintK:'taltasterne eller ← → og Enter · Esc: luk',orderHintP:'◀ ▶ vælg · A: bestil · B: tilbage',
  inIt:'du sidder i den',onWay:'på vej!',noWater:'intet vand i nærheden',noLand:'ingen plads her',dropOn2:'på vej: kig efter den røde røg',dropped:'Leveret!',callInT:'eller tryk 🪂 for at bestille en',callInK:'eller tryk B for at bestille en',callInP:'eller D-pad ◀ ▶ for at bestille en',
+ tMap:'Stort kort (Tab)',mapT:'ADVENTURE BAY',mapCloseK:'Tab · K · Esc: luk',mapCloseT:'tryk for at lukke',mapCloseP:'− eller A: luk',
+ mapLeg:'<span>➤ Dig</span><span>🐔 Høns</span><span>🤖 Kattebotter</span><span>🏠 Hvalpe-HQ</span><span>🚓 Bil</span><span>🚁 Kopter</span><span>🚤 Båd</span><span>🚜 Gravko</span><span>🎈 Himmelhval</span><span>😺 Venner</span>',
  b_DIVE:'DYK',b_JUMP:'HOP',b_CHUTE:'SKÆRM',b_WINGS:'WINGS',b_HOP:'UD',b_UP:'OP',b_DOWN:'NED',b_FOLD:'FOLD',b_JET:'JET',b_CAR:'BIL',b_HOOK:'KROG',
  'Town Hall tower':'rådhustårnet','water tower':'vandtårnet','Pup HQ roof':'taget på Hvalpe-HQ','bridge tower':'brotårnet','lighthouse':'fyrtårnet','Jake-ish Mountain peak':'bjergtoppen'}};
 let lang=(()=>{try{const l=localStorage.getItem('jpLang');if(l==='da'||l==='en')return l}catch(e){}return /^da|^nb|^no/i.test(navigator.language||'')?'da':'en'})();
@@ -322,7 +336,9 @@ const sun=new THREE.DirectionalLight(0xfff0d0,0.82);
 sun.castShadow=true;const SM=isTouch?1024:2048;sun.shadow.mapSize.set(SM,SM);
 Object.assign(sun.shadow.camera,{left:-70,right:70,top:70,bottom:-70,near:10,far:320});
 sun.shadow.bias=-0.0006;scene.add(sun,sun.target);
-function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
+// the view is shifted up so the camera's aim point (and the crosshair) sits 10% below screen centre, showing more sky ahead
+const AIM_Y=0.1;
+function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.setViewOffset(innerWidth,innerHeight,0,-AIM_Y*innerHeight,innerWidth,innerHeight);camera.updateProjectionMatrix()}
 addEventListener('resize',resize);resize();
 
 const matCache={};
@@ -1158,8 +1174,10 @@ const look={id:null,lx:0,ly:0};
 let nowT=0;
 addEventListener('keydown',e=>{
   if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
+  if(e.code==='Tab')e.preventDefault();
   if(e.repeat)return;keys[e.code]=true;if(!S.running)return;
   if(orderOpen){orderKey(e.code);return}
+  if(e.code==='Tab'||e.code==='KeyK'||(e.code==='Escape'&&bigOpen)){toggleBigMap();return}
   switch(e.code){case'Space':actJump();break;case'KeyF':actGrapple();break;case'KeyQ':actWing();break;case'KeyE':actCar();break;case'KeyC':actCut();break;case'KeyR':respawn();break;case'KeyM':toggleMute();break;case'KeyV':cycleStyle();break;case'KeyT':actTether(false);break;case'KeyX':clearTethers(true);break;case'KeyN':cycleSnd();break;case'KeyB':openOrder();break}
 });
 addEventListener('keyup',e=>{keys[e.code]=false});
@@ -1206,7 +1224,7 @@ $('bRespawn').addEventListener('click',()=>respawn());$('bStyle').addEventListen
 function toggleMute(){muted=!muted;$('bMute').textContent=muted?'✕':'♪';if(engine)engine.g.gain.value=0}
 // ---- gamepad (standard mapping: Xbox / PlayStation / MFi over Bluetooth, incl. iPad Safari) ----
 // A/✕ jump (heli: up) · B/○ parachute-wingsuit (heli: down) · X/□ or RT grapple · Y/△ car/copter
-// LT or LB jetpack (hold) · RB cut loose · L3 sprint · left stick move · right stick camera · Start respawn · Select look
+// LT or LB jetpack (hold) · RB cut loose · L3 sprint · left stick move · right stick camera · Start respawn · Select big map · R3 look
 const gpad={on:false,nin:false,x:0,y:0,sprint:false,prev:[],nav:0};
 function pollPad(dt){
   const pads=navigator.getGamepads?navigator.getGamepads():[];let g=null;
@@ -1235,7 +1253,8 @@ function pollPad(dt){
     hold.up=hold.down=hold.jet=false;
   }
   else{
-    if(hit(0)){if(P.mode==='heli'||P.mode==='dive'||P.mode==='ship'||P.mode==='dig')hold.up=true;else actJump()}
+    if(hit(8)||(bigOpen&&hit(0)))toggleBigMap();
+    else if(hit(0)){if(P.mode==='heli'||P.mode==='dive'||P.mode==='ship'||P.mode==='dig')hold.up=true;else actJump()}
     if(rel(0)&&!now[7])hold.up=false;
     if(hit(1)){if(P.mode==='heli'||P.mode==='swim'||P.mode==='dive'||P.mode==='ship'||P.mode==='dig')hold.down=true;else actWing()}
     if(rel(1)&&!now[6])hold.down=false;
@@ -1251,7 +1270,7 @@ function pollPad(dt){
     if(hit(4)||(hit(6)&&!fly))hold.jet=true;
     if((rel(6)||rel(4))&&!now[6]&&!now[4])hold.jet=false;
     if(hit(9))respawn();
-    if(hit(8))cycleStyle();
+    if(hit(11))cycleStyle();
     if(hit(12))actTether(false);
     if(hit(13))clearTethers(true);
     if(hit(14)||hit(15))openOrder();
@@ -1700,14 +1719,14 @@ renderer.shadowMap.autoUpdate=false;
 PERF.mergeStatic(scene,[...noInk,...flags,...radar,...chickens.map(c=>c.ring),hookBall]);
 for(const p of props)PERF.mergeGroup(p.g);for(const b of bots)PERF.mergeGroup(b.g,[b.prop,...b.eyes]);for(const c of clouds)PERF.mergeGroup(c);
 // hooks for concept shots
-const JP=window.JP={setStyle,fixed:null,world:{LG,LOOK,TOWN,BX},dbg:{P,cam,sfx,sbuf,heliSnd,heli,car,ship,boat,props,bots,chickens,S,gpad,keys,hold,ground,roofH,roofs:roofGeo,step(n){for(let i=0;i<n;i++){nowT+=1/60;update(1/60,nowT)}}},
+const JP=window.JP={setStyle,fixed:null,world:{LG,LOOK,TOWN,BX},dbg:{P,cam,camera,sfx,sbuf,heliSnd,heli,car,ship,boat,props,bots,chickens,S,gpad,keys,hold,ground,roofH,roofs:roofGeo,step(n){for(let i=0;i<n;i++){nowT+=1/60;update(1/60,nowT)}}},
   shot(o){
     JP.fixed=o;
     if(o.pup){P.pos.set(...o.pup.pos);P.face=o.pup.face??0;chute.visible=o.pup.mode==='chute';pup.wings.visible=o.pup.mode==='wing';pup.g.rotation.x=o.pup.mode==='wing'?0.75:0;
       pup.legs.forEach((l,i)=>l.rotation.x=o.pup.mode==='chute'?0.3*(i%2?1:-1):o.pup.mode==='wing'?(i<2?-1.2:1.2):0)}
     if(o.car){car.pos.set(...o.car.pos);car.heading=o.car.heading??0}
     if(o.bot){const b=bots[0];b.home.set(...o.bot)}
-    for(const k of ['intro','stats','map','corner','cross','mode','hint','toast'])$(k).hidden=true;
+    for(const k of ['intro','stats','map','corner','cross','mode','hint','toast','ver'])$(k).hidden=true;
   }};
 
 // ================= bedtime: everyone sleeps (BEDTIME flag at the top) =================
@@ -1902,6 +1921,62 @@ function drawMap(){
   for(const q of MP.peers.values())if(q.cat)pin(q.pos.x,q.pos.z,'🐱',12,true,'#ff7eb6');
   mctx.fillStyle='#fff';mctx.strokeStyle='#16244a';mctx.lineWidth=2*s;mctx.beginPath();mctx.moveTo(W/2,W/2-7*s);mctx.lineTo(W/2+5*s,W/2+5*s);mctx.lineTo(W/2-5*s,W/2+5*s);mctx.closePath();mctx.fill();mctx.stroke();
 }
+// big map: tap the minimap / Tab / K / Select unfolds the whole bay, north up; the game keeps running underneath
+const big=$('bigC'),bctx=big.getContext('2d'),MBX=10,MBZ=-20,MBH=410;let bigOpen=false,bigBg=null;   // framed on the island
+function makeBigBg(){
+  const N=600,c=document.createElement('canvas');c.width=c.height=N;const g=c.getContext('2d'),img=g.createImageData(N,N);
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){const x=MBX+(i/N*2-1)*MBH,z=MBZ+(j/N*2-1)*MBH,h=terrain(x,z),k=(j*N+i)*4;
+    let c=h<-0.6?(h<-6?[38,150,208]:[47,168,220]):h<1.6?[240,220,160]:h>78?[246,251,255]:h>34?[141,151,136]:[121,194,87];
+    if(h>=1.6&&h<34){const s=1-h/80;c=[c[0]*s,c[1]*(0.85+0.15*s),c[2]*s]}img.data.set([c[0],c[1],c[2],255],k)}
+  g.putImageData(img,0,0);
+  const ux=v=>((v-MBX)/MBH+1)*N/2,uz=v=>((v-MBZ)/MBH+1)*N/2,sc=N/(2*MBH);
+  g.strokeStyle='rgba(60,64,78,.85)';g.lineWidth=4;g.lineCap=g.lineJoin='round';g.beginPath();
+  for(let i=0;i<roadPts.length;i++){const p=roadPts[i],q=roadPts[i-1];if(q&&Math.hypot(p[0]-q[0],p[1]-q[1])<14)g.lineTo(ux(p[0]),uz(p[1]));else g.moveTo(ux(p[0]),uz(p[1]))}
+  g.stroke();
+  g.fillStyle='rgba(255,248,232,.9)';g.strokeStyle='rgba(22,36,74,.55)';g.lineWidth=1;
+  for(const b of boxes){const w=b.max.x-b.min.x,d=b.max.z-b.min.z;if(w<2.5||d<2.5||w>60||d>60||b.max.y-b.min.y<2)continue;
+    g.fillRect(ux(b.min.x),uz(b.min.z),w*sc,d*sc);g.strokeRect(ux(b.min.x),uz(b.min.z),w*sc,d*sc)}
+  return c;
+}
+function sizeBigMap(){
+  const dpr=Math.min(2,devicePixelRatio||1),side=Math.max(200,Math.floor(Math.min(innerWidth-48,innerHeight-120)));
+  big.style.width=big.style.height=side+'px';big.width=big.height=Math.round(side*dpr);
+}
+function toggleBigMap(open=!bigOpen){
+  if(open===bigOpen||(open&&!S.running))return;bigOpen=open;$('bigmap').hidden=!open;
+  if(open){if(!bigBg)bigBg=makeBigBg();sizeBigMap();$('bigHint').textContent=TD('mapClose');drawBigMap()}
+  else canvas.focus();
+}
+function drawBigMap(){
+  const W=big.width,s=W/600,X=x=>((x-MBX)/MBH+1)*W/2,Z=z=>((z-MBZ)/MBH+1)*W/2;
+  bctx.clearRect(0,0,W,W);bctx.drawImage(bigBg,0,0,W,W);
+  bctx.textAlign='center';bctx.textBaseline='middle';
+  const pin=(x,z,icon,size,ring)=>{const px=X(x),pz=Z(z),r=size*0.62*s;
+    bctx.fillStyle=ring;bctx.strokeStyle='#16244a';bctx.lineWidth=2*s;bctx.beginPath();bctx.arc(px,pz,r,0,7);bctx.fill();bctx.stroke();
+    bctx.font=`${size*s}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;bctx.fillStyle='#000';bctx.fillText(icon,px,pz+size*0.06*s)};
+  // chicken beacons pulse so they are easy to spot
+  const pulse=0.5+0.5*Math.sin(nowT*4);
+  for(const c of chickens)if(!c.rescued){bctx.strokeStyle=`rgba(255,201,60,${0.35+0.5*pulse})`;bctx.lineWidth=3*s;bctx.beginPath();bctx.arc(X(c.pos.x),Z(c.pos.z),(20+6*pulse)*s,0,7);bctx.stroke()}
+  pin(LOOK.x,LOOK.z,'🏠',22,'#ffd7d5');
+  for(const b of bots)if(b.alive)pin(b.pos.x,b.pos.z,'🤖',15,'#e3d6ff');
+  pin(ship.pos.x,ship.pos.z,'🎈',20,'#ffe0de');
+  if(P.mode!=='boat')pin(boat.pos.x,boat.pos.z,'🚤',18,'#d6f3ff');
+  if(P.mode!=='car')pin(car.pos.x,car.pos.z,'🚓',18,'#d6e6ff');
+  if(P.mode!=='dig')pin(dig.pos.x,dig.pos.z,'🚜',18,'#ffe9b8');
+  if(P.mode!=='heli')pin(heli.pos.x,heli.pos.z,'🚁',18,'#ffd9ec');
+  for(const c of chickens)if(!c.rescued)pin(c.pos.x,c.pos.z,'🐔',20,'#ffe14d');
+  for(const q of MP.peers.values())if(q.cat)pin(q.pos.x,q.pos.z,'😺',17,'#ff7eb6');
+  // you: arrow along the camera's view, like the minimap
+  bctx.save();bctx.translate(X(P.pos.x),Z(P.pos.z));bctx.scale(1.5,1.5);bctx.rotate(Math.PI-cam.yaw);
+  bctx.fillStyle='rgba(255,255,255,.35)';bctx.beginPath();bctx.arc(0,0,20*s*(0.8+0.2*pulse),0,7);bctx.fill();
+  bctx.fillStyle='#fff';bctx.strokeStyle='#e8413c';bctx.lineWidth=3*s;bctx.beginPath();bctx.moveTo(0,-13*s);bctx.lineTo(9*s,9*s);bctx.lineTo(0,4*s);bctx.lineTo(-9*s,9*s);bctx.closePath();bctx.fill();bctx.stroke();
+  bctx.restore();
+  // compass
+  bctx.font=`400 ${20*s}px 'Lilita One',sans-serif`;bctx.fillStyle='#fff8e8';bctx.strokeStyle='#16244a';bctx.lineWidth=4*s;bctx.strokeText('N ▲',W-34*s,24*s);bctx.fillText('N ▲',W-34*s,24*s);
+}
+$('map').addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();toggleBigMap(true)});
+$('bigmap').addEventListener('pointerdown',e=>{e.preventDefault();toggleBigMap(false)});
+addEventListener('resize',()=>{if(bigOpen)sizeBigMap()});
 let lastHint='',lastMode='',lastJump='';
 function hud(dt){
   if(toastT>0){toastT-=dt;if(toastT<=0)$('toast').classList.remove('show')}
@@ -1936,7 +2011,7 @@ function frame(now){
     update(orderOpen?dt*0.2:dt,t);updateCamera(dt);
     if(frameN%4===0&&P.mode!=='car'&&P.mode!=='heli')computeAim();
     $('cross').hidden=P.mode==='car'||P.mode==='heli'||P.mode==='boat'||P.mode==='ride'||P.mode==='ship'||P.mode==='dig';
-    hud(dt);drawMap();mpUpdate(dt,t);
+    hud(dt);drawMap();if(bigOpen)drawBigMap();mpUpdate(dt,t);
   }else{
     const F=JP.fixed;
     if(F){camera.position.set(...F.cam);camera.lookAt(...F.look);if(F.fov){camera.fov=F.fov;camera.updateProjectionMatrix()}}
@@ -2092,6 +2167,7 @@ function updateDrops(dt){
 // ---- the menu (🪂 button, B key, D-pad ◀ ▶) ----
 let orderOpen=false,orderSel=0;
 function openOrder(){
+  if(bigOpen)toggleBigMap(false);
   if(!S.running||!$('win').hidden||orderOpen)return;
   orderOpen=true;initAudio();sfx.zip();if(document.pointerLockElement)document.exitPointerLock();
   const box=$('rides');box.innerHTML='';
@@ -2220,8 +2296,11 @@ setInterval(saveGame,3000);
 const reloadNow=()=>{saveGame();const u=new URL(location.href);u.searchParams.set('v',Date.now().toString(36));location.replace(u.href)};
 $('bReload').addEventListener('click',reloadNow);
 // watch for a new deploy (worker.js /version = hash of the page) and light up the reload button
-{let tag=null;const chk=()=>{if(document.hidden)return;fetch('/version',{cache:'no-store'}).then(r=>r.ok?r.text():null).then(e=>{if(!e||e.length>40)return;
-  if(tag===null)tag=e;else if(e!==tag){if(!S.running){reloadNow();return}if(!$('bReload').classList.contains('new')){$('bReload').classList.add('new');toast(T('update'),T('update2'))}}}).catch(()=>{})};
+// the first answer is this page's release: shown small in the bottom corner as deploy date/time + page hash
+{let tag=null;const chk=()=>{if(document.hidden)return;fetch('/version',{cache:'no-store'}).then(r=>r.ok?r.text():null).then(e=>{if(!e||e.length>60)return;
+  if(tag===null){tag=e;const [h,at]=e.split(' '),d=at&&new Date(at),p=n=>String(n).padStart(2,'0');
+    $('ver').textContent='v '+(d&&!isNaN(d)?d.getDate()+'/'+(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes())+' · ':'')+h.slice(0,6);$('ver').hidden=false}
+  else if(e!==tag){if(!S.running){reloadNow();return}if(!$('bReload').classList.contains('new')){$('bReload').classList.add('new');toast(T('update'),T('update2'))}}}).catch(()=>{})};
   // a new version loads by itself on the title screen, or when the game comes back from the background (iPad woken up)
   if(/workers\.dev$/.test(location.hostname)){chk();setInterval(chk,60000);document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if($('bReload').classList.contains('new'))reloadNow();else chk()})}}
 addEventListener('pagehide',saveGame);document.addEventListener('visibilitychange',()=>{if(document.hidden)saveGame()});
