@@ -129,6 +129,7 @@ body.touch #mode{left:calc(16px + env(safe-area-inset-left,0px));transform:none;
 <div id="intro" class="overlay">
   <div class="card">
     <h1>JUST <span>PAWS</span></h1>
+    <p class="tag" id="nightNote" data-i18n="nightIntro" hidden></p>
     <p class="tag" data-i18n="introTag">Mayor Grumbleton has flooded Adventure Bay with Kitty-Bots, and the town chickens have fled to the highest rooftops. Grab your gear pack, Scout the cat.</p>
     <ul data-i18n="introList">
       <li>Rescue <b>6 chickens</b> stuck up high (follow the yellow beams).</li>
@@ -184,9 +185,13 @@ body.touch #mode{left:calc(16px + env(safe-area-inset-left,0px));transform:none;
 const $=id=>document.getElementById(id);
 const V3=THREE.Vector3;
 const isTouch=matchMedia('(pointer:coarse)').matches||('ontouchstart' in window);
+// ---- bedtime: every animal lies down to sleep, night sky, lullaby. Flip BEDTIME_ON to switch it off;
+// ?sleep=0 / ?sleep=1 in the URL overrides it for one visit.
+const BEDTIME_ON=true;
+const BEDTIME=/[?&]sleep=1/.test(location.search)||(BEDTIME_ON&&!/[?&]sleep=0/.test(location.search));
 // ---- language: Danish / English, picked from the browser, switchable (button in the corner) ----
 const LANG={
-en:{hudChick:'CHICKENS',hudBots:'KITTY-BOTS',hudChaos:'CHAOS',
+en:{hudChick:'CHICKENS',night:'Good night! 🌙',night2:'all the animals are asleep. Shh…',nightIntro:'🌙 Bedtime: all the animals have curled up to sleep. Tiptoe around and say good night. Stand still and Scout dozes off too.',hudBots:'KITTY-BOTS',hudChaos:'CHAOS',
  tRespawn:'Back to Pup HQ (R)',tMute:'Sound (M)',tStyle:'Switch look (V)',tReload:'Load updates (reload)',update:'Update ready!',update2:'tap ⟳ to load it',tSnd:'Sound theme (N)',snd_real:'Real sounds',snd_toy:'Toy box',snd_space:'Space sounds',snd_retro:'Retro beeps',sndSwitched:'sound theme',tFull:'Fullscreen',tLang:'Dansk',
  joyhint:'◀ DRAG HERE TO MOVE<br>DRAG RIGHT SIDE TO LOOK ▶',
  introTag:'Mayor Grumbleton has flooded Adventure Bay with Kitty-Bots, and the town chickens have fled to the highest rooftops. Grab your gear pack, Scout the cat.',
@@ -224,7 +229,7 @@ en:{hudChick:'CHICKENS',hudBots:'KITTY-BOTS',hudChaos:'CHAOS',
  tMap:'Big map (Tab)',mapT:'ADVENTURE BAY',mapCloseK:'Tab · K · Esc: close',mapCloseT:'tap to close',mapCloseP:'− or A: close',
  mapLeg:'<span>➤ You</span><span>🐔 Chickens</span><span>🤖 Kitty-Bots</span><span>🏠 Pup HQ</span><span>🚓 Cruiser</span><span>🚁 Copter</span><span>🚤 Boat</span><span>🚜 Digger</span><span>🎈 Sky Whale</span><span>😺 Friends</span>',
  b_DIVE:'DIVE',b_JUMP:'JUMP',b_CHUTE:'CHUTE',b_WINGS:'WINGS',b_HOP:'HOP',b_UP:'UP',b_DOWN:'DOWN',b_FOLD:'FOLD',b_JET:'JET',b_CAR:'CAR',b_HOOK:'HOOK'},
-da:{hudChick:'HØNS',hudBots:'KATTEBOTTER',hudChaos:'KAOS',
+da:{hudChick:'HØNS',night:'Godnat! 🌙',night2:'alle dyrene sover. Sssh…',nightIntro:'🌙 Sovetid: alle dyrene har lagt sig til at sove. List rundt og sig godnat. Står du stille, falder Scout også i søvn.',hudBots:'KATTEBOTTER',hudChaos:'KAOS',
  tRespawn:'Tilbage til Hvalpe-HQ (R)',tMute:'Lyd (M)',tStyle:'Skift stil (V)',tReload:'Hent opdateringer (genindlæs)',update:'Ny version klar!',update2:'tryk ⟳ for at hente den',tSnd:'Lydtema (N)',snd_real:'Rigtige lyde',snd_toy:'Legetøjskassen',snd_space:'Rumlyde',snd_retro:'Retro-bip',sndSwitched:'lydtema',tFull:'Fuld skærm',tLang:'English',
  joyhint:'◀ TRÆK HER FOR AT GÅ<br>TRÆK I HØJRE SIDE FOR AT KIGGE ▶',
  introTag:'Borgmester Brokkenborg har fyldt Adventure Bay med kattebotter, og byens høns er flygtet op på de højeste tage. Tag din udstyrstaske på, katten Scout.',
@@ -925,16 +930,16 @@ function heliVisual(dt){heli.g.position.copy(heli.pos);heli.g.rotation.y=heli.ya
 // ================= kitty-bots =================
 const bots=[];
 function makeBot(){
-  const g=new THREE.Group(),P=mat(0x7b4bd6);
+  const g=new THREE.Group(),P=mat(0x7b4bd6),eyes=[];
   const b=mesh(new THREE.SphereGeometry(1,16,12),P,0,0,0,g);b.scale.set(1.1,0.85,1);
   const face=mesh(new THREE.SphereGeometry(0.75,14,10),mat(0xe9ddff),0,-0.05,0.45,g);face.scale.set(1,0.8,0.6);
   for(const s of [-1,1]){const e=mesh(new THREE.ConeGeometry(0.35,0.7,4),P,s*0.6,0.85,0,g);e.rotation.z=-s*0.3;
-    mesh(new THREE.SphereGeometry(0.16,8,6),new THREE.MeshBasicMaterial({color:0xffe14d}),s*0.3,0.08,0.88,g);
+    eyes.push(mesh(new THREE.SphereGeometry(0.16,8,6),new THREE.MeshBasicMaterial({color:0xffe14d}),s*0.3,0.08,0.88,g));
     for(const k of [-1,1]){const wh=mesh(new THREE.BoxGeometry(0.5,0.03,0.03),mat(0x333333),s*0.72,-0.2+k*0.08,0.8,g);wh.rotation.z=s*k*0.2}}
   const rod=mesh(new THREE.CylinderGeometry(0.06,0.06,0.6,6),mat(0x333333),0,1.05,0,g);
   const prop=mesh(new THREE.BoxGeometry(3.4,0.06,0.35),mat(0xffc93c),0,1.35,0,g);
   const tail=mesh(new THREE.CylinderGeometry(0.08,0.12,1.2,6),P,0,-0.2,-1.1,g);tail.rotation.x=-1;
-  return {g,prop};
+  return {g,prop,eyes};
 }
 {
   const inter=[];XS.forEach(x=>ZS.forEach(z=>inter.push([x,z])));
@@ -942,7 +947,7 @@ function makeBot(){
   const list=inter.slice(0,8).map(([x,z])=>[x+R(-4,4),z+R(-4,4),R(12,20)]);
   list.push([LOOK.x-30,LOOK.z-5,14],[BX,BRIDGE_Z,16],[60,125,10],[LH.x-18,20,14],[-195,-160,14],[120,200,12],[-150,100,12],[150,-120,14]);
   list.forEach(([x,z,hh])=>{const m=makeBot();const y=Math.max(ground(x,z),0)+hh;m.g.position.set(x,y,z);scene.add(m.g);
-    const bot={g:m.g,prop:m.prop,home:new V3(x,y,z),pos:m.g.position,phase:R(0,6),alive:true,falling:false,vel:new V3(),spin:new V3(),t:0};m.g.traverse(o=>o.userData.ent=bot);bot.kind='bot';bots.push(bot)});
+    const bot={g:m.g,prop:m.prop,eyes:m.eyes,home:new V3(x,y,z),pos:m.g.position,phase:R(0,6),alive:true,falling:false,vel:new V3(),spin:new V3(),t:0};m.g.traverse(o=>o.userData.ent=bot);bot.kind='bot';bots.push(bot)});
   $('sBotsT').textContent=bots.length;
 }
 
@@ -1603,6 +1608,9 @@ const STYLES={
   pastel:{hazeD:0.0021,hazeH:70,sunDir:[0.3,0.9,0.5],sun:0xfff6ea,sunI:0.75,keep:0.5,back:0xffc4e6,backI:0.2,hemiSky:0xf2f4ff,hemiGround:0xb6d4a6,hemiI:0.95,
     skyTop:0x8cc8ff,skyHor:0xffe4f1,sunGlow:0xffffff,fogN:220,fogF:900,bands:[175,255],ink:[0.3,0.25,0.4],inkMix:0.75,inkW:1.0,
     sat:0.92,warm:0.02,contrast:0.96,lift:0.06,vig:0.1},
+  night:{hazeD:0.0017,hazeH:70,sunDir:[0.4,0.5,-0.77],sun:0xc4d2ff,sunI:0.8,keep:0.5,back:0x7c6cd8,backI:0.3,hemiSky:0x8090d0,hemiGround:0x4a5870,hemiI:0.75,
+    skyTop:0x0c1440,skyHor:0x34457e,sunGlow:0xfff6d6,fogN:200,fogF:820,bands:[140,200,255],ink:[0.04,0.04,0.14],inkMix:0.5,inkW:1.2,
+    sat:0.9,warm:-0.02,contrast:1.0,lift:0.03,vig:0.3},
 };
 const toonMats=[];
 function toonify(){
@@ -1624,10 +1632,14 @@ const sky=new THREE.Mesh(new THREE.SphereGeometry(2000,32,16),new THREE.ShaderMa
   vertexShader:'varying vec3 vD;void main(){vD=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
   fragmentShader:'uniform vec3 top,hor,glow,sunDir;varying vec3 vD;void main(){vec3 d=normalize(vD);float h=clamp(d.y,0.,1.);vec3 c=mix(hor,top,pow(h,0.6));float s=max(dot(d,normalize(sunDir)),0.);c=mix(c,glow,pow(s,6.)*0.55);c+=glow*smoothstep(0.9975,0.998,s);gl_FragColor=vec4(c,1.);}'}));
 sky.renderOrder=-10;sky.frustumCulled=false;scene.add(sky);
+// stars for the night look (children of the sky dome, so they follow the camera and skip the ink pass with it)
+const stars=(()=>{const n=700,a=new Float32Array(n*3),r=mulberry32(4242);for(let i=0;i<n;i++){const u=r()*6.283,y=0.08+Math.pow(r(),0.7)*0.92,h=Math.sqrt(1-y*y);a.set([Math.sin(u)*h*1900,y*1900,Math.cos(u)*h*1900],i*3)}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(a,3));
+  const p=new THREE.Points(g,new THREE.PointsMaterial({color:0xfff8e0,size:2.2,sizeAttenuation:false,fog:false,transparent:true,opacity:0.85,depthWrite:false}));p.renderOrder=-9;p.frustumCulled=false;p.visible=false;sky.add(p);return p})();
 const noInk=[lhBeam,rope,hookBall,sky,...chickens.map(c=>c.beam),...parts.map(p=>p.m)];
 const sunDir=new V3();let STY=null;
 function setStyle(name){
-  const s=STYLES[name]||STYLES.bold;STY=s;
+  const s=STYLES[name]||STYLES.bold;STY=s;stars.visible=s===STYLES.night;
   sunDir.set(...s.sunDir).normalize();
   sun.color.set(s.sun);sun.intensity=s.sunI*(1-s.keep);sunSoft.color.set(s.sun);sunSoft.intensity=s.sunI*s.keep;backLight.color.set(s.back);backLight.intensity=s.backI;
   hemi.color.set(s.hemiSky);hemi.groundColor.set(s.hemiGround);hemi.intensity=s.hemiI;
@@ -1701,11 +1713,11 @@ function draw(){
 }
 const startStyle=(location.hash||'').slice(1);let styleName='golden';
 function cycleStyle(){const k=Object.keys(STYLES);styleName=k[(k.indexOf(styleName)+1)%k.length];setStyle(styleName);toast(T('s_'+styleName),T('lookSwitched'))}
-if(STYLES[startStyle])styleName=startStyle;setStyle(styleName);
+if(BEDTIME)styleName='night';if(STYLES[startStyle])styleName=startStyle;setStyle(styleName);
 const PERF=JPPerf.init(THREE,renderer,{toonMats,maxPR:Math.min(devicePixelRatio,isTouch?1.25:1.5),onResize:pr=>{renderer.setPixelRatio(pr);resize();makeRT()}});
 renderer.shadowMap.autoUpdate=false;
 PERF.mergeStatic(scene,[...noInk,...flags,...radar,...chickens.map(c=>c.ring),hookBall]);
-for(const p of props)PERF.mergeGroup(p.g);for(const b of bots)PERF.mergeGroup(b.g,[b.prop]);for(const c of clouds)PERF.mergeGroup(c);
+for(const p of props)PERF.mergeGroup(p.g);for(const b of bots)PERF.mergeGroup(b.g,[b.prop,...b.eyes]);for(const c of clouds)PERF.mergeGroup(c);
 // hooks for concept shots
 const JP=window.JP={setStyle,fixed:null,world:{LG,LOOK,TOWN,BX},dbg:{P,cam,camera,sfx,sbuf,heliSnd,heli,car,ship,boat,props,bots,chickens,S,gpad,keys,hold,ground,roofH,roofs:roofGeo,step(n){for(let i=0;i<n;i++){nowT+=1/60;update(1/60,nowT)}}},
   shot(o){
@@ -1716,6 +1728,73 @@ const JP=window.JP={setStyle,fixed:null,world:{LG,LOOK,TOWN,BX},dbg:{P,cam,camer
     if(o.bot){const b=bots[0];b.home.set(...o.bot)}
     for(const k of ['intro','stats','map','corner','cross','mode','hint','toast','ver'])$(k).hidden=true;
   }};
+
+// ================= bedtime: everyone sleeps (BEDTIME flag at the top) =================
+const zTex=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');x.font='bold 50px sans-serif';x.textAlign='center';x.textBaseline='middle';
+  x.lineWidth=8;x.strokeStyle='#23305e';x.strokeText('Z',32,34);x.fillStyle='#fffbe8';x.fillText('Z',32,34);const t=new THREE.CanvasTexture(c);return t})();
+const zzz=[];
+if(BEDTIME){const m=new THREE.SpriteMaterial({map:zTex,transparent:true,depthWrite:false,fog:false});
+  for(let i=0;i<120;i++){const s=new THREE.Sprite(m.clone());s.visible=false;s.renderOrder=5;scene.add(s);noInk.push(s);zzz.push({s,life:0,x:0,y:0,z:0,sc:1,ph:0})}}
+let zI=0;
+function puffZ(x,y,z,sc){const q=zzz[zI++%zzz.length];q.life=2.6;q.x=x;q.y=y;q.z=z;q.sc=sc;q.ph=Math.random()*6;q.s.visible=true}
+function tickZ(dt,t){for(const q of zzz){if(q.life<=0)continue;q.life-=dt;const k=1-q.life/2.6;
+  q.s.position.set(q.x+Math.sin(k*5+q.ph)*0.35*q.sc,q.y+k*1.8*q.sc,q.z);q.s.scale.setScalar(q.sc*(0.35+k*0.55));
+  q.s.material.opacity=Math.min(1,k*5)*Math.min(1,q.life*1.5);if(q.life<=0)q.s.visible=false}}
+// every sleeper sends up a Z now and then (only the ones near the camera)
+function snore(o,x,y,z,sc,dt){o.zT=(o.zT===undefined?Math.random()*1.5:o.zT)-dt;if(o.zT>0)return;o.zT=1.5+Math.random()*0.5;
+  if((x-camera.position.x)**2+(z-camera.position.z)**2<110*110)puffZ(x,y,z,sc)}
+const hp=new V3(),heroZ={};let heroIdle=0,heroSleep=0;
+// lullaby (Brahms, as a soft music box) on its own gain so mute cuts it at once
+const LULL=[[64,.5],[64,.5],[67,2],[64,.5],[64,.5],[67,2],[64,.5],[67,.5],[72,1],[71,1.5],[69,.5],[69,1],[67,1],[62,.5],[64,.5],[65,1],[62,1],[62,.5],[64,.5],[65,2],[62,.5],[65,.5],[71,.5],[69,.5],[67,1],[71,1],[72,3]];
+let lullG=null,lullNext=0;
+function lullaby(){
+  if(!ac||!S.running)return;
+  if(!lullG){lullG=ac.createGain();lullG.connect(ac.destination);lullNext=ac.currentTime+2.5}
+  lullG.gain.value=muted?0:1;
+  if(ac.currentTime<lullNext-0.5)return;
+  const B=0.6;let at=lullNext;
+  for(const [n,d] of LULL){const f=440*Math.pow(2,(n-69)/12),len=Math.min(d*B+0.8,2.4);
+    for(const [mul,type,v] of [[1,'sine',0.05],[2,'triangle',0.012]]){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f*mul;
+      g.gain.setValueAtTime(0.0001,at);g.gain.linearRampToValueAtTime(v,at+0.02);g.gain.exponentialRampToValueAtTime(0.0005,at+len);o.connect(g).connect(lullG);o.start(at);o.stop(at+len+0.05)}
+    at+=d*B}
+  lullNext=at+7;
+}
+function bedtime(dt,t,title){
+  if(!BEDTIME)return;
+  // NPC pups: fast asleep
+  for(const n of npcs){ANIM.sleep(n.p,1,dt,t);n.p.head.getWorldPosition(hp);snore(n,hp.x,hp.y+0.7,hp.z,1,dt)}
+  // Scout: dozes off after standing still for a few seconds (asleep on the title screen)
+  const still=title||(P.mode==='ground'&&Math.hypot(P.vel.x,P.vel.z)<0.5&&moveInput().mag<0.1);
+  heroIdle=still?heroIdle+dt:0;
+  heroSleep=clamp(heroSleep+(heroIdle>3?dt*0.7:-dt*4),0,1);
+  ANIM.sleep(pup,heroSleep*heroSleep*(3-2*heroSleep),dt,t);
+  if(heroSleep>0.9){pup.head.getWorldPosition(hp);snore(heroZ,hp.x,hp.y+0.7,hp.z,1,dt)}
+  // chickens: hunkered down, wings folded, eyes shut
+  for(const c of chickens){
+    if(c.rescued){c.g.scale.set(1,1,1);c.g.rotation.x=0;continue}
+    if(!c.eyes)c.eyes=c.g.children.filter(o=>o.geometry&&o.geometry.parameters&&o.geometry.parameters.radius===0.05);
+    const br=Math.sin(t*1.8+c.phase);
+    c.g.position.y=c.pos.y-0.6;c.g.rotation.x=0.22;c.g.scale.set(1+br*0.03,0.72+br*0.02,1);
+    for(const e of c.eyes)e.scale.y=0.15;
+    if(c.anim)for(const w of c.anim.wings)w.rotation.z=Math.sign(w.position.x)*0.08;
+    snore(c,c.pos.x,c.pos.y+0.7,c.pos.z,0.8,dt);
+  }
+  // Kitty-Bots: propellers off, flopped down on whatever is under them, eyes shut
+  for(const b of bots){
+    if(!b.alive)continue;
+    if(b.sleepY===undefined)b.sleepY=Math.max(support(b.home.x,b.home.z,b.home.y),0)+0.75;
+    const br=Math.sin(t*1.4+b.phase);
+    b.pos.set(b.home.x,b.sleepY+br*0.03,b.home.z);
+    b.g.rotation.order='YXZ';b.g.rotation.set(0.12,b.phase*3,0.5+br*0.03);b.g.scale.set(1,1+br*0.03,1);
+    b.prop.rotation.y=b.phase;
+    for(const e of b.eyes)e.scale.y=0.18;
+    snore(b,b.pos.x,b.pos.y+1.6,b.pos.z,1.4,dt);
+  }
+  tickZ(dt,t);
+  if(!title)lullaby();
+}
+if(BEDTIME)$('nightNote').hidden=false;
+JP.dbg.bedtime=()=>({on:BEDTIME,hero:heroSleep,style:styleName});
 
 // ================= loop =================
 let last=performance.now(),frameN=0;
@@ -1756,7 +1835,7 @@ function update(dt,t){
   }
   // chickens
   for(const c of chickens){
-    if(!c.rescued){c.ring.rotation.z+=dt*2;c.g.rotation.y+=dt*0.8;c.g.position.y=c.pos.y-0.6+Math.abs(Math.sin(t*3+c.phase))*0.25;if(P.mode!=='car'&&c.pos.distanceTo(tc.set(P.pos.x,P.pos.y+0.7,P.pos.z))<2.6)rescue(c)}
+    if(!c.rescued){c.ring.rotation.z+=dt*2;if(!BEDTIME){c.g.rotation.y+=dt*0.8;c.g.position.y=c.pos.y-0.6+Math.abs(Math.sin(t*3+c.phase))*0.25}if(P.mode!=='car'&&c.pos.distanceTo(tc.set(P.pos.x,P.pos.y+0.7,P.pos.z))<2.6)rescue(c)}
     else if(c.g.visible){c.t+=dt;c.g.position.y+=dt*10;c.g.rotation.y+=dt*12;if(c.t>1){c.g.visible=false;burst(c.g.position,[0xffffff,0xffe14d],12,5)}}
   }
   // particles
@@ -1766,6 +1845,7 @@ function update(dt,t){
   // npcs
   for(const n of npcs){n.p.tail.rotation.z=Math.sin(t*12+n.phase)*0.6;n.p.head.rotation.y=clamp(Math.atan2(P.pos.x-n.p.g.position.x,P.pos.z-n.p.g.position.z)-n.p.g.rotation.y,-0.8,0.8)*0.6}
   for(const n of npcs)ANIM.npc(n.p,dt,t,P.pos);
+  bedtime(dt,t,false);
 }
 function ambient(dt,t){
   for(const c of clouds){if(c.userData.far)continue;c.position.x+=dt*3;if(c.position.x>700)c.position.x=-700}
@@ -1939,6 +2019,7 @@ function frame(now){
     for(const b of bots)if(b.alive){b.t+=dt;b.pos.set(b.home.x,b.home.y+Math.sin(b.t*1.3+b.phase)*0.6,b.home.z);b.g.rotation.y=Math.atan2(camera.position.x-b.pos.x,camera.position.z-b.pos.z)}
     pup.g.position.copy(P.pos);pup.g.rotation.y=P.face;carVisual();heliVisual(dt);if(F)pup.tail.rotation.z=Math.sin(t*14)*0.5;else{ANIM.pup(pup,P,dt,t,{chute});for(const n of npcs)ANIM.npc(n.p,dt,t,P.pos)}
     for(const b of bots)b.prop.rotation.y+=dt*22;
+    bedtime(dt,t,true);
     if(F)placeLights(...F.look);else placeLights(LOOK.x,LG,LOOK.z);
   }
   draw();PERF.frame(now);
@@ -1950,7 +2031,7 @@ $('bLang').addEventListener('click',()=>{lang=lang==='da'?'en':'da';try{localSto
 $('start').addEventListener('click',()=>{
   initAudio();$('intro').hidden=true;S.running=true;$('touch').hidden=!isTouch;
   if(!isTouch){try{const r=canvas.requestPointerLock();if(r&&r.catch)r.catch(()=>{})}catch(e){}}
-  canvas.focus();sfx.meow();mpConnect();if(restored)toast(T('welcome'),T('welcome2'));else toast(T('ready'),T('ready2'));saveGame();
+  canvas.focus();sfx.meow();mpConnect();if(BEDTIME)toast(T('night'),T('night2'));else if(restored)toast(T('welcome'),T('welcome2'));else toast(T('ready'),T('ready2'));saveGame();
 });
 $('keep').addEventListener('click',()=>{$('win').hidden=true;canvas.focus()});
 car.g.rotation.order='YXZ';
@@ -2225,19 +2306,22 @@ function loadGame(){let d=null;try{d=JSON.parse(localStorage.getItem(SAVE_KEY))}
   if(ok(d.p)&&d.p.length===3){updateShip(0,nowT);const gy=ground(d.p[0],d.p[2]);P.pos.set(d.p[0],Math.max(d.p[1],gy)+0.3,d.p[2]);P.vel.set(0,0,0);P.mode='air';P.hook=null;
     if(Number.isFinite(d.yaw))cam.yaw=d.yaw;if(Number.isFinite(d.face))P.face=d.face}
   if(Number.isFinite(d.fuel))P.fuel=clamp(d.fuel,0,100);
-  if(d.style&&STYLES[d.style]&&!STYLES[(location.hash||'').slice(1)]){styleName=d.style;setStyle(styleName)}
+  if(d.style&&STYLES[d.style]&&!BEDTIME&&d.style!=='night'&&!STYLES[(location.hash||'').slice(1)]){styleName=d.style;setStyle(styleName)}
   return true}
 restored=loadGame();
 if(restored){$('start').dataset.i18n='cont';$('fresh').hidden=false;applyLang()}
 $('fresh').addEventListener('click',()=>{try{localStorage.removeItem(SAVE_KEY)}catch(e){}location.reload()});
 setInterval(saveGame,3000);
-$('bReload').addEventListener('click',()=>{saveGame();const u=new URL(location.href);u.searchParams.set('v',Date.now().toString(36));location.replace(u.href)});
+const reloadNow=()=>{saveGame();const u=new URL(location.href);u.searchParams.set('v',Date.now().toString(36));location.replace(u.href)};
+$('bReload').addEventListener('click',reloadNow);
 // watch for a new deploy (worker.js /version = hash of the page) and light up the reload button
 // the first answer is this page's release: shown small in the bottom corner as deploy date/time + page hash
 {let tag=null;const chk=()=>{if(document.hidden)return;fetch('/version',{cache:'no-store'}).then(r=>r.ok?r.text():null).then(e=>{if(!e||e.length>60)return;
   if(tag===null){tag=e;const [h,at]=e.split(' '),d=at&&new Date(at),p=n=>String(n).padStart(2,'0');
-    $('ver').textContent='v '+(d&&!isNaN(d)?d.getDate()+'/'+(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes())+' · ':'')+h.slice(0,6);$('ver').hidden=false}else if(e!==tag&&!$('bReload').classList.contains('new')){$('bReload').classList.add('new');if(S.running)toast(T('update'),T('update2'))}}).catch(()=>{})};
-  if(/workers\.dev$/.test(location.hostname)){chk();setInterval(chk,60000)}}
+    $('ver').textContent='v '+(d&&!isNaN(d)?d.getDate()+'/'+(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes())+' · ':'')+h.slice(0,6);$('ver').hidden=false}
+  else if(e!==tag){if(!S.running){reloadNow();return}if(!$('bReload').classList.contains('new')){$('bReload').classList.add('new');toast(T('update'),T('update2'))}}}).catch(()=>{})};
+  // a new version loads by itself on the title screen, or when the game comes back from the background (iPad woken up)
+  if(/workers\.dev$/.test(location.hostname)){chk();setInterval(chk,60000);document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if($('bReload').classList.contains('new'))reloadNow();else chk()})}}
 addEventListener('pagehide',saveGame);document.addEventListener('visibilitychange',()=>{if(document.hidden)saveGame()});
 JP.dbg.saveGame=saveGame;JP.dbg.loadGame=loadGame;
 requestAnimationFrame(frame);
