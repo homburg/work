@@ -3,3 +3,5 @@ README.md
 wrangler.jsonc
 .assetsignore
 .wrangler
+worker.js
+node_modules
