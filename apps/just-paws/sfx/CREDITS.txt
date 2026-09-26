@@ -1,0 +1,17 @@
+Just Paws sound effects. All are CC0 (public domain), converted to mono MP3 and peak-normalised.
+
+Kenney (https://kenney.nl), CC0:
+  jump.mp3      Digital Audio   phaseJump1
+  zip.mp3       Digital Audio   phaserUp1
+  chute.mp3     RPG Audio       cloth1
+  wing.mp3      RPG Audio       cloth2
+  pop1/2.mp3    Impact Sounds   impactMetal_heavy_000 / _002
+  knock1/2.mp3  Impact Sounds   impactWood_medium_000 / _002
+  bonk1/2.mp3   Impact Sounds   impactSoft_heavy_000 / _002
+  rescue.mp3    Music Jingles   jingles_PIZZI01
+
+OpenGameArt.org, CC0:
+  meow1.mp3     "Meow" by IgnasD                 https://opengameart.org/content/meow
+  meow2.mp3     "Kitten Mew" by AntumDeluge      https://opengameart.org/content/kitten-mew
+  splash1-3.mp3 "40 CC0 water / splash / slime SFX" by rubberduck (splash_02, _03, _06)
+                https://opengameart.org/content/40-cc0-water-splash-slime-sfx
