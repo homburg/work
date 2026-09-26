@@ -100,6 +100,18 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     document.getElementById('bigmap').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); out.bigMap.tapClose = bm();
     // bedtime: the Kitty-Bots are lying down asleep, not hovering
     out.bed = Object.assign(d.bedtime(), { botsDown: d.bots.every(b => !b.alive || (b.sleepY !== undefined && Math.abs(b.pos.y - b.sleepY) < 0.1)) });
+    // online: another player's car, sent 15x a second with uneven network delay, moves evenly on our screen
+    P.mode = 'air'; const M = d.MP, x0 = d.car.pos.x + 40, z0 = d.car.pos.z, send = [], spd = [], turn = [];
+    for (let i = 0, j = 7; i <= 45; i++) { j = (j * 9301 + 49297) % 233280; const t = i / 15; send.push({ at: 0.05 + t + 0.04 * j / 233280, k: t * 1000, s: [x0 + 20 * t, 2, z0, 0, 7, 20, 0, 0, 0.6 * t, 0] }); }
+    let last = null, lastYaw = null;
+    for (let f = 0; f <= 180; f++) {
+      M.clock = f / 60; while (send.length && send[0].at <= M.clock) { const m = send.shift(); d.mpPeer({ id: 'racer', n: 'Tom', c: 1, s: m.s }, true, m.k / 1000); }
+      d.mpUpdate(1 / 60, M.clock); const q = M.peers.get('racer'); if (!q) continue; const g = q.veh.car.g;
+      if (f > 40) { spd.push((g.position.x - last) * 60); turn.push((g.rotation.y - lastYaw) * 60); }
+      last = g.position.x; lastYaw = g.rotation.y;
+    }
+    M.clock = null;
+    out.mpSmooth = { minSpeed: Math.min(...spd), maxSpeed: Math.max(...spd), minTurn: Math.min(...turn), maxTurn: Math.max(...turn) };
     return out;
   });
   await browser.close();
@@ -121,9 +133,10 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     ['digger drives, scoops, lifts and tips', r.dig.mode === 'dig' && r.dig.drove > 3 && r.dig.loaded === 1 && r.dig.lifted > 3 && r.dig.tipped && r.dig.dirt && r.dig.out !== 'dig', r.dig],
     ['big map folds out and back', r.bigMap.tab && r.bigMap.drawn && !r.bigMap.k && r.bigMap.tap && !r.bigMap.tapClose, r.bigMap],
     ['bedtime: Kitty-Bots asleep on the ground', r.bed.on && r.bed.botsDown, r.bed],
+    ['online car moves smoothly', r.mpSmooth.minSpeed > 17 && r.mpSmooth.maxSpeed < 23 && r.mpSmooth.minTurn > 0.5 && r.mpSmooth.maxTurn < 0.7, r.mpSmooth],
     ['airship follows the online captain', r.shipSync.off < 3 && r.shipSync.dy < 2 && r.shipSync.dyaw < 0.2 && r.shipSync.mode !== 'ship', r.shipSync],
   ];
   let fail = 0;
-  for (const [name, ok, info] of checks) { console.log(`${ok ? 'PASS' : 'FAIL'} ${name}`, ok ? '' : JSON.stringify(info)); if (!ok) fail++; }
+  for (const [name, ok, info] of checks) { console.log(`${ok ? 'PASS' : 'FAIL'} ${name}`, ok && !process.env.V ? '' : JSON.stringify(info)); if (!ok) fail++; }
   process.exit(fail ? 1 : 0);
 })().catch(e => { console.error(e); process.exit(1); });
