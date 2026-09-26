@@ -120,6 +120,18 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     out.mpSmooth = { minSpeed: Math.min(...spd), maxSpeed: Math.max(...spd), minTurn: Math.min(...turn), maxTurn: Math.max(...turn) };
     return out;
   });
+  // real frames with that captain still aboard: the aim ray walks the ship, where a player's name tag (a Sprite) used to throw and stop the game loop
+  // (the test page has no server, so the captain is re-sent every frame like live updates would be)
+  Object.assign(r, await page.evaluate(() => new Promise(res => {
+    const d = JP.dbg, Sh = d.ship; let n = 0;
+    const f = () => {
+      d.MP.id = 'me'; const q = d.mpPeer({ id: 'captain', n: 'Luna', c: 2, s: [Sh.pos.x, Sh.baseY, Sh.pos.z, 0, 12, 0, 0, 0, Sh.yaw, 0] }, true);
+      if (++n < 12) return requestAnimationFrame(f);
+      let lam = 0; q.cat.g.traverse(o => { if (o.material && o.material.isMeshLambertMaterial) lam++; });
+      res({ liveFrames: n, peerLambert: lam });
+    };
+    requestAnimationFrame(f);
+  })));
   // Pup HQ is walk-in, and round things collide as round things
   const hq = await page.evaluate(() => {
     const d = JP.dbg, W = JP.world, H = W.HQ, E = W.elev, P = d.P, L = W.LOOK, out = {};
@@ -212,6 +224,7 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     ['ramp side is a wall', hq.ramp.y < 1, hq.ramp],
     ['digger drives, scoops, lifts and tips', r.dig.mode === 'dig' && r.dig.drove > 3 && r.dig.loaded === 1 && r.dig.lifted > 3 && r.dig.tipped && r.dig.dirt && r.dig.out !== 'dig', r.dig],
     ['big map folds out and back', r.bigMap.tab && r.bigMap.drawn && !r.bigMap.k && r.bigMap.tap && !r.bigMap.tapClose, r.bigMap],
+    ['online players: toon look (no shader compile on join), game runs with one at the wheel', r.peerLambert === 0 && r.liveFrames === 12, { peerLambert: r.peerLambert, liveFrames: r.liveFrames }],
     ['daytime at noon Danish time', !r.day.on, r.day],
     ['bedtime at 21:00: Kitty-Bots and Scout asleep, Scout stays put', r.bed.on && r.bed.style === 'night' && r.bed.botsDown && r.bed.hero === 1 && r.bed.moved < 0.01 && r.bed.mode === 'ground', r.bed],
     ['bedtime: the menu only orders a bed, and Scout sleeps in it', r.bed.menu.open && r.bed.menu.items === 1 && r.bed.menu.closed && r.bed.menu.inBed, r.bed.menu],
