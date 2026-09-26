@@ -49,6 +49,8 @@ body.touch #mode{left:calc(16px + env(safe-area-inset-left,0px));transform:none;
 #btns button{border-radius:50%;border:3px solid rgba(255,255,255,.35);background:rgba(22,36,74,.72);color:var(--cream);font:800 14px 'Baloo 2',system-ui,sans-serif;letter-spacing:.04em;touch-action:none}
 #btns button:active,#btns button.on{background:var(--gold);color:var(--navy)}
 #tHook{background:rgba(232,65,60,.85)!important}
+#tTether{grid-column:2;grid-row:3;background:rgba(255,201,60,.8)!important;color:var(--navy)!important;font-size:12px!important}
+#tTether.on{box-shadow:0 0 0 4px #fff8e8}
 #tHook:active{background:var(--gold)!important}
 #tCar.dim{opacity:.35}
 .overlay{position:fixed;inset:0;z-index:5;display:grid;place-items:center;padding:16px;background:rgba(22,36,74,.45);overflow:auto}
@@ -97,7 +99,7 @@ body.touch #mode{left:calc(16px + env(safe-area-inset-left,0px));transform:none;
   <div id="joyhint" data-i18n="joyhint">◀ DRAG HERE TO MOVE<br>DRAG RIGHT SIDE TO LOOK ▶</div>
   <div id="btns">
     <button id="tJet">JET</button><button id="tWing">WINGS</button><button id="tCar">CAR</button>
-    <button id="tJump">JUMP</button><button id="tHook">HOOK</button>
+    <button id="tJump">JUMP</button><button id="tHook">HOOK</button><button id="tTether" data-i18n="b_TETHER">TETHER</button>
   </div>
 </div>
 
@@ -158,11 +160,11 @@ en:{hudChick:'CHICKENS',hudBots:'KITTY-BOTS',hudChaos:'CHAOS',
  joyhint:'◀ DRAG HERE TO MOVE<br>DRAG RIGHT SIDE TO LOOK ▶',
  introTag:'Mayor Grumbleton has flooded Adventure Bay with Kitty-Bots, and the town chickens have fled to the highest rooftops. Grab your gear pack, Scout the cat.',
  introList:'<li>Rescue <b>6 chickens</b> stuck up high (follow the yellow beams).</li><li>Bust all <b>Kitty-Bots</b>: hook them, ram them or fly into them.</li><li>Knock stuff over for <b>chaos points</b>.</li>',
- keysDesk:'<kbd>WASD</kbd><span>Run (Shift to sprint) · drive</span><kbd>Mouse</kbd><span>Look (click to lock the mouse)</span><kbd>Click / F</kbd><span>Grappling hook at the crosshair</span><kbd>Space</kbd><span>Jump, then parachute, then wingsuit</span><kbd>Q · C</kbd><span>Wingsuit on/off · cut parachute</span><kbd>Hold J</kbd><span>Jetpack (refuels on the ground)</span><kbd>E</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (Space up, Shift down)</span><kbd>W / S</kbd><span>In the air: dive / climb · A D turn</span><kbd>J · C</kbd><span>In the water: water jets · dive (Space up)</span>',
- keysTouch:'<kbd>Left thumb</kbd><span>Move · drive · steer in the air</span><kbd>Right thumb</kbd><span>Drag to look and aim</span><kbd>HOOK</kbd><span>Grappling hook at the crosshair</span><kbd>JUMP</kbd><span>Jump, then parachute, then wingsuit</span><kbd>JET</kbd><span>Hold for jetpack (refuels on the ground)</span><kbd>CAR</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (hold UP / DOWN)</span><kbd>JET · DIVE</kbd><span>In the water: water jets · dive</span>',
- keysPad:'<kbd>Left stick</kbd><span>Move · drive · steer (click to sprint)</span><kbd>Right stick</kbd><span>Look and aim</span><kbd>A / ✕</kbd><span>Jump, then parachute, then wingsuit</span><kbd>X / □ · RT</kbd><span>Grappling hook at the crosshair</span><kbd>B / ○</kbd><span>Wingsuit on/off</span><kbd>Hold LT</kbd><span>Jetpack</span><kbd>Y / △</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (A up, B down)</span><kbd>RB · Start</kbd><span>Cut parachute · back to Pup HQ</span><kbd>LT · B</kbd><span>In the water: water jets · dive (A up)</span>',
+ keysDesk:'<kbd>T · X</kbd><span>Tether two things together · cut all tethers</span><kbd>WASD</kbd><span>Run (Shift to sprint) · drive</span><kbd>Mouse</kbd><span>Look (click to lock the mouse)</span><kbd>Click / F</kbd><span>Grappling hook at the crosshair</span><kbd>Space</kbd><span>Jump, then parachute, then wingsuit</span><kbd>Q · C</kbd><span>Wingsuit on/off · cut parachute</span><kbd>Hold J</kbd><span>Jetpack (refuels on the ground)</span><kbd>E</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (Space up, Shift down)</span><kbd>W / S</kbd><span>In the air: dive / climb · A D turn</span><kbd>J · C</kbd><span>In the water: water jets · dive (Space up)</span>',
+ keysTouch:'<kbd>TETHER</kbd><span>Aim at two things to tie them together (tap at the sky to cut all)</span><kbd>Left thumb</kbd><span>Move · drive · steer in the air</span><kbd>Right thumb</kbd><span>Drag to look and aim</span><kbd>HOOK</kbd><span>Grappling hook at the crosshair</span><kbd>JUMP</kbd><span>Jump, then parachute, then wingsuit</span><kbd>JET</kbd><span>Hold for jetpack (refuels on the ground)</span><kbd>CAR</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (hold UP / DOWN)</span><kbd>JET · DIVE</kbd><span>In the water: water jets · dive</span>',
+ keysPad:'<kbd>D-pad ▲ · ▼</kbd><span>Tether two things together · cut all tethers</span><kbd>Left stick</kbd><span>Move · drive · steer (click to sprint)</span><kbd>Right stick</kbd><span>Look and aim</span><kbd>A / ✕</kbd><span>Jump, then parachute, then wingsuit</span><kbd>X / □ · RT</kbd><span>Grappling hook at the crosshair</span><kbd>B / ○</kbd><span>Wingsuit on/off</span><kbd>Hold LT</kbd><span>Jetpack</span><kbd>Y / △</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (A up, B down)</span><kbd>RB · Start</kbd><span>Cut parachute · back to Pup HQ</span><kbd>LT · B</kbd><span>In the water: water jets · dive (A up)</span>',
  start:'Start the rescue',fine:'A fan-made prototype. Hook + parachute = slingshot. Sounds: Kenney.nl & OpenGameArt (CC0).',
- winTag:'Every chicken is safe and Grumbleton\'s Kitty-Bots are scrap. Chaos score: <b id="winChaos">0</b>.',keep:'Keep playing',hudOnline:'ONLINE',joined:'joined the bay',left:'left the bay',cont:'Continue the rescue',fresh:'Start over',welcome:'Welcome back!',welcome2:'your rescue was saved',
+ winTag:'Every chicken is safe and Grumbleton\'s Kitty-Bots are scrap. Chaos score: <b id="winChaos">0</b>.',keep:'Keep playing',b_TETHER:'TETHER',teth1:'Tether hooked',teth1b:'now aim at the second thing',teth2:'Tethered!',teth2b:'watch them pull together',tethCut:'Tethers cut',tethMiss:'Nothing to tether there',hudOnline:'ONLINE',joined:'joined the bay',left:'left the bay',cont:'Continue the rescue',fresh:'Start over',welcome:'Welcome back!',welcome2:'your rescue was saved',
  m_ground:'On paws',m_air:'Airborne',m_chute:'Parachute',m_wing:'Wingsuit',m_grapple:'Grappling',m_swim:'Paddling',m_car:'Pup Cruiser',m_heli:'Pup Copter',m_jet:'Jetpack',m_dive:'Diving',m_boat:'Speedboat',m_ride:'Passenger',
  s_bold:'Saturday Morning',s_golden:'Golden Hour',s_pastel:'Pastel Toy',lookSwitched:'look switched (V / ◐)',
  fsNo:'Fullscreen',fsNo2:'not allowed here',padOn:'Controller connected',padHint:'A jump · X hook · Y car · LT jetpack',
@@ -190,11 +192,11 @@ da:{hudChick:'HØNS',hudBots:'KATTEBOTTER',hudChaos:'KAOS',
  joyhint:'◀ TRÆK HER FOR AT GÅ<br>TRÆK I HØJRE SIDE FOR AT KIGGE ▶',
  introTag:'Borgmester Brokkenborg har fyldt Adventure Bay med kattebotter, og byens høns er flygtet op på de højeste tage. Tag din udstyrstaske på, katten Scout.',
  introList:'<li>Red <b>6 høns</b>, der sidder højt oppe (følg de gule lysstråler).</li><li>Stop alle <b>kattebotter</b>: fang dem med krogen, ram dem eller flyv ind i dem.</li><li>Vælt ting for at få <b>kaospoint</b>.</li>',
- keysDesk:'<kbd>WASD</kbd><span>Løb (Shift for at spurte) · kør</span><kbd>Mus</kbd><span>Kig (klik for at låse musen)</span><kbd>Klik / F</kbd><span>Gribekrog mod sigtekornet</span><kbd>Mellemrum</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>Q · C</kbd><span>Wingsuit til/fra · slip faldskærmen</span><kbd>Hold J</kbd><span>Jetpack (tankes op på jorden)</span><kbd>E</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (Mellemrum op, Shift ned)</span><kbd>W / S</kbd><span>I luften: dyk / stig · A D drej</span><kbd>J · C</kbd><span>I vandet: vand-jets · dyk (Mellemrum op)</span>',
- keysTouch:'<kbd>Venstre tommel</kbd><span>Gå · kør · styr i luften</span><kbd>Højre tommel</kbd><span>Træk for at kigge og sigte</span><kbd>KROG</kbd><span>Gribekrog mod sigtekornet</span><kbd>HOP</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>JET</kbd><span>Hold for jetpack (tankes op på jorden)</span><kbd>BIL</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (hold OP / NED)</span><kbd>JET · DYK</kbd><span>I vandet: vand-jets · dyk</span>',
- keysPad:'<kbd>Venstre stik</kbd><span>Gå · kør · styr (tryk ind for at spurte)</span><kbd>Højre stik</kbd><span>Kig og sigt</span><kbd>A / ✕</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>X / □ · RT</kbd><span>Gribekrog mod sigtekornet</span><kbd>B / ○</kbd><span>Wingsuit til/fra</span><kbd>Hold LT</kbd><span>Jetpack</span><kbd>Y / △</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (A op, B ned)</span><kbd>RB · Start</kbd><span>Slip faldskærmen · tilbage til Hvalpe-HQ</span><kbd>LT · B</kbd><span>I vandet: vand-jets · dyk (A op)</span>',
+ keysDesk:'<kbd>T · X</kbd><span>Bind to ting sammen · klip alle tethers</span><kbd>WASD</kbd><span>Løb (Shift for at spurte) · kør</span><kbd>Mus</kbd><span>Kig (klik for at låse musen)</span><kbd>Klik / F</kbd><span>Gribekrog mod sigtekornet</span><kbd>Mellemrum</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>Q · C</kbd><span>Wingsuit til/fra · slip faldskærmen</span><kbd>Hold J</kbd><span>Jetpack (tankes op på jorden)</span><kbd>E</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (Mellemrum op, Shift ned)</span><kbd>W / S</kbd><span>I luften: dyk / stig · A D drej</span><kbd>J · C</kbd><span>I vandet: vand-jets · dyk (Mellemrum op)</span>',
+ keysTouch:'<kbd>TETHER</kbd><span>Sigt på to ting for at binde dem sammen (tryk mod himlen for at klippe alle)</span><kbd>Venstre tommel</kbd><span>Gå · kør · styr i luften</span><kbd>Højre tommel</kbd><span>Træk for at kigge og sigte</span><kbd>KROG</kbd><span>Gribekrog mod sigtekornet</span><kbd>HOP</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>JET</kbd><span>Hold for jetpack (tankes op på jorden)</span><kbd>BIL</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (hold OP / NED)</span><kbd>JET · DYK</kbd><span>I vandet: vand-jets · dyk</span>',
+ keysPad:'<kbd>D-pad ▲ · ▼</kbd><span>Bind to ting sammen · klip alle tethers</span><kbd>Venstre stik</kbd><span>Gå · kør · styr (tryk ind for at spurte)</span><kbd>Højre stik</kbd><span>Kig og sigt</span><kbd>A / ✕</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>X / □ · RT</kbd><span>Gribekrog mod sigtekornet</span><kbd>B / ○</kbd><span>Wingsuit til/fra</span><kbd>Hold LT</kbd><span>Jetpack</span><kbd>Y / △</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (A op, B ned)</span><kbd>RB · Start</kbd><span>Slip faldskærmen · tilbage til Hvalpe-HQ</span><kbd>LT · B</kbd><span>I vandet: vand-jets · dyk (A op)</span>',
  start:'Start redningen',fine:'En fan-lavet prototype. Krog + faldskærm = slangebøsse. Lyde: Kenney.nl & OpenGameArt (CC0).',
- winTag:'Alle høns er i sikkerhed, og Brokkenborgs kattebotter er skrot. Kaospoint: <b id="winChaos">0</b>.',keep:'Spil videre',hudOnline:'ONLINE',joined:'kom til byen',left:'tog hjem',cont:'Fortsæt redningen',fresh:'Start forfra',welcome:'Velkommen tilbage!',welcome2:'din redning blev gemt',
+ winTag:'Alle høns er i sikkerhed, og Brokkenborgs kattebotter er skrot. Kaospoint: <b id="winChaos">0</b>.',keep:'Spil videre',b_TETHER:'TETHER',teth1:'Tether sat fast',teth1b:'sigt nu på den anden ting',teth2:'Bundet sammen!',teth2b:'se dem trække sammen',tethCut:'Tethers klippet',tethMiss:'Intet at binde fast der',hudOnline:'ONLINE',joined:'kom til byen',left:'tog hjem',cont:'Fortsæt redningen',fresh:'Start forfra',welcome:'Velkommen tilbage!',welcome2:'din redning blev gemt',
  m_ground:'På poterne',m_air:'I luften',m_chute:'Faldskærm',m_wing:'Wingsuit',m_grapple:'Gribekrog',m_swim:'Svømmer',m_car:'Hvalpebilen',m_heli:'Hvalpekopteren',m_jet:'Jetpack',m_dive:'Dykker',m_boat:'Speedbåden',m_ride:'Passager',
  s_bold:'Lørdagsmorgen',s_golden:'Gyldne time',s_pastel:'Pastel-legetøj',lookSwitched:'stil skiftet (V / ◐)',
  fsNo:'Fuld skærm',fsNo2:'ikke tilladt her',padOn:'Controller forbundet',padHint:'A hop · X krog · Y bil · LT jetpack',
@@ -960,7 +962,7 @@ let nowT=0;
 addEventListener('keydown',e=>{
   if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
   if(e.repeat)return;keys[e.code]=true;if(!S.running)return;
-  switch(e.code){case'Space':actJump();break;case'KeyF':actGrapple();break;case'KeyQ':actWing();break;case'KeyE':actCar();break;case'KeyC':actCut();break;case'KeyR':respawn();break;case'KeyM':toggleMute();break;case'KeyV':cycleStyle();break;case'KeyN':cycleSnd();break}
+  switch(e.code){case'Space':actJump();break;case'KeyF':actGrapple();break;case'KeyQ':actWing();break;case'KeyE':actCar();break;case'KeyC':actCut();break;case'KeyR':respawn();break;case'KeyM':toggleMute();break;case'KeyV':cycleStyle();break;case'KeyT':actTether(false);break;case'KeyX':clearTethers(true);break;case'KeyN':cycleSnd();break}
 });
 addEventListener('keyup',e=>{keys[e.code]=false});
 addEventListener('blur',()=>{for(const k in keys)keys[k]=false});
@@ -990,7 +992,7 @@ canvas.addEventListener('pointermove',e=>{
 function endPtr(e){if(e.pointerType==='mouse'){dragging=false;return}if(e.pointerId===joy.id){joy.id=null;joy.x=joy.y=0;$('joy').style.display='none'}if(e.pointerId===look.id)look.id=null}
 canvas.addEventListener('pointerup',endPtr);canvas.addEventListener('pointercancel',endPtr);
 function btn(id,fn){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();initAudio();fn()});b.addEventListener('contextmenu',e=>e.preventDefault())}
-btn('tJump',()=>{if(P.mode==='heli'||P.mode==='dive')hold.up=true;else actJump()});btn('tHook',()=>actGrapple());btn('tWing',()=>{if(P.mode==='heli'||P.mode==='swim'||P.mode==='dive')hold.down=true;else actWing()});
+btn('tTether',()=>actTether(true));btn('tJump',()=>{if(P.mode==='heli'||P.mode==='dive')hold.up=true;else actJump()});btn('tHook',()=>actGrapple());btn('tWing',()=>{if(P.mode==='heli'||P.mode==='swim'||P.mode==='dive')hold.down=true;else actWing()});
 btn('tJet',()=>{hold.jet=true});
 for(const [id,k] of [['tJump','up'],['tWing','down'],['tJet','jet']])for(const ev of ['pointerup','pointercancel','pointerleave'])$(id).addEventListener(ev,()=>{hold[k]=false});btn('tCar',()=>actCar());
 $('bRespawn').addEventListener('click',()=>respawn());$('bStyle').addEventListener('click',()=>cycleStyle());$('bSnd').addEventListener('click',()=>{initAudio();cycleSnd()});$('bMute').addEventListener('click',()=>toggleMute());
@@ -1037,6 +1039,8 @@ function pollPad(dt){
     if((rel(6)||rel(4))&&!now[6]&&!now[4])hold.jet=false;
     if(hit(9))respawn();
     if(hit(8))cycleStyle();
+    if(hit(12))actTether(false);
+    if(hit(13))clearTethers(true);
   }
   gpad.prev=now;
 }
@@ -1470,6 +1474,7 @@ let last=performance.now(),frameN=0;
 function update(dt,t){
   updateShip(dt,t);
   updatePlayer(dt);
+  updateTethers(dt);
   if(P.mode!=='boat')updateBoat(dt,{x:0,y:0},false);boatVisual();
   // pup visuals
   pup.g.position.copy(P.pos);pup.g.rotation.order='YXZ';
@@ -1603,7 +1608,7 @@ function hud(dt){
   else if(P.mode==='swim')h=TD('h_swim');
   else if(P.mode==='dive')h=TD('h_dive');
   if(h!==lastHint){lastHint=h;$('hint').textContent=h;$('hint').hidden=!h}
-  if(isTouch){const j={ground:'JUMP',swim:'JUMP',dive:'UP',air:'CHUTE',chute:'WINGS',wing:'CHUTE',grapple:'CHUTE',car:'HOP',boat:'HOP',heli:'UP'}[P.mode];if(j!==lastJump){lastJump=j;$('tJump').textContent=T('b_'+j);$('tWing').textContent=T('b_'+(P.mode==='heli'?'DOWN':P.mode==='swim'||P.mode==='dive'?'DIVE':P.mode==='wing'?'FOLD':'WINGS'))}
+  if(isTouch){const j={ground:'JUMP',swim:'JUMP',dive:'UP',air:'CHUTE',chute:'WINGS',wing:'CHUTE',grapple:'CHUTE',car:'HOP',boat:'HOP',heli:'UP',ride:'HOP'}[P.mode];if(j!==lastJump){lastJump=j;$('tJump').textContent=T('b_'+j);$('tWing').textContent=T('b_'+(P.mode==='heli'?'DOWN':P.mode==='swim'||P.mode==='dive'?'DIVE':P.mode==='wing'?'FOLD':'WINGS'))}
     $('tCar').classList.toggle('dim',!(P.mode==='car'||P.mode==='heli'||P.mode==='boat'||P.mode==='ride'||P.pos.distanceTo(boat.pos)<5.5||P.pos.distanceTo(car.pos)<5.5||P.pos.distanceTo(heli.pos)<6.5))}
 }
 function frame(now){
@@ -1637,6 +1642,66 @@ $('start').addEventListener('click',()=>{
 });
 $('keep').addEventListener('click',()=>{$('win').hidden=true;canvas.focus()});
 car.g.rotation.order='YXZ';
+// ================= tethers: tie any two things together; the rope reels in and drags whatever can move =================
+const tethers=[],MAX_TETHERS=8,tDir=new V3(),tethMat=new THREE.MeshBasicMaterial({color:0xffc93c}),tethGeo=new THREE.CylinderGeometry(0.07,0.07,1,6).translate(0,0.5,0).rotateX(Math.PI/2);let tethPending=null;
+const tethMark=mesh(new THREE.SphereGeometry(0.3,10,8),0xffc93c);tethMark.visible=false;
+const TMASS={prop:1,bot:1,chick:1,car:5,boat:5,heli:4};
+function castTether(){
+  camera.updateMatrixWorld();camera.getWorldDirection(tmpDir);const o=camera.position;
+  const tg=aimTargets.slice();tg.push(car.g,boat.g,heli.g);ray.set(o,tmpDir);ray.far=150;
+  const hits=ray.intersectObjects(tg,true);let t=Infinity,h=null;if(hits.length){t=hits[0].distance;h=hits[0]}
+  const tt=rayTerrain(o,tmpDir,Math.min(t,150));
+  const pt=o.clone().addScaledVector(tmpDir,Math.min(t,tt));
+  if(!(Math.min(t,tt)<Infinity)||pt.distanceTo(P.pos)>115)return null;
+  if(tt<t||!h)return {kind:'static',p:pt};
+  let ent=h.object.userData.ent||null,veh=null;for(let x=h.object;x;x=x.parent){if(x===car.g)veh='car';else if(x===boat.g)veh='boat';else if(x===heli.g)veh='heli';else if(x===ship.g)veh='ship'}
+  if(veh==='ship')return {kind:'ship',local:ship.g.worldToLocal(pt.clone())};
+  if(veh)return {kind:veh,local:pt.clone().sub({car,boat,heli}[veh].pos)};
+  if(ent&&ent.kind==='prop')return {kind:'prop',e:ent};
+  if(ent&&ent.kind==='bot')return {kind:'bot',e:ent};
+  return {kind:'static',p:pt}}
+function tethPos(e,out){switch(e.kind){
+  case'static':return out.copy(e.p);case'ship':return out.copy(e.local).applyMatrix4(ship.g.matrixWorld);
+  case'prop':case'bot':return out.copy(e.e.pos);default:return out.copy({car,boat,heli}[e.kind].pos).add(e.local)}}
+function tethAlive(e){return e.kind==='bot'?e.e.g.visible:true}
+function actTether(touch){
+  if(P.mode==='car'||P.mode==='heli'||P.mode==='boat'||P.mode==='ride'){toast(T('hopFirst'),TD('hop'));return}
+  const e=castTether();
+  if(!e){if(tethPending){tethPending=null;tethMark.visible=false;$('tTether').classList.remove('on')}else if(touch&&tethers.length)clearTethers(true);else toast(T('tethMiss'),'');return}
+  if(!tethPending){tethPending=e;tethPos(e,tethMark.position);tethMark.visible=true;$('tTether').classList.add('on');sfx.zip();toast(T('teth1'),T('teth1b'));return}
+  const a=tethPending;tethPending=null;tethMark.visible=false;$('tTether').classList.remove('on');
+  if(makeTether(a,e)){sfx.zip();toast(T('teth2'),T('teth2b'));addChaos(5)}}
+function makeTether(a,e){const A=tethPos(a,new V3()),B=tethPos(e,new V3());if(A.distanceTo(B)<0.5)return false;
+  const line=new THREE.Mesh(tethGeo,tethMat);line.frustumCulled=false;scene.add(line);
+  tethers.push({a,b:e,len:A.distanceTo(B),line,A,B});if(tethers.length>MAX_TETHERS){const o=tethers.shift();scene.remove(o.line)}
+  return true}
+function clearTethers(say){for(const t of tethers)scene.remove(t.line);const had=tethers.length;tethers.length=0;tethPending=null;tethMark.visible=false;$('tTether').classList.remove('on');if(say&&had){sfx.chute();toast(T('tethCut'),'')}}
+// shove an end toward the other one (dv = velocity change); returns false for things that can't move
+function tethPush(e,dv,dt){switch(e.kind){
+  case'prop':{const p=e.e;if(p.state!=='fly'){p.state='fly';p.knocked=true;p.spin.set(R(-3,3),R(-3,3),R(-3,3))}p.vel.add(dv);return true}
+  case'bot':{const b=e.e;if(b.alive)hitBot(b,dv.clone().multiplyScalar(4));else if(b.falling)b.vel.add(dv).add(tc.set(0,25*dt*0.9,0));return true}
+  case'heli':heli.vel.add(dv);if(dv.y>0)heli.landed=false;return true;
+  case'car':case'boat':{const v=e.kind==='car'?car:boat;v.tv=v.tv||new V3();v.tv.add(dv);if(e.kind==='car'&&dv.y>30*dt){car.onGround=false;car.vy+=dv.y}return true}
+  default:return false}}
+function updateTethers(dt){
+  for(let i=tethers.length-1;i>=0;i--){const t=tethers[i];
+    if(!tethAlive(t.a)||!tethAlive(t.b)){scene.remove(t.line);tethers.splice(i,1);continue}
+    tethPos(t.a,t.A);tethPos(t.b,t.B);const d=t.A.distanceTo(t.B);
+    t.len=Math.max(1.6,Math.min(t.len,d)-10*dt);
+    if(d>t.len){const ex=d-t.len,dir=tDir.copy(t.B).sub(t.A).divideScalar(d||1),ma=TMASS[t.a.kind]||0,mb=TMASS[t.b.kind]||0;
+      if(ma||mb){const k=Math.min(90,ex*14)*dt,fa=mb&&ma?mb/(ma+mb):ma?1:0,fb=1-fa;
+        if(fa)tethPush(t.a,dir.clone().multiplyScalar(k*fa),dt);if(fb)tethPush(t.b,dir.clone().multiplyScalar(-k*fb),dt)}}
+    t.line.position.copy(t.A);t.line.lookAt(t.B);t.line.scale.set(1,1,Math.max(0.01,t.A.distanceTo(t.B)))}
+  // free motion for vehicles being dragged
+  for(const v of [car,boat]){if(!v.tv)continue;
+    if(v===boat){const nx=boat.pos.x+v.tv.x*dt,nz=boat.pos.z+v.tv.z*dt;if(ground(nx,nz)<-0.9){boat.pos.x=nx;boat.pos.z=nz}else v.tv.set(0,0,0)}
+    else{car.pos.x+=v.tv.x*dt;car.pos.z+=v.tv.z*dt;
+      if(P.mode!=='car'){const sup=support(car.pos.x,car.pos.z,car.pos.y,0.5);if(!car.onGround){car.vy-=30*dt;car.pos.y+=car.vy*dt;if(car.pos.y<=sup){car.pos.y=sup;car.onGround=true;car.vy=0}}else if(sup<car.pos.y-0.9)car.onGround=false;else car.pos.y=sup;
+        if(car.pos.y<-0.6){sfx.splash();resetCar();v.tv.set(0,0,0)}}}
+    v.tv.y=0;v.tv.multiplyScalar(Math.max(0,1-(v===car&&!car.onGround?0.3:2.5)*dt))}
+  if(tethPending)tethPos(tethPending,tethMark.position);
+}
+
 // ================= multiplayer: one shared room for everyone on the site (worker.js relays states) =================
 const MP={ws:null,id:null,peers:new Map(),tries:0,sendT:0,last:''};
 const MP_MODES=['ground','air','chute','wing','grapple','swim','dive','car','heli','jet','boat','ride'];
@@ -1704,7 +1769,7 @@ function rideUpdate(dt){const q=MP.peers.get(P.ride&&P.ride.id);if(!q||!SEATS[q.
   const nx=q.pos.x+st[0]*c+st[2]*sn,nz=q.pos.z-st[0]*sn+st[2]*c,ny=q.pos.y+st[1]-0.2;
   if(dt>0)P.vel.set((nx-P.pos.x)/dt,(ny-P.pos.y)/dt,(nz-P.pos.z)/dt);P.pos.set(nx,ny,nz);P.face=q.vyaw}
 function rideOff(){if(P.mode!=='ride')return;const c=Math.cos(P.face),sn=Math.sin(P.face);P.pos.x-=c*2.2;P.pos.z+=sn*2.2;P.pos.y+=1;P.vel.set(0,4,0);P.ride=null;toAir()}
-JP.dbg.MP=MP;
+JP.dbg.MP=MP;JP.dbg.tethers=tethers;JP.dbg.makeTether=makeTether;
 
 // ================= save / restore: progress, position, vehicles and look survive a refresh =================
 const SAVE_KEY='jpSave1',r2=v=>Math.round(v*100)/100;
