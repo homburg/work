@@ -1703,8 +1703,8 @@ if(restored){$('start').dataset.i18n='cont';$('fresh').hidden=false;applyLang()}
 $('fresh').addEventListener('click',()=>{try{localStorage.removeItem(SAVE_KEY)}catch(e){}location.reload()});
 setInterval(saveGame,3000);
 $('bReload').addEventListener('click',()=>{saveGame();const u=new URL(location.href);u.searchParams.set('v',Date.now().toString(36));location.replace(u.href)});
-// watch for a new deploy (the page's ETag changes) and light up the reload button
-{let tag=null;const chk=()=>{if(document.hidden)return;fetch(location.pathname,{method:'HEAD',cache:'no-store'}).then(r=>{const e=r.headers.get('etag');if(!e)return;
+// watch for a new deploy (worker.js /version = hash of the page) and light up the reload button
+{let tag=null;const chk=()=>{if(document.hidden)return;fetch('/version',{cache:'no-store'}).then(r=>r.ok?r.text():null).then(e=>{if(!e||e.length>40)return;
   if(tag===null)tag=e;else if(e!==tag&&!$('bReload').classList.contains('new')){$('bReload').classList.add('new');if(S.running)toast(T('update'),T('update2'))}}).catch(()=>{})};
   if(/workers\.dev$/.test(location.hostname)){chk();setInterval(chk,60000)}}
 addEventListener('pagehide',saveGame);document.addEventListener('visibilitychange',()=>{if(document.hidden)saveGame()});

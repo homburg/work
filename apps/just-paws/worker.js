@@ -56,6 +56,13 @@ export default {
       if (request.headers.get('Upgrade') !== 'websocket') return new Response('websocket only', { status: 426 });
       return env.ROOM.get(env.ROOM.idFromName('default')).fetch(request);
     }
+    if (url.pathname === '/version') {
+      // short hash of the deployed page, so open games can tell a new version is out
+      const page = await env.ASSETS.fetch(new Request(new URL('/', url)));
+      const hash = new Uint8Array(await crypto.subtle.digest('SHA-1', await page.arrayBuffer()));
+      const v = [...hash.slice(0, 6)].map((b) => b.toString(16).padStart(2, '0')).join('');
+      return new Response(v, { headers: { 'content-type': 'text/plain', 'cache-control': 'no-store' } });
+    }
     return env.ASSETS.fetch(request);
   },
 };
