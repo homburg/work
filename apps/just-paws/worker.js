@@ -62,7 +62,8 @@ export default {
       const hash = new Uint8Array(await crypto.subtle.digest('SHA-1', await page.arrayBuffer()));
       // plus when this release was deployed (Workers version metadata), shown small in the game's corner
       const v = [...hash.slice(0, 6)].map((b) => b.toString(16).padStart(2, '0')).join('');
-      const at = env.CF_VERSION_METADATA && env.CF_VERSION_METADATA.timestamp;
+      // (fraction cut to milliseconds: the deploy stamp has microseconds, which older Safari can't parse)
+      const at = env.CF_VERSION_METADATA && env.CF_VERSION_METADATA.timestamp && String(env.CF_VERSION_METADATA.timestamp).replace(/(\.\d{3})\d+/, '$1');
       return new Response(at ? v + ' ' + at : v, { headers: { 'content-type': 'text/plain', 'cache-control': 'no-store' } });
     }
     return env.ASSETS.fetch(request);
