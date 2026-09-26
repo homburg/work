@@ -13,7 +13,7 @@ Play: https://claude.ai/artifact/5UT89YJF74HdhmNKqgFBeL (private Claude Artifact
 - Toon renderer: cel shading, screen-space ink outlines, sky dome, colour grading. Three looks: Golden Hour (default), Saturday Morning, Pastel Toy (switch with V or the ◐ button)
 - Squash-and-stretch pup rig (trot/gallop, landings, chute/wingsuit poses), car suspension, copter hover
 - Keyboard/mouse and touch controls
-- Bedtime, by itself and not optional from 20:00 to 06:00 Danish time (a running game reloads into it): every animal lies down to sleep with floating Zs (pups, chickens, Kitty-Bots flop down, Scout dozes off after standing still ~3 s), night look with moon and stars, soft lullaby. The look can't be switched then. `?sleep=1` forces it on in the daytime (the test uses it)
+- Bedtime, by itself and not optional from 20:00 to 06:00 Danish time (a running game reloads into it): every animal lies down to sleep with floating Zs (pups, chickens, Kitty-Bots flop down, Scout dozes off after standing still ~3 s), night look with moon and stars, soft lullaby. Scout sleeps too and can't be moved (only the camera); the ride menu only offers a bed, which parachutes in and Scout sleeps in it. The look can't be switched then. `?sleep=1` forces it on in the daytime (the test uses it)
 - New deploys load by themselves on the title screen or when the game comes back from the background; mid-game the ⟳ button lights up
 
 ## Files
