@@ -828,7 +828,7 @@ function updateHeli(dt,inp,piloted){
   if(piloted){
     const c=tc.set(heli.pos.x,heli.pos.y+2.5,heli.pos.z);
     for(const b of bots)if(b.alive&&b.pos.distanceTo(c)<5.2)hitBot(b,new V3(heli.vel.x+R(-6,6),8,heli.vel.z+R(-6,6)));
-    if(engine&&!muted){engine.o.frequency.value=70+heli.spin*40+Math.abs(heli.vel.y)*2+Math.abs(fwd)*1.2;engine.g.gain.value=0.03*heli.spin}
+    if(engine&&!muted&&!heliLoopOn()){engine.o.frequency.value=70+heli.spin*40+Math.abs(heli.vel.y)*2+Math.abs(fwd)*1.2;engine.g.gain.value=0.03*heli.spin}
   }
 }
 function heliVisual(dt){heli.g.position.copy(heli.pos);heli.g.rotation.y=heli.yaw;heli.rotor.rotation.y+=dt*28*heli.spin;heli.tail.rotation.x+=dt*40*heli.spin}
@@ -928,6 +928,17 @@ function loadSfx(){const th=SND_THEMES[sndTheme],jobs=[];for(const k in th)for(c
   return Promise.all(jobs)}
 for(const k in sfx){const synth=sfx[k];sfx[k]=()=>{if(!ac||muted)return;const e=SND_THEMES[sndTheme][k],b=e&&sbuf[e[0][Math.floor(Math.random()*e[0].length)]];if(!b){synth();return}
   const s=ac.createBufferSource(),g=ac.createGain();s.buffer=b;s.playbackRate.value=0.94+Math.random()*0.12;g.gain.value=e[1];s.connect(g).connect(ac.destination);s.start();if(k==='pop'&&sndTheme==='real')tone(700,.18,'triangle',.04,1500,.05)}}
+// recorded rotor loop for the Copter ("Helicopter Sounds" by aquinn, CC0), pitched and faded by rotor spin and distance
+const heliSnd={buf:null,src:null,g:null,req:false};
+function heliLoopOn(){return !!heliSnd.src&&sndTheme!=='retro'}
+function heliAudio(){if(!ac)return;
+  if(!heliSnd.req){heliSnd.req=true;fetch('sfx/heli-loop.wav').then(r=>r.ok?r.arrayBuffer():Promise.reject()).then(b=>ac.decodeAudioData(b,d=>{heliSnd.buf=d},()=>{})).catch(()=>{})}
+  if(!heliSnd.buf)return;
+  if(!heliSnd.src){const s=ac.createBufferSource(),g=ac.createGain();s.buffer=heliSnd.buf;s.loop=true;g.gain.value=0;s.connect(g).connect(ac.destination);s.start();heliSnd.src=s;heliSnd.g=g;if(engine&&P.mode==='heli')engine.g.gain.value=0}
+  const d=camera.position.distanceTo(heli.pos),near=clamp(1-(d-8)/140,0,1);
+  const fwd=Math.hypot(heli.vel.x,heli.vel.z);
+  heliSnd.g.gain.value=muted||sndTheme==='retro'?0:0.4*heli.spin*heli.spin*near*near;
+  heliSnd.src.playbackRate.value=0.55+heli.spin*0.45+Math.min(0.15,fwd*0.004+Math.abs(heli.vel.y)*0.004)}
 function cycleSnd(){const k=Object.keys(SND_THEMES);sndTheme=k[(k.indexOf(sndTheme)+1)%k.length];try{localStorage.setItem('jpSnd',sndTheme)}catch(e){}
   toast(T('snd_'+sndTheme),T('sndSwitched'));if(ac){if(muted)toggleMute();loadSfx().then(()=>sfx.rescue())}}
 
@@ -1439,7 +1450,7 @@ renderer.shadowMap.autoUpdate=false;
 PERF.mergeStatic(scene,[...noInk,...flags,...radar,...chickens.map(c=>c.ring),hookBall]);
 for(const p of props)PERF.mergeGroup(p.g);for(const b of bots)PERF.mergeGroup(b.g,[b.prop]);for(const c of clouds)PERF.mergeGroup(c);
 // hooks for concept shots
-const JP=window.JP={setStyle,fixed:null,world:{LG,LOOK,TOWN,BX},dbg:{P,cam,sfx,sbuf,heli,car,ship,boat,props,bots,chickens,S,gpad,keys,hold,ground,roofH,roofs:roofGeo,step(n){for(let i=0;i<n;i++){nowT+=1/60;update(1/60,nowT)}}},
+const JP=window.JP={setStyle,fixed:null,world:{LG,LOOK,TOWN,BX},dbg:{P,cam,sfx,sbuf,heliSnd,heli,car,ship,boat,props,bots,chickens,S,gpad,keys,hold,ground,roofH,roofs:roofGeo,step(n){for(let i=0;i<n;i++){nowT+=1/60;update(1/60,nowT)}}},
   shot(o){
     JP.fixed=o;
     if(o.pup){P.pos.set(...o.pup.pos);P.face=o.pup.face??0;chute.visible=o.pup.mode==='chute';pup.wings.visible=o.pup.mode==='wing';pup.g.rotation.x=o.pup.mode==='wing'?0.75:0;
@@ -1468,7 +1479,7 @@ function update(dt,t){
     a.setXYZ(0,P.pos.x,P.pos.y+1.2,P.pos.z);a.setXYZ(1,e.x,e.y,e.z);a.needsUpdate=true;rope.visible=true;hookBall.visible=true;hookBall.position.copy(e);
   }else{rope.visible=false;hookBall.visible=false}
   carVisual();
-  if(P.mode!=='heli'&&(!heli.landed||heli.spin>0.01))updateHeli(dt,{x:0,y:0},false);heliVisual(dt);ANIM.heli(heli,dt,t,P.mode==='heli');
+  if(P.mode!=='heli'&&(!heli.landed||heli.spin>0.01))updateHeli(dt,{x:0,y:0},false);heliVisual(dt);ANIM.heli(heli,dt,t,P.mode==='heli');heliAudio();
   const blink=Math.floor(t*6)%2;car.lights[0].material.emissive.setHex(blink?0xff2020:0x330000);car.lights[1].material.emissive.setHex(blink?0x000033:0x2050ff);
   // props
   for(const p of props){
