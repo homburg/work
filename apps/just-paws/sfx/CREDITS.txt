@@ -15,3 +15,10 @@ OpenGameArt.org, CC0:
   meow2.mp3     "Kitten Mew" by AntumDeluge      https://opengameart.org/content/kitten-mew
   splash1-3.mp3 "40 CC0 water / splash / slime SFX" by rubberduck (splash_02, _03, _06)
                 https://opengameart.org/content/40-cc0-water-splash-slime-sfx
+
+Sound themes (switch with N or the ♫ button), all Kenney CC0:
+  t-*  "Toy box": Interface Sounds pluck_002, maximize_001/_003, switch_002, glass_001, drop_002/_003, bong_001;
+       Music Jingles jingles_PIZZI07
+  s-*  "Space": Sci-Fi Sounds laserSmall_000, laserLarge_000, forceField_000, thrusterFire_000 (trimmed),
+       explosionCrunch_000, impactMetal_000/_001/_002, slime_000; Music Jingles jingles_STEEL00
+  r-*  "Retro" (the rest is the built-in synth): Sci-Fi Sounds laserRetro_000; Music Jingles jingles_NES03
