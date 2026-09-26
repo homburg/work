@@ -32,6 +32,7 @@ export class Room extends DurableObject {
     } else if (m.t === 's' && Array.isArray(m.s) && m.s.length <= 12 && m.s.every((v) => typeof v === 'number' || typeof v === 'string')) {
       a.s = m.s;
       out = { t: 's', id: a.id, n: a.n, c: a.c, s: m.s };
+      if (Number.isFinite(m.k)) out.k = m.k; // sender's clock (ms), lets others interpolate on the sender's timeline
     } else return;
     ws.serializeAttachment(a);
     const msg = JSON.stringify(out);
