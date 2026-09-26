@@ -20,7 +20,6 @@ body{font-family:'Baloo 2',ui-rounded,system-ui,sans-serif;color:var(--cream);us
 .pill b{color:var(--gold)}
 .pill small{font-weight:600;opacity:.8;font-size:12px;letter-spacing:.03em}
 body.touch #mode{left:calc(16px + env(safe-area-inset-left,0px));transform:none;bottom:calc(16px + env(safe-area-inset-bottom,0px))}
-body.touch #hint{bottom:auto;top:calc(34% + env(safe-area-inset-top,0px));font-size:14px}
 #fuel{margin-top:5px;height:8px;border-radius:6px;background:var(--navy-a);border:2px solid rgba(255,255,255,.25);overflow:hidden}
 #fuelBar{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff7a1a,var(--gold))}
 #mode{top:auto;bottom:calc(14px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%)}
@@ -35,7 +34,7 @@ body.touch #hint{bottom:auto;top:calc(34% + env(safe-area-inset-top,0px));font-s
 #cross.ok{border-color:var(--gold);transform:scale(1.15)}
 #cross.ok::after{background:var(--gold)}
 #cross.hit{border-color:#ff7ad9}
-#hint{left:50%;bottom:calc(52px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font-weight:800;font-size:15px;background:rgba(255,248,232,.92);color:var(--navy);padding:4px 14px;border-radius:12px;white-space:nowrap}
+#hint{margin-top:2px;max-width:min(340px,58vw);font-weight:800;font-size:13px;line-height:1.35;background:rgba(255,248,232,.88);color:var(--navy);padding:3px 10px;border-radius:10px}
 #toast{left:50%;top:22%;transform:translateX(-50%);font-family:'Lilita One',sans-serif;font-size:30px;color:var(--gold);text-shadow:0 3px 0 var(--navy),0 0 14px rgba(0,0,0,.3);text-align:center;opacity:0;transition:opacity .25s,transform .25s;white-space:nowrap}
 #toast.show{opacity:1;transform:translateX(-50%) scale(1.05)}
 #toast small{display:block;font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;color:var(--cream)}
@@ -82,11 +81,11 @@ body.touch #hint{bottom:auto;top:calc(34% + env(safe-area-inset-top,0px));font-s
     <div class="pill"><b id="sBots">0</b>/<span id="sBotsT">14</span> <small data-i18n="hudBots">KITTY-BOTS</small></div>
     <div class="pill"><b id="sChaos">0</b> <small data-i18n="hudChaos">CHAOS</small></div>
   </div>
+  <div id="hint" hidden></div>
 </div>
 <canvas id="map" class="hud" width="300" height="300"></canvas>
 <div id="corner" class="hud"><button id="bRespawn" data-i18n-title="tRespawn">↺</button><button id="bMute" data-i18n-title="tMute">♪</button><button id="bStyle" data-i18n-title="tStyle">◐</button><button id="bFull" data-i18n-title="tFull">⛶</button><button id="bLang" data-i18n-title="tLang" style="font-size:13px">EN</button></div>
 <div id="cross" class="hud"></div>
-<div id="hint" class="hud" hidden></div>
 <div id="under" class="hud" hidden></div>
 <div id="toast" class="hud"></div>
 <div id="mode" class="hud"><div class="pill" id="modeTxt"></div><div id="fuel" hidden><i id="fuelBar"></i></div></div>
