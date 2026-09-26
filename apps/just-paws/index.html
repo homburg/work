@@ -1765,17 +1765,19 @@ const STYLES={
     skyTop:0x0c1440,skyHor:0x34457e,sunGlow:0xfff6d6,fogN:200,fogF:820,bands:[140,200,255],ink:[0.04,0.04,0.14],inkMix:0.5,inkW:1.2,
     sat:0.9,warm:-0.02,contrast:1.0,lift:0.03,vig:0.3},
 };
-const toonMats=[];
-function toonify(){
-  const conv=new Map();
+const toonMats=[],toonConv=new Map();
+// swap Lambert materials for toon ones (shared per source material, so things made later reuse compiled shaders)
+function toonify(root=scene){
+  const conv=toonConv;
   const c=m=>{
     if(!m||!m.isMeshLambertMaterial)return m;
     if(conv.has(m))return conv.get(m);
     const t=new THREE.MeshToonMaterial({color:m.color,map:m.map,emissive:m.emissive,transparent:m.transparent,opacity:m.opacity,vertexColors:m.vertexColors,side:m.side,fog:m.fog,
       polygonOffset:m.polygonOffset,polygonOffsetFactor:m.polygonOffsetFactor,polygonOffsetUnits:m.polygonOffsetUnits,depthWrite:m.depthWrite});
-    t.flatShading=!!m.userData.flat;conv.set(m,t);toonMats.push(t);return t;
+    t.flatShading=!!m.userData.flat;if(toonMats.length)t.gradientMap=toonMats[0].gradientMap;conv.set(m,t);toonMats.push(t);return t;
   };
-  scene.traverse(o=>{if(o.material)o.material=Array.isArray(o.material)?o.material.map(c):c(o.material)});
+  root.traverse(o=>{if(o.material)o.material=Array.isArray(o.material)?o.material.map(c):c(o.material)});
+  return root;
 }
 toonify();
 const backLight=new THREE.DirectionalLight(0xffffff,0.2);scene.add(backLight,backLight.target);
@@ -2159,6 +2161,7 @@ function hud(dt){
     $('tCar').classList.toggle('dim',!(P.mode==='car'||P.mode==='heli'||P.mode==='boat'||P.mode==='ride'||P.mode==='ship'||P.mode==='dig'||P.pos.distanceTo(dig.pos)<5.5||P.pos.distanceTo(boat.pos)<5.5||P.pos.distanceTo(car.pos)<5.5||P.pos.distanceTo(heli.pos)<6.5))}
 }
 function frame(now){
+  requestAnimationFrame(frame);   // first, so one error can't stop the game loop for good
   const dt=Math.min(0.05,(now-last)/1000);last=now;nowT=now/1000;frameN++;
   const t=nowT;
   ambient(dt,t);pollPad(dt);
@@ -2178,7 +2181,6 @@ function frame(now){
     if(F)placeLights(...F.look);else placeLights(LOOK.x,LG,LOOK.z);
   }
   draw();PERF.frame(now);
-  requestAnimationFrame(frame);
 }
 if(isTouch){document.body.classList.add('touch');$('keysDesk').hidden=true;$('keysTouch').hidden=false}
 applyLang();
@@ -2268,7 +2270,7 @@ function makeCanopy(top){
   const rim=4.6*Math.sin(Math.PI/2.4),ry=4.6*Math.cos(Math.PI/2.4)*0.7,pts=[];
   for(let i=0;i<8;i++){const a=i/8*Math.PI*2;pts.push(new V3(Math.sin(a)*rim,ry,Math.cos(a)*rim),new V3(Math.sin(a)*0.9,1.6-top,Math.cos(a)*1.3))}
   g.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0x16244a})));
-  g.visible=false;scene.add(g);return g}
+  g.visible=false;scene.add(toonify(g));return g}
 function makeFlare(){
   const g=new THREE.Group();
   const ring=new THREE.Mesh(new THREE.TorusGeometry(2.4,0.16,6,28),new THREE.MeshBasicMaterial({color:0xff5a3c}));ring.rotation.x=Math.PI/2;ring.position.y=0.25;g.add(ring);
@@ -2371,7 +2373,7 @@ function mpCount(){const n=[...MP.peers.values()].filter(q=>q.cat).length;$('pOn
 function mpTag(name){const c=document.createElement('canvas');c.width=256;c.height=64;const g=c.getContext('2d');g.font='800 34px "Baloo 2",system-ui,sans-serif';
   const w=Math.min(248,g.measureText(name).width+28);g.fillStyle='rgba(22,36,74,.78)';g.beginPath();if(g.roundRect)g.roundRect(128-w/2,8,w,48,22);else g.rect(128-w/2,8,w,48);g.fill();
   g.fillStyle='#fff8e8';g.textAlign='center';g.textBaseline='middle';g.fillText(name,128,33);
-  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false,transparent:true}));sp.scale.set(2.6,0.65,1);sp.renderOrder=10;return sp}
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false,transparent:true}));sp.scale.set(2.6,0.65,1);sp.renderOrder=10;sp.raycast=()=>{};return sp}   // name tags are not aim or tether targets
 function mpVehicle(src,drv,rotor){const g=src.g.clone(true),i=src.g.children.indexOf(drv.g);if(i>=0)g.children[i].visible=false;g.visible=false;scene.add(g);
   return {g,rotor:rotor?g.children[src.g.children.indexOf(rotor)]:null,seat:drv.g.position.clone(),scale:drv.g.scale.x}}
 function mpPeer(o,live,sentT){if(!o||!o.id||o.id===MP.id)return null;let q=MP.peers.get(o.id);
@@ -2380,7 +2382,7 @@ function mpPeer(o,live,sentT){if(!o||!o.id||o.id===MP.id)return null;let q=MP.pe
   const s=o.s;if(!Array.isArray(s)||s.length<9||!s.slice(0,9).every(v=>typeof v==='number'&&Number.isFinite(v)))return q;
   const was=q.mode==='ride'?q.host:null;q.tgt.set(s[0],s[1],s[2]);q.tface=s[3];q.mode=MP_MODES[s[4]]||'ground';q.vel.set(s[5],s[6],s[7]);if(!q.cat)q.vyaw=s[8];q.wp=+s[9]||0;q.seen=nowT;
   mpSnap(q,s,sentT);q.host=q.mode==='ride'&&typeof s[10]==='string'?s[10]:null;q.seat=Math.abs(s[11]|0)%3;if(q.host&&q.host===MP.id&&was!==MP.id&&q.cat)toast((q.n||'?')+' '+T('rideGot'),T('rideGot2'));
-  if(!q.cat){const cat=makeCat(...CAT_COLS[q.c%CAT_COLS.length]);ANIM.rigPup(cat);scene.add(cat.g);q.cat=cat;q.pos.copy(q.tgt);q.face=q.tface;
+  if(!q.cat){const cat=makeCat(...CAT_COLS[q.c%CAT_COLS.length]);ANIM.rigPup(cat);scene.add(toonify(cat.g));q.cat=cat;q.pos.copy(q.tgt);q.face=q.tface;
     q.chute=chute.clone(true);q.chute.visible=false;cat.g.add(q.chute);q.tag=mpTag(q.n||'?');q.tag.position.y=2.5;cat.g.add(q.tag);
     q.veh={car:mpVehicle(car,car.driver),heli:mpVehicle(heli,heli.pilot,heli.rotor),boat:mpVehicle(boat,boat.driver),dig:mpVehicle(dig,dig.driver)};
     if(live&&!q.announced)toast(q.n||'?',T('joined'));q.announced=true;mpCount()}
@@ -2481,6 +2483,10 @@ if(!SLEEP_FORCED)setInterval(()=>{if(isNight()!==BEDTIME)reloadNow()},20000);
   if(/workers\.dev$/.test(location.hostname)){chk();setInterval(chk,60000);document.addEventListener('visibilitychange',()=>{if(document.hidden)return;if($('bReload').classList.contains('new'))reloadNow();else chk()})}}
 addEventListener('pagehide',saveGame);document.addEventListener('visibilitychange',()=>{if(document.hidden)saveGame()});
 JP.dbg.saveGame=saveGame;JP.dbg.loadGame=loadGame;
+// compile every shader up front: the first ride drop or another player joining used to stall the game for up to a second
+{for(const r of RIDES){r.chute=r.chute||makeCanopy(r.top);r.flare=r.flare||makeFlare()}
+  const c=makeCat(...CAT_COLS[0]);ANIM.rigPup(c);c.g.add(chute.clone(true),mpTag('?'));c.g.visible=false;scene.add(toonify(c.g));
+  try{renderer.compile(scene,camera)}catch(e){}scene.remove(c.g)}
 requestAnimationFrame(frame);
 })();
 </script>
