@@ -159,6 +159,13 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     walk(Math.atan2(-sx, -sz), 60); out.ramp = { y: P.pos.y - rp.base, h: rp.H * 0.8 };
     return out;
   });
+  // fullscreen survives a reload (update, bedtime): the first tap afterwards goes back in
+  const full = { before: await page.evaluate(() => document.documentElement.requestFullscreen().then(() => !!document.fullscreenElement, () => false)) };
+  await Promise.all([page.waitForNavigation({ timeout: 90000 }), page.evaluate(() => document.getElementById('bReload').click())]);
+  await page.waitForFunction(() => window.JP && window.JP.dbg, null, { timeout: 60000 });
+  full.afterReload = await page.evaluate(() => !!document.fullscreenElement);
+  await page.click('#start');
+  full.afterTap = await page.waitForFunction(() => !!document.fullscreenElement, null, { timeout: 5000 }).then(() => true, () => false);
   // 21:00 in Denmark: bedtime. Everyone sleeps, Scout too, and Scout can't be moved
   const night = await open(21);
   r.bed = await night.evaluate(() => {
@@ -209,6 +216,7 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     ['bedtime at 21:00: Kitty-Bots and Scout asleep, Scout stays put', r.bed.on && r.bed.style === 'night' && r.bed.botsDown && r.bed.hero === 1 && r.bed.moved < 0.01 && r.bed.mode === 'ground', r.bed],
     ['bedtime: the menu only orders a bed, and Scout sleeps in it', r.bed.menu.open && r.bed.menu.items === 1 && r.bed.menu.closed && r.bed.menu.inBed, r.bed.menu],
     ['online car moves smoothly', r.mpSmooth.minSpeed > 17 && r.mpSmooth.maxSpeed < 23 && r.mpSmooth.minTurn > 0.5 && r.mpSmooth.maxTurn < 0.7, r.mpSmooth],
+    ['back to fullscreen on the first tap after a reload', full.before && !full.afterReload && full.afterTap, full],
     ['airship follows the online captain', r.shipSync.off < 3 && r.shipSync.dy < 2 && r.shipSync.dyaw < 0.2 && r.shipSync.mode !== 'ship', r.shipSync],
   ];
   let fail = 0;
