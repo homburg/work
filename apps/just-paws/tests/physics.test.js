@@ -50,6 +50,19 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     out.bot = { busted: d.S.bots, alive: bot.alive };
     const ch = d.chickens[0]; P.pos.set(ch.pos.x, ch.pos.y - 0.7, ch.pos.z); d.step(2);
     out.chicken = { rescued: ch.rescued, count: d.S.chick };
+    // digger: hop in, drive, scoop a crate, lift it, tip it out, then scoop dirt
+    const G = d.dig, tip = new THREE.Vector3();
+    P.pos.set(G.pos.x + 3, G.pos.y + 1, G.pos.z); P.vel.set(0, 0, 0); P.mode = 'air'; d.step(30);
+    key('keydown', 'KeyE'); key('keyup', 'KeyE'); const dmode = P.mode, g0 = G.pos.clone();
+    key('keydown', 'KeyW'); d.step(40); key('keyup', 'KeyW'); d.step(30);
+    const drove = G.pos.distanceTo(g0);
+    G.tip.getWorldPosition(tip); const crate = d.props.find(p => p.state === 'rest'); crate.pos.set(tip.x, d.ground(tip.x, tip.z) + 0.7, tip.z);
+    key('keydown', 'KeyF'); key('keyup', 'KeyF'); const loaded = G.load.length;
+    key('keydown', 'Space'); d.step(90); key('keyup', 'Space'); const lifted = crate.pos.y - d.ground(crate.pos.x, crate.pos.z);
+    key('keydown', 'KeyF'); key('keyup', 'KeyF'); d.step(60); const tipped = G.load.length === 0 && crate.pos.distanceTo(tip) > 3;
+    key('keydown', 'ShiftLeft'); d.step(90); key('keyup', 'ShiftLeft'); key('keydown', 'KeyF'); key('keyup', 'KeyF');
+    out.dig = { mode: dmode, drove, loaded, lifted, tipped, dirt: G.dirt };
+    key('keydown', 'KeyE'); key('keyup', 'KeyE'); d.step(10); out.dig.out = P.mode;
     for (let i = 0; i < 3; i++) { key('keydown', 'KeyV'); key('keyup', 'KeyV'); d.step(2); }
     return out;
   });
@@ -65,6 +78,7 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     ['props get knocked', r.prop.knocked && r.prop.moved > 0.5, r.prop],
     ['kitty-bot busted by touch', r.bot.busted >= 1 && !r.bot.alive, r.bot],
     ['chicken rescued by touch', r.chicken.rescued && r.chicken.count === 1, r.chicken],
+    ['digger drives, scoops, lifts and tips', r.dig.mode === 'dig' && r.dig.drove > 3 && r.dig.loaded === 1 && r.dig.lifted > 3 && r.dig.tipped && r.dig.dirt && r.dig.out !== 'dig', r.dig],
   ];
   let fail = 0;
   for (const [name, ok, info] of checks) { console.log(`${ok ? 'PASS' : 'FAIL'} ${name}`, ok ? '' : JSON.stringify(info)); if (!ok) fail++; }
