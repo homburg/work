@@ -100,7 +100,7 @@ body.touch #hint{bottom:auto;top:calc(34% + env(safe-area-inset-top,0px));font-s
 <div id="intro" class="overlay">
   <div class="card">
     <h1>JUST <span>PAWS</span></h1>
-    <p class="tag" data-i18n="introTag">Mayor Grumbleton has flooded Adventure Bay with Kitty-Bots, and the town chickens have fled to the highest rooftops. Grab your pup pack, Scout.</p>
+    <p class="tag" data-i18n="introTag">Mayor Grumbleton has flooded Adventure Bay with Kitty-Bots, and the town chickens have fled to the highest rooftops. Grab your gear pack, Scout the cat.</p>
     <ul data-i18n="introList">
       <li>Rescue <b>6 chickens</b> stuck up high (follow the yellow beams).</li>
       <li>Bust all <b>Kitty-Bots</b>: hook them, ram them or fly into them.</li>
@@ -151,7 +151,7 @@ const LANG={
 en:{hudChick:'CHICKENS',hudBots:'KITTY-BOTS',hudChaos:'CHAOS',
  tRespawn:'Back to Pup HQ (R)',tMute:'Sound (M)',tStyle:'Switch look (V)',tFull:'Fullscreen',tLang:'Dansk',
  joyhint:'◀ DRAG HERE TO MOVE<br>DRAG RIGHT SIDE TO LOOK ▶',
- introTag:'Mayor Grumbleton has flooded Adventure Bay with Kitty-Bots, and the town chickens have fled to the highest rooftops. Grab your pup pack, Scout.',
+ introTag:'Mayor Grumbleton has flooded Adventure Bay with Kitty-Bots, and the town chickens have fled to the highest rooftops. Grab your gear pack, Scout the cat.',
  introList:'<li>Rescue <b>6 chickens</b> stuck up high (follow the yellow beams).</li><li>Bust all <b>Kitty-Bots</b>: hook them, ram them or fly into them.</li><li>Knock stuff over for <b>chaos points</b>.</li>',
  keysDesk:'<kbd>WASD</kbd><span>Run (Shift to sprint) · drive</span><kbd>Mouse</kbd><span>Look (click to lock the mouse)</span><kbd>Click / F</kbd><span>Grappling hook at the crosshair</span><kbd>Space</kbd><span>Jump, then parachute, then wingsuit</span><kbd>Q · C</kbd><span>Wingsuit on/off · cut parachute</span><kbd>Hold J</kbd><span>Jetpack (refuels on the ground)</span><kbd>E</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (Space up, Shift down)</span><kbd>W / S</kbd><span>In the air: dive / climb · A D turn</span><kbd>J · C</kbd><span>In the water: water jets · dive (Space up)</span>',
  keysTouch:'<kbd>Left thumb</kbd><span>Move · drive · steer in the air</span><kbd>Right thumb</kbd><span>Drag to look and aim</span><kbd>HOOK</kbd><span>Grappling hook at the crosshair</span><kbd>JUMP</kbd><span>Jump, then parachute, then wingsuit</span><kbd>JET</kbd><span>Hold for jetpack (refuels on the ground)</span><kbd>CAR</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (hold UP / DOWN)</span><kbd>JET · DIVE</kbd><span>In the water: water jets · dive</span>',
@@ -166,7 +166,7 @@ en:{hudChick:'CHICKENS',hudBots:'KITTY-BOTS',hudChaos:'CHAOS',
  copter:'Pup Copter!',liftT:'hold UP to lift off',liftK:'hold Space to lift off · Shift to sink',liftP:'hold A to lift off · B to sink',
  carFar:'Cruiser too far',carFar2:'find the blue car on the map',hopFirst:'Hop out first',hopT:'CAR button',hopK:'E',hopP:'Y',
  botBusted:'Kitty-Bot busted!',chickSaved:'Chicken rescued!',of:'of',bonk:'Bonk!',bonk2:'nice landing, Scout',
- splash:'Splash!',splash2:'the Cruiser got towed back to HQ',ready:'Pup pack ready!',ready2:'hook the Kitty-Bots, find the chickens',
+ splash:'Splash!',splash2:'the Cruiser got towed back to HQ',ready:'Gear pack ready!',ready2:'hook the Kitty-Bots, find the chickens',
  h_heliT:'UP / DOWN: altitude · CAR: jump out',h_heliK:'Space up · Shift down · WASD fly · E jump out',h_heliP:'A up · B down · left stick fly · Y jump out',
  h_carT:'CAR: hop out',h_carK:'E: hop out · Space: hop',h_carP:'Y: hop out · A: hop',
  h_flyT:'CAR: fly the Pup Copter',h_flyK:'E: fly the Pup Copter',h_flyP:'Y: fly the Pup Copter',
@@ -180,7 +180,7 @@ en:{hudChick:'CHICKENS',hudBots:'KITTY-BOTS',hudChaos:'CHAOS',
 da:{hudChick:'HØNS',hudBots:'KATTEBOTTER',hudChaos:'KAOS',
  tRespawn:'Tilbage til Hvalpe-HQ (R)',tMute:'Lyd (M)',tStyle:'Skift stil (V)',tFull:'Fuld skærm',tLang:'English',
  joyhint:'◀ TRÆK HER FOR AT GÅ<br>TRÆK I HØJRE SIDE FOR AT KIGGE ▶',
- introTag:'Borgmester Brokkenborg har fyldt Adventure Bay med kattebotter, og byens høns er flygtet op på de højeste tage. Tag din hvalpetaske på, Scout.',
+ introTag:'Borgmester Brokkenborg har fyldt Adventure Bay med kattebotter, og byens høns er flygtet op på de højeste tage. Tag din udstyrstaske på, katten Scout.',
  introList:'<li>Red <b>6 høns</b>, der sidder højt oppe (følg de gule lysstråler).</li><li>Stop alle <b>kattebotter</b>: fang dem med krogen, ram dem eller flyv ind i dem.</li><li>Vælt ting for at få <b>kaospoint</b>.</li>',
  keysDesk:'<kbd>WASD</kbd><span>Løb (Shift for at spurte) · kør</span><kbd>Mus</kbd><span>Kig (klik for at låse musen)</span><kbd>Klik / F</kbd><span>Gribekrog mod sigtekornet</span><kbd>Mellemrum</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>Q · C</kbd><span>Wingsuit til/fra · slip faldskærmen</span><kbd>Hold J</kbd><span>Jetpack (tankes op på jorden)</span><kbd>E</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (Mellemrum op, Shift ned)</span><kbd>W / S</kbd><span>I luften: dyk / stig · A D drej</span><kbd>J · C</kbd><span>I vandet: vand-jets · dyk (Mellemrum op)</span>',
  keysTouch:'<kbd>Venstre tommel</kbd><span>Gå · kør · styr i luften</span><kbd>Højre tommel</kbd><span>Træk for at kigge og sigte</span><kbd>KROG</kbd><span>Gribekrog mod sigtekornet</span><kbd>HOP</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>JET</kbd><span>Hold for jetpack (tankes op på jorden)</span><kbd>BIL</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (hold OP / NED)</span><kbd>JET · DYK</kbd><span>I vandet: vand-jets · dyk</span>',
@@ -195,7 +195,7 @@ da:{hudChick:'HØNS',hudBots:'KATTEBOTTER',hudChaos:'KAOS',
  copter:'Hvalpekopteren!',liftT:'hold OP for at lette',liftK:'hold Mellemrum for at lette · Shift for at synke',liftP:'hold A for at lette · B for at synke',
  carFar:'Bilen er for langt væk',carFar2:'find den blå bil på kortet',hopFirst:'Hop ud først',hopT:'BIL-knappen',hopK:'E',hopP:'Y',
  botBusted:'Kattebot stoppet!',chickSaved:'Høne reddet!',of:'af',bonk:'Bonk!',bonk2:'flot landing, Scout',
- splash:'Plask!',splash2:'bilen blev slæbt tilbage til HQ',ready:'Hvalpetasken er klar!',ready2:'fang kattebotterne, find hønsene',
+ splash:'Plask!',splash2:'bilen blev slæbt tilbage til HQ',ready:'Tasken er klar, Scout!',ready2:'fang kattebotterne, find hønsene',
  h_heliT:'OP / NED: højde · BIL: hop ud',h_heliK:'Mellemrum op · Shift ned · WASD flyv · E hop ud',h_heliP:'A op · B ned · venstre stik flyv · Y hop ud',
  h_carT:'BIL: hop ud',h_carK:'E: hop ud · Mellemrum: hop',h_carP:'Y: hop ud · A: hop',
  h_flyT:'BIL: flyv Hvalpekopteren',h_flyK:'E: flyv Hvalpekopteren',h_flyP:'Y: flyv Hvalpekopteren',
@@ -570,22 +570,53 @@ const clouds=[];
 // Built from a unit sphere (radius 1, so the anim rig's r=0.5 swap leaves it alone); cream chest/belly via vertex colours.
 const pupBodyMat=new THREE.MeshLambertMaterial({color:0xffffff,vertexColors:true});
 const pupBodyCache={};
-function pupBodyGeo(fur){
-  if(pupBodyCache[fur])return pupBodyCache[fur];
+function pupBodyGeo(fur,stripe){
+  const key=fur+':'+(stripe||0);if(pupBodyCache[key])return pupBodyCache[key];
   const g=new THREE.SphereGeometry(1,32,24),p=g.attributes.position,L=0.66;
   // profile along the body, u=-1 rump .. u=+1 chest: half-width, top line, bottom line
   const U=[-1,-0.6,-0.15,0.3,0.7,1],W=[0.3,0.33,0.25,0.34,0.34,0.3],T=[1.08,1.13,1.12,1.17,1.2,1.18],B=[0.66,0.6,0.7,0.5,0.46,0.56];
   const f=(A,u)=>{for(let i=1;i<U.length;i++)if(u<=U[i]){const k=(u-U[i-1])/(U[i]-U[i-1]),e=k*k*(3-2*k);return A[i-1]+(A[i]-A[i-1])*e}return A[A.length-1]};
-  const fc=new THREE.Color(fur),cr=new THREE.Color(0xfff1dc),col=[];
+  const fc=new THREE.Color(fur),cr=new THREE.Color(0xfff1dc),sc=new THREE.Color(stripe||fur),col=[];
   for(let i=0;i<p.count;i++){
     const x=p.getX(i),y=p.getY(i),u=p.getZ(i),t=f(T,u),b=f(B,u);
     p.setXYZ(i,x*f(W,u),(t+b)/2+y*(t-b)/2,u*L);
     const cream=(y<-0.42&&u>-0.55)||(u>0.62&&y<0.35);
-    const c=cream?cr:fc;col.push(c.r,c.g,c.b);
+    const striped=stripe&&!cream&&y>-0.15&&Math.sin(u*15+Math.abs(x)*2.5)>0.45;
+    const c=cream?cr:striped?sc:fc;col.push(c.r,c.g,c.b);
   }
   g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.computeVertexNormals();
-  return pupBodyCache[fur]=g;
+  if(stripe){p.needsUpdate=true;for(let i=0;i<p.count;i++)p.setX(i,p.getX(i)*0.88)}   // cats are a touch slimmer
+  g.computeVertexNormals();return pupBodyCache[key]=g;
 }
+// the hero is a cat: tabby, pointy ears, whiskers, long curly tail (same part layout as makePup so the anim rig fits)
+function makeCat(fur,stripe,gear){
+  const g=new THREE.Group(),M=c=>mat(c),S=(r,w=14,h=10)=>new THREE.SphereGeometry(r,w,h);
+  mesh(pupBodyGeo(fur,stripe),pupBodyMat,0,0,0,g);
+  const head=new THREE.Group();head.position.set(0,1.32,0.55);g.add(head);
+  const skull=mesh(S(0.42,18,14),M(fur),0,0,0,head);skull.scale.set(1.08,0.94,0.96);
+  for(const x of [-0.1,0,0.1]){const st=mesh(S(0.07,8,6),M(stripe),x,0.25,0.29,head);st.scale.set(0.45,1.5,0.35);st.rotation.x=-0.8}
+  const mz=mesh(S(0.19,14,10),M(0xfff1dc),0,-0.12,0.32,head);mz.scale.set(1.25,0.75,0.8);
+  const nose=mesh(new THREE.ConeGeometry(0.055,0.06,3),M(0xff8fb1),0,-0.04,0.45,head);nose.rotation.x=Math.PI/2+0.3;nose.rotation.z=Math.PI;
+  for(const s of [-1,1]){
+    mesh(S(0.115,12,8),M(0xd9f07a),s*0.17,0.06,0.33,head);
+    const pu=mesh(S(0.062,10,8),M(0x1a1a1a),s*0.175,0.06,0.42,head);pu.scale.set(0.45,1.15,0.6);
+    const ear=mesh(new THREE.ConeGeometry(0.17,0.34,4),M(fur),s*0.25,0.38,-0.02,head);ear.rotation.z=-s*0.22;ear.rotation.y=Math.PI/4;
+    const inner=mesh(new THREE.ConeGeometry(0.1,0.22,4),M(0xffb3c7),0,-0.04,0.05,ear);inner.castShadow=false;
+    for(const k of [-1,0,1]){const w=mesh(new THREE.BoxGeometry(0.34,0.012,0.012),M(0x3a3a3a),s*0.3,-0.11+k*0.035,0.36,head);w.rotation.z=s*k*0.18;w.rotation.y=-s*0.25;w.castShadow=false}
+  }
+  const collar=mesh(new THREE.TorusGeometry(0.3,0.06,6,16),M(gear),0,1.06,0.45,g);collar.rotation.x=Math.PI/2.4;
+  mesh(new THREE.SphereGeometry(0.07,8,6),M(0xffc93c),0,0.93,0.72,g);
+  const pack=mesh(new THREE.BoxGeometry(0.56,0.4,0.48),M(gear),0,1.16,-0.1,g);
+  mesh(new THREE.CylinderGeometry(0.11,0.11,0.08,10),M(0xffc93c),0,1.16,0.15,g).rotation.x=Math.PI/2;
+  const legs=[];for(const [x,z] of [[-0.22,0.38],[0.22,0.38],[-0.22,-0.38],[0.22,-0.38]]){const p=new THREE.Group();p.position.set(x,0.55,z);g.add(p);mesh(new THREE.CylinderGeometry(0.09,0.08,0.52,8),M(fur),0,-0.27,0,p);mesh(S(0.11,8,6),M(0xfff1dc),0,-0.52,0.04,p);legs.push(p)}
+  const tail=new THREE.Group();tail.position.set(0,0.98,-0.6);g.add(tail);
+  {const c=new THREE.CatmullRomCurve3([new V3(0,0,0),new V3(0,0.1,-0.35),new V3(0,0.45,-0.55),new V3(0,0.85,-0.45),new V3(0,1.0,-0.2)]);
+   mesh(new THREE.TubeGeometry(c,20,0.065,8,false),M(fur),0,0,0,tail);mesh(S(0.075,8,6),M(stripe),0,1.0,-0.2,tail)}
+  const wings=new THREE.Group();g.add(wings);wings.visible=false;
+  for(const s of [-1,1]){const w=mesh(new THREE.BoxGeometry(1.5,0.05,0.9),M(gear),s*0.95,0.95,-0.05,wings);w.rotation.z=s*0.06;mesh(new THREE.BoxGeometry(0.3,0.06,0.92),M(0xffc93c),s*1.6,0.95,-0.05,wings)}
+  return {g,legs,tail,head,wings,pack};
+}
+const HERO=[0xf2a14e,0xc4652a,0x2e5fb8];   // ginger tabby, blue gear
 function makePup(fur,gear,hat){
   const g=new THREE.Group(),M=c=>mat(c),S=(r,w=14,h=10)=>new THREE.SphereGeometry(r,w,h);
   const body=mesh(pupBodyGeo(fur),pupBodyMat,0,0,0,g);
@@ -607,7 +638,7 @@ function makePup(fur,gear,hat){
   for(const s of [-1,1]){const w=mesh(new THREE.BoxGeometry(1.5,0.05,0.9),M(gear),s*0.95,0.95,-0.05,wings);w.rotation.z=s*0.06;mesh(new THREE.BoxGeometry(0.3,0.06,0.92),M(0xffc93c),s*1.6,0.95,-0.05,wings)}
   return {g,legs,tail,head,wings,pack};
 }
-const pup=makePup(0xc68a4c,0x2e5fb8,0x2e5fb8);scene.add(pup.g);
+const pup=makeCat(...HERO);scene.add(pup.g);
 const jetFx=[];
 for(const s of [-1,1]){
   mesh(new THREE.CylinderGeometry(0.13,0.16,0.55,10),0x9aa3b5,s*0.22,1.1,-0.42,pup.g);
@@ -643,7 +674,7 @@ const car={g:new THREE.Group(),pos:new V3(176,0,102),heading:Math.atan2(-22,-38)
   const paw=new THREE.Mesh(new THREE.PlaneGeometry(1.2,1.2),new THREE.MeshLambertMaterial({map:pawTex,transparent:true}));paw.rotation.x=-Math.PI/2;paw.position.set(0,1.41,1.3);g.add(paw);
   for(const s of [-1,1]){mesh(new THREE.BoxGeometry(0.3,0.25,0.1),new THREE.MeshBasicMaterial({color:0xfff7c2}),s*0.8,1.05,2.21,g)}
   for(const [x,z] of [[-1.2,1.4],[1.2,1.4],[-1.2,-1.4],[1.2,-1.4]]){const w=new THREE.Group();w.position.set(x,0.55,z);g.add(w);const t=mesh(new THREE.CylinderGeometry(0.55,0.55,0.45,14),0x222222,0,0,0,w);t.rotation.z=Math.PI/2;mesh(new THREE.CylinderGeometry(0.28,0.28,0.47,10),0xdddddd,0,0,0,w).rotation.z=Math.PI/2;car.wheels.push(w)}
-  const drv=makePup(0xc68a4c,0x2e5fb8,0x2e5fb8);ANIM.rigPup(drv);drv.g.scale.setScalar(0.9);drv.g.position.set(0,0.9,-0.5);g.add(drv.g);drv.g.visible=false;car.driver=drv;
+  const drv=makeCat(...HERO);ANIM.rigPup(drv);drv.g.scale.setScalar(0.9);drv.g.position.set(0,0.9,-0.5);g.add(drv.g);drv.g.visible=false;car.driver=drv;
   scene.add(g);
 }
 ANIM.rigCar(car);
@@ -679,7 +710,7 @@ const PAD={x:LOOK.x+26,z:LOOK.z-22};
   for(const a of [0,Math.PI/2]){const b=mesh(new THREE.BoxGeometry(9.5,0.07,0.45),0x3d4458,0,0.05,0,rot);b.rotation.y=a}
   const paw=new THREE.Mesh(new THREE.PlaneGeometry(1.3,1.3),new THREE.MeshLambertMaterial({map:pawTex,transparent:true}));
   for(const s of [-1,1]){const p=paw.clone();p.position.set(s*1.62,2.0,-0.4);p.rotation.y=s*Math.PI/2;g.add(p)}
-  const pl=makePup(0xc68a4c,0x2e5fb8,0x2e5fb8);ANIM.rigPup(pl);pl.g.scale.setScalar(0.85);pl.g.position.set(0,1.3,0.5);g.add(pl.g);pl.g.visible=false;heli.pilot=pl;
+  const pl=makeCat(...HERO);ANIM.rigPup(pl);pl.g.scale.setScalar(0.85);pl.g.position.set(0,1.3,0.5);g.add(pl.g);pl.g.visible=false;heli.pilot=pl;
   g.rotation.order='YXZ';scene.add(g);
 }
 function resetHeli(){heli.pos.set(PAD.x,PAD.y,PAD.z);heli.vel.set(0,0,0);heli.yaw=Math.atan2(TOWN.x-PAD.x,TOWN.z-PAD.z);heli.landed=true}
@@ -790,7 +821,7 @@ function initAudio(){if(ac)return;try{ac=new (window.AudioContext||window.webkit
 function tone(f,d,type='square',v=0.07,slide=0,delay=0){if(!ac||muted)return;const t=ac.currentTime+delay,o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(0.001,t+d);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+d+0.02)}
 const sfx={jump:()=>tone(380,.14,'square',.04,720),zip:()=>tone(1100,.22,'sawtooth',.035,260),chute:()=>tone(180,.35,'triangle',.08,420),wing:()=>tone(500,.3,'triangle',.06,1000),
   pop:()=>{tone(170,.35,'square',.07,50);tone(700,.18,'triangle',.05,1500,.05)},knock:()=>tone(220,.09,'square',.04,120),bonk:()=>tone(150,.25,'square',.07,70),
-  rescue:()=>[523,659,784,1046].forEach((f,i)=>tone(f,.2,'triangle',.08,0,i*.09)),woof:()=>{tone(320,.07,'sawtooth',.06,200);tone(300,.09,'sawtooth',.06,170,.12)},splash:()=>tone(900,.4,'sawtooth',.03,120)};
+  rescue:()=>[523,659,784,1046].forEach((f,i)=>tone(f,.2,'triangle',.08,0,i*.09)),woof:()=>{tone(320,.07,'sawtooth',.06,200);tone(300,.09,'sawtooth',.06,170,.12)},meow:()=>{tone(520,.16,'triangle',.06,820);tone(820,.26,'triangle',.05,430,.14)},splash:()=>tone(900,.4,'sawtooth',.03,120)};
 
 // ================= game state & HUD =================
 const S={chick:0,bots:0,chaos:0,won:false,running:false};
@@ -922,7 +953,7 @@ function actCar(){
     toAir();return;
   }
   if(P.mode!=='car'&&P.mode!=='grapple'&&P.pos.distanceTo(heli.pos)<6.5&&P.pos.distanceTo(heli.pos)<P.pos.distanceTo(car.pos)){
-    if(P.mode==='chute'||P.mode==='wing')toAir();P.mode='heli';pup.g.visible=false;heli.pilot.g.visible=true;sfx.woof();
+    if(P.mode==='chute'||P.mode==='wing')toAir();P.mode='heli';pup.g.visible=false;heli.pilot.g.visible=true;sfx.meow();
     toast(T('copter'),TD('lift'));return;
   }
   if(P.mode==='car'){
@@ -931,7 +962,7 @@ function actCar(){
     toAir();pup.g.visible=true;car.driver.g.visible=false;cam.dist=9;if(engine)engine.g.gain.value=0;return;
   }
   if(P.mode==='grapple')return;
-  if(P.pos.distanceTo(car.pos)<5.5){if(P.mode==='chute'||P.mode==='wing')toAir();P.mode='car';pup.g.visible=false;car.driver.g.visible=true;sfx.woof()}
+  if(P.pos.distanceTo(car.pos)<5.5){if(P.mode==='chute'||P.mode==='wing')toAir();P.mode='car';pup.g.visible=false;car.driver.g.visible=true;sfx.meow()}
   else toast(T('carFar'),T('carFar2'));
 }
 const ray=new THREE.Raycaster(),tmpDir=new V3(),aim={ok:false,point:new V3(),ent:null,dist:0};
@@ -1428,7 +1459,7 @@ $('bLang').addEventListener('click',()=>{lang=lang==='da'?'en':'da';try{localSto
 $('start').addEventListener('click',()=>{
   initAudio();$('intro').hidden=true;S.running=true;$('touch').hidden=!isTouch;
   if(!isTouch){try{const r=canvas.requestPointerLock();if(r&&r.catch)r.catch(()=>{})}catch(e){}}
-  canvas.focus();sfx.woof();toast(T('ready'),T('ready2'));
+  canvas.focus();sfx.meow();toast(T('ready'),T('ready2'));
 });
 $('keep').addEventListener('click',()=>{$('win').hidden=true;canvas.focus()});
 car.g.rotation.order='YXZ';
