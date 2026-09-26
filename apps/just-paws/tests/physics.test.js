@@ -51,6 +51,21 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     const ch = d.chickens[0]; P.pos.set(ch.pos.x, ch.pos.y - 0.7, ch.pos.z); d.step(2);
     out.chicken = { rescued: ch.rescued, count: d.S.chick };
     for (let i = 0; i < 3; i++) { key('keydown', 'KeyV'); key('keyup', 'KeyV'); d.step(2); }
+    // call in a ride: B opens the menu, 1 orders the car, it parachutes down next to you
+    key('keydown', 'KeyR'); key('keyup', 'KeyR'); d.step(30);
+    key('keydown', 'KeyB'); key('keyup', 'KeyB'); const menu = !document.getElementById('order').hidden;
+    key('keydown', 'Digit1'); key('keyup', 'Digit1');
+    const C = d.car, dropping = d.drops.length, hi = C.pos.y - d.ground(C.pos.x, C.pos.z);
+    d.step(400);
+    out.carDrop = { menu, closed: document.getElementById('order').hidden, dropping, hi, left: d.drops.length,
+      dist: Math.hypot(C.pos.x - P.pos.x, C.pos.z - P.pos.z), onGround: Math.abs(C.pos.y - d.ground(C.pos.x, C.pos.z)) < 0.05 };
+    P.pos.set(C.pos.x + 3, C.pos.y + 0.5, C.pos.z); P.mode = 'air'; d.step(30);
+    key('keydown', 'KeyE'); key('keyup', 'KeyE'); out.carDrop.enter = P.mode; key('keydown', 'KeyE'); key('keyup', 'KeyE'); d.step(30);
+    const hw = d.orderRide(d.RIDES[1]); d.step(400);
+    out.heliDrop = { why: hw, landed: H.landed, dist: Math.hypot(H.pos.x - P.pos.x, H.pos.z - P.pos.z), again: d.orderRide(d.RIDES[1]) };
+    const B = d.boat; P.pos.set(B.pos.x + 30, 0, B.pos.z); P.mode = 'swim'; d.step(5);
+    const bw = d.orderRide(d.RIDES[2]); d.step(400);
+    out.boatDrop = { why: bw, y: B.pos.y, depth: d.ground(B.pos.x, B.pos.z), left: d.drops.length };
     return out;
   });
   await browser.close();
@@ -64,6 +79,9 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     ['merged meshes keep their entity', r.ents, r.ents],
     ['props get knocked', r.prop.knocked && r.prop.moved > 0.5, r.prop],
     ['kitty-bot busted by touch', r.bot.busted >= 1 && !r.bot.alive, r.bot],
+    ['call in the car: menu, parachute drop, land next to you', r.carDrop.menu && r.carDrop.closed && r.carDrop.dropping === 1 && r.carDrop.hi > 30 && r.carDrop.left === 0 && r.carDrop.dist < 45 && r.carDrop.onGround && r.carDrop.enter === 'car', r.carDrop],
+    ['call in the copter', r.heliDrop.why === '' && r.heliDrop.landed && r.heliDrop.dist < 45 && r.heliDrop.again === '', r.heliDrop],
+    ['call in the boat onto water', r.boatDrop.why === '' && Math.abs(r.boatDrop.y) < 0.2 && r.boatDrop.depth < -3 && r.boatDrop.left === 0, r.boatDrop],
     ['chicken rescued by touch', r.chicken.rescued && r.chicken.count === 1, r.chicken],
   ];
   let fail = 0;
