@@ -28,12 +28,12 @@ body.touch #mode{left:calc(16px + env(safe-area-inset-left,0px));transform:none;
 #corner{top:calc(170px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));display:flex;gap:6px;pointer-events:auto}
 #corner button{width:40px;height:40px;border-radius:12px;border:2px solid rgba(255,255,255,.2);background:var(--navy-a);color:var(--cream);font:800 18px 'Baloo 2',system-ui,sans-serif;cursor:pointer}
 #under{inset:0;z-index:1;background:radial-gradient(ellipse at 50% 0%,rgba(120,220,255,.18),rgba(10,70,130,.38))}
-#corner button.on{background:var(--gold);color:var(--navy)}
-#cross{left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:3px solid rgba(255,255,255,.75);box-shadow:0 0 0 2px rgba(22,36,74,.35)}
-#cross::after{content:"";position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:#fff}
-#cross.ok{border-color:var(--gold);transform:scale(1.15)}
+#corner button.on,#corner button.new{background:var(--gold);color:var(--navy)}
+#cross{left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;border:2px solid transparent;transition:border-color .15s,transform .15s}
+#cross::after{content:"";position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:50%;background:rgba(255,255,255,.5);box-shadow:0 0 0 1px rgba(22,36,74,.2)}
+#cross.ok{border-color:rgba(255,201,60,.7)}
 #cross.ok::after{background:var(--gold)}
-#cross.hit{border-color:#ff7ad9}
+#cross.hit{border-color:rgba(255,122,217,.75)}
 #hint{margin-top:2px;max-width:min(340px,58vw);font-weight:800;font-size:13px;line-height:1.35;background:rgba(255,248,232,.88);color:var(--navy);padding:3px 10px;border-radius:10px}
 #toast{left:50%;top:22%;transform:translateX(-50%);font-family:'Lilita One',sans-serif;font-size:30px;color:var(--gold);text-shadow:0 3px 0 var(--navy),0 0 14px rgba(0,0,0,.3);text-align:center;opacity:0;transition:opacity .25s,transform .25s;white-space:nowrap}
 #toast.show{opacity:1;transform:translateX(-50%) scale(1.05)}
@@ -87,7 +87,7 @@ body.touch #mode{left:calc(16px + env(safe-area-inset-left,0px));transform:none;
   <div id="hint" hidden></div>
 </div>
 <canvas id="map" class="hud" width="300" height="300"></canvas>
-<div id="corner" class="hud"><button id="bRespawn" data-i18n-title="tRespawn">↺</button><button id="bMute" data-i18n-title="tMute">♪</button><button id="bStyle" data-i18n-title="tStyle">◐</button><button id="bSnd" data-i18n-title="tSnd">♫</button><button id="bFull" data-i18n-title="tFull">⛶</button><button id="bLang" data-i18n-title="tLang" style="font-size:13px">EN</button></div>
+<div id="corner" class="hud"><button id="bRespawn" data-i18n-title="tRespawn">↺</button><button id="bMute" data-i18n-title="tMute">♪</button><button id="bStyle" data-i18n-title="tStyle">◐</button><button id="bSnd" data-i18n-title="tSnd">♫</button><button id="bFull" data-i18n-title="tFull">⛶</button><button id="bReload" data-i18n-title="tReload">⟳</button><button id="bLang" data-i18n-title="tLang" style="font-size:13px">EN</button></div>
 <div id="cross" class="hud"></div>
 <div id="under" class="hud" hidden></div>
 <div id="toast" class="hud"></div>
@@ -154,7 +154,7 @@ const isTouch=matchMedia('(pointer:coarse)').matches||('ontouchstart' in window)
 // ---- language: Danish / English, picked from the browser, switchable (button in the corner) ----
 const LANG={
 en:{hudChick:'CHICKENS',hudBots:'KITTY-BOTS',hudChaos:'CHAOS',
- tRespawn:'Back to Pup HQ (R)',tMute:'Sound (M)',tStyle:'Switch look (V)',tSnd:'Sound theme (N)',snd_real:'Real sounds',snd_toy:'Toy box',snd_space:'Space sounds',snd_retro:'Retro beeps',sndSwitched:'sound theme',tFull:'Fullscreen',tLang:'Dansk',
+ tRespawn:'Back to Pup HQ (R)',tMute:'Sound (M)',tStyle:'Switch look (V)',tReload:'Load updates (reload)',update:'Update ready!',update2:'tap ⟳ to load it',tSnd:'Sound theme (N)',snd_real:'Real sounds',snd_toy:'Toy box',snd_space:'Space sounds',snd_retro:'Retro beeps',sndSwitched:'sound theme',tFull:'Fullscreen',tLang:'Dansk',
  joyhint:'◀ DRAG HERE TO MOVE<br>DRAG RIGHT SIDE TO LOOK ▶',
  introTag:'Mayor Grumbleton has flooded Adventure Bay with Kitty-Bots, and the town chickens have fled to the highest rooftops. Grab your gear pack, Scout the cat.',
  introList:'<li>Rescue <b>6 chickens</b> stuck up high (follow the yellow beams).</li><li>Bust all <b>Kitty-Bots</b>: hook them, ram them or fly into them.</li><li>Knock stuff over for <b>chaos points</b>.</li>',
@@ -172,7 +172,7 @@ en:{hudChick:'CHICKENS',hudBots:'KITTY-BOTS',hudChaos:'CHAOS',
  carFar:'Cruiser too far',carFar2:'find the blue car on the map',hopFirst:'Hop out first',hopT:'CAR button',hopK:'E',hopP:'Y',
  botBusted:'Kitty-Bot busted!',chickSaved:'Chicken rescued!',of:'of',bonk:'Bonk!',bonk2:'nice landing, Scout',
  splash:'Splash!',splash2:'the Cruiser got towed back to HQ',ready:'Gear pack ready!',ready2:'hook the Kitty-Bots, find the chickens',
- h_heliT:'UP / DOWN: altitude · CAR: jump out',h_heliK:'Space up · Shift down · WASD fly · E jump out',h_heliP:'A up · B down · left stick fly · Y jump out',
+ h_heliT:'UP / DOWN: altitude · look to turn · CAR: jump out',h_heliK:'Space up · Shift down · WASD fly · mouse turns · E jump out',h_heliP:'A up · B down · left stick fly · right stick turns · Y jump out',
  h_boatT:'CAR: hop out · JUMP: jump the waves',h_boatK:'E: hop out · WASD: steer · Space: jump the waves',h_boatP:'Y: hop out · A: jump the waves',
  h_sailT:'CAR: drive the Speedboat',h_sailK:'E: drive the Speedboat',h_sailP:'Y: drive the Speedboat',
  aboard:'All aboard the Sky Whale!',aboard2:'it circles the town all day',boat:'Speedboat!',boat2:'full throttle across the bay',boatBlock:'Too shallow!',
@@ -186,7 +186,7 @@ en:{hudChick:'CHICKENS',hudBots:'KITTY-BOTS',hudChaos:'CHAOS',
  h_diveT:'UP / DIVE · JET: water jets',h_diveK:'Space up · C down · hold J: water jets',h_diveP:'A up · B down · hold LT: water jets',splashIn:'Splash!',jets:'Water jets!',
  b_DIVE:'DIVE',b_JUMP:'JUMP',b_CHUTE:'CHUTE',b_WINGS:'WINGS',b_HOP:'HOP',b_UP:'UP',b_DOWN:'DOWN',b_FOLD:'FOLD',b_JET:'JET',b_CAR:'CAR',b_HOOK:'HOOK'},
 da:{hudChick:'HØNS',hudBots:'KATTEBOTTER',hudChaos:'KAOS',
- tRespawn:'Tilbage til Hvalpe-HQ (R)',tMute:'Lyd (M)',tStyle:'Skift stil (V)',tSnd:'Lydtema (N)',snd_real:'Rigtige lyde',snd_toy:'Legetøjskassen',snd_space:'Rumlyde',snd_retro:'Retro-bip',sndSwitched:'lydtema',tFull:'Fuld skærm',tLang:'English',
+ tRespawn:'Tilbage til Hvalpe-HQ (R)',tMute:'Lyd (M)',tStyle:'Skift stil (V)',tReload:'Hent opdateringer (genindlæs)',update:'Ny version klar!',update2:'tryk ⟳ for at hente den',tSnd:'Lydtema (N)',snd_real:'Rigtige lyde',snd_toy:'Legetøjskassen',snd_space:'Rumlyde',snd_retro:'Retro-bip',sndSwitched:'lydtema',tFull:'Fuld skærm',tLang:'English',
  joyhint:'◀ TRÆK HER FOR AT GÅ<br>TRÆK I HØJRE SIDE FOR AT KIGGE ▶',
  introTag:'Borgmester Brokkenborg har fyldt Adventure Bay med kattebotter, og byens høns er flygtet op på de højeste tage. Tag din udstyrstaske på, katten Scout.',
  introList:'<li>Red <b>6 høns</b>, der sidder højt oppe (følg de gule lysstråler).</li><li>Stop alle <b>kattebotter</b>: fang dem med krogen, ram dem eller flyv ind i dem.</li><li>Vælt ting for at få <b>kaospoint</b>.</li>',
@@ -204,7 +204,7 @@ da:{hudChick:'HØNS',hudBots:'KATTEBOTTER',hudChaos:'KAOS',
  carFar:'Bilen er for langt væk',carFar2:'find den blå bil på kortet',hopFirst:'Hop ud først',hopT:'BIL-knappen',hopK:'E',hopP:'Y',
  botBusted:'Kattebot stoppet!',chickSaved:'Høne reddet!',of:'af',bonk:'Bonk!',bonk2:'flot landing, Scout',
  splash:'Plask!',splash2:'bilen blev slæbt tilbage til HQ',ready:'Tasken er klar, Scout!',ready2:'fang kattebotterne, find hønsene',
- h_heliT:'OP / NED: højde · BIL: hop ud',h_heliK:'Mellemrum op · Shift ned · WASD flyv · E hop ud',h_heliP:'A op · B ned · venstre stik flyv · Y hop ud',
+ h_heliT:'OP / NED: højde · kig for at dreje · BIL: hop ud',h_heliK:'Mellemrum op · Shift ned · WASD flyv · musen drejer · E hop ud',h_heliP:'A op · B ned · venstre stik flyv · højre stik drejer · Y hop ud',
  h_boatT:'BIL: hop ud · HOP: hop over bølgerne',h_boatK:'E: hop ud · WASD: styr · Mellemrum: hop over bølgerne',h_boatP:'Y: hop ud · A: hop over bølgerne',
  h_sailT:'BIL: sejl Speedbåden',h_sailK:'E: sejl Speedbåden',h_sailP:'Y: sejl Speedbåden',
  aboard:'Velkommen ombord på Himmelhvalen!',aboard2:'den flyver rundt om byen hele dagen',boat:'Speedbåd!',boat2:'fuld fart over bugten',boatBlock:'For lavt vand!',
@@ -810,10 +810,10 @@ function updateHeli(dt,inp,piloted){
   const fx=Math.sin(heli.yaw),fz=Math.cos(heli.yaw);
   let fwd=heli.vel.x*fx+heli.vel.z*fz;
   if(piloted&&heli.spin>0.5){
-    if(!heli.landed||up)heli.yaw-=inp.x*1.7*dt;
+    if(!heli.landed||up)heli.yaw=lerpAngle(heli.yaw,cam.yaw,Math.min(1,2.2*dt));
     const target=heli.landed&&!up?0:inp.y*32;
     const acc=(target-fwd)*1.5;heli.vel.x+=fx*acc*dt;heli.vel.z+=fz*acc*dt;
-    const side=-heli.vel.x*fz+heli.vel.z*fx;heli.vel.x+=fz*side*2*dt;heli.vel.z-=fx*side*2*dt;
+    const side=-heli.vel.x*fz+heli.vel.z*fx,sAcc=((heli.landed&&!up?0:inp.x*22)-side)*1.5;heli.vel.x-=fz*sAcc*dt;heli.vel.z+=fx*sAcc*dt;
     heli.vel.y=lerp(heli.vel.y,(up-dn)*13,Math.min(1,3*dt));
   }else{heli.vel.y-=18*dt;heli.vel.x*=1-1.2*dt;heli.vel.z*=1-1.2*dt}
   heli.pos.addScaledVector(heli.vel,dt);
@@ -1702,6 +1702,11 @@ restored=loadGame();
 if(restored){$('start').dataset.i18n='cont';$('fresh').hidden=false;applyLang()}
 $('fresh').addEventListener('click',()=>{try{localStorage.removeItem(SAVE_KEY)}catch(e){}location.reload()});
 setInterval(saveGame,3000);
+$('bReload').addEventListener('click',()=>{saveGame();const u=new URL(location.href);u.searchParams.set('v',Date.now().toString(36));location.replace(u.href)});
+// watch for a new deploy (the page's ETag changes) and light up the reload button
+{let tag=null;const chk=()=>{if(document.hidden)return;fetch(location.pathname,{method:'HEAD',cache:'no-store'}).then(r=>{const e=r.headers.get('etag');if(!e)return;
+  if(tag===null)tag=e;else if(e!==tag&&!$('bReload').classList.contains('new')){$('bReload').classList.add('new');if(S.running)toast(T('update'),T('update2'))}}).catch(()=>{})};
+  if(/workers\.dev$/.test(location.hostname)){chk();setInterval(chk,60000)}}
 addEventListener('pagehide',saveGame);document.addEventListener('visibilitychange',()=>{if(document.hidden)saveGame()});
 JP.dbg.saveGame=saveGame;JP.dbg.loadGame=loadGame;
 requestAnimationFrame(frame);
