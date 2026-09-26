@@ -50,6 +50,19 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     out.bot = { busted: d.S.bots, alive: bot.alive };
     const ch = d.chickens[0]; P.pos.set(ch.pos.x, ch.pos.y - 0.7, ch.pos.z); d.step(2);
     out.chicken = { rescued: ch.rescued, count: d.S.chick };
+    // digger: hop in, drive, scoop a crate, lift it, tip it out, then scoop dirt
+    const G = d.dig, tip = new THREE.Vector3();
+    P.pos.set(G.pos.x + 3, G.pos.y + 1, G.pos.z); P.vel.set(0, 0, 0); P.mode = 'air'; d.step(30);
+    key('keydown', 'KeyE'); key('keyup', 'KeyE'); const dmode = P.mode, g0 = G.pos.clone();
+    key('keydown', 'KeyW'); d.step(40); key('keyup', 'KeyW'); d.step(30);
+    const drove = G.pos.distanceTo(g0);
+    G.tip.getWorldPosition(tip); const crate = d.props.find(p => p.state === 'rest'); crate.pos.set(tip.x, d.ground(tip.x, tip.z) + 0.7, tip.z);
+    key('keydown', 'KeyF'); key('keyup', 'KeyF'); const loaded = G.load.length;
+    key('keydown', 'Space'); d.step(90); key('keyup', 'Space'); const lifted = crate.pos.y - d.ground(crate.pos.x, crate.pos.z);
+    key('keydown', 'KeyF'); key('keyup', 'KeyF'); d.step(60); const tipped = G.load.length === 0 && crate.pos.distanceTo(tip) > 3;
+    key('keydown', 'ShiftLeft'); d.step(90); key('keyup', 'ShiftLeft'); key('keydown', 'KeyF'); key('keyup', 'KeyF');
+    out.dig = { mode: dmode, drove, loaded, lifted, tipped, dirt: G.dirt };
+    key('keydown', 'KeyE'); key('keyup', 'KeyE'); d.step(10); out.dig.out = P.mode;
     for (let i = 0; i < 3; i++) { key('keydown', 'KeyV'); key('keyup', 'KeyV'); d.step(2); }
     // call in a ride: B opens the menu, 1 orders the car, it parachutes down next to you
     key('keydown', 'KeyR'); key('keyup', 'KeyR'); d.step(30);
@@ -66,6 +79,16 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     const B = d.boat; P.pos.set(B.pos.x + 30, 0, B.pos.z); P.mode = 'swim'; d.step(5);
     const bw = d.orderRide(d.RIDES[2]); d.step(400);
     out.boatDrop = { why: bw, y: B.pos.y, depth: d.ground(B.pos.x, B.pos.z), left: d.drops.length };
+    key('keydown', 'KeyR'); key('keyup', 'KeyR'); d.step(30);
+    const Dg = d.dig, gw = d.orderRide(d.RIDES[3]); d.step(400);
+    out.digDrop = { why: gw, dist: Math.hypot(Dg.pos.x - P.pos.x, Dg.pos.z - P.pos.z), left: d.drops.length };
+    // online: another player at the Sky Whale's wheel moves our copy of it, and the wheel is taken
+    const Sh = d.ship; d.MP.id = 'me';
+    const tx = Sh.pos.x + 30, tz = Sh.pos.z + 20, ty = Sh.baseY + 12, tyaw = Sh.yaw + 1;
+    for (let i = 0; i < 12; i++) { d.mpPeer({ id: 'captain', n: 'Luna', c: 2, s: [tx, ty, tz, 0, 12, 0, 0, 0, tyaw, 0] }, true); d.step(15); }
+    out.shipSync = { off: Math.hypot(Sh.pos.x - tx, Sh.pos.z - tz), dy: Math.abs(Sh.baseY - ty), dyaw: Math.abs(Math.atan2(Math.sin(Sh.yaw - tyaw), Math.cos(Sh.yaw - tyaw))) };
+    P.mode = 'air'; P.pos.set(Sh.pos.x, Sh.pos.y + Sh.deckY + 1, Sh.pos.z); P.vel.set(0, 0, 0); d.mpPeer({ id: 'captain', s: [tx, ty, tz, 0, 12, 0, 0, 0, tyaw, 0] }, true); d.step(5);
+    key('keydown', 'KeyE'); key('keyup', 'KeyE'); out.shipSync.mode = P.mode;
     return out;
   });
   await browser.close();
@@ -82,7 +105,10 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     ['call in the car: menu, parachute drop, land next to you', r.carDrop.menu && r.carDrop.closed && r.carDrop.dropping === 1 && r.carDrop.hi > 30 && r.carDrop.left === 0 && r.carDrop.dist < 45 && r.carDrop.onGround && r.carDrop.enter === 'car', r.carDrop],
     ['call in the copter', r.heliDrop.why === '' && r.heliDrop.landed && r.heliDrop.dist < 45 && r.heliDrop.again === '', r.heliDrop],
     ['call in the boat onto water', r.boatDrop.why === '' && Math.abs(r.boatDrop.y) < 0.2 && r.boatDrop.depth < -3 && r.boatDrop.left === 0, r.boatDrop],
+    ['call in the digger', r.digDrop.why === '' && r.digDrop.dist < 45 && r.digDrop.left === 0, r.digDrop],
     ['chicken rescued by touch', r.chicken.rescued && r.chicken.count === 1, r.chicken],
+    ['digger drives, scoops, lifts and tips', r.dig.mode === 'dig' && r.dig.drove > 3 && r.dig.loaded === 1 && r.dig.lifted > 3 && r.dig.tipped && r.dig.dirt && r.dig.out !== 'dig', r.dig],
+    ['airship follows the online captain', r.shipSync.off < 3 && r.shipSync.dy < 2 && r.shipSync.dyaw < 0.2 && r.shipSync.mode !== 'ship', r.shipSync],
   ];
   let fail = 0;
   for (const [name, ok, info] of checks) { console.log(`${ok ? 'PASS' : 'FAIL'} ${name}`, ok ? '' : JSON.stringify(info)); if (!ok) fail++; }
