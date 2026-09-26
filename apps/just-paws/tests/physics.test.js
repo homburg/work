@@ -16,16 +16,23 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', ...(proxy ? ['--ignore-certificate-errors'] : [])],
     ...(proxy ? { proxy: { server: proxy } } : {}),
   });
-  const page = await browser.newPage({ viewport: { width: 1100, height: 700 } });
   const errors = [];
-  page.on('pageerror', e => errors.push(e.message));
-  await page.route('**fonts.g*/**', r => r.abort());
-  await page.route(u => u.pathname === '/', r => r.fulfill({ body: html, contentType: 'text/html' }));
-  for (const f of ['animations.js', 'perf.js'])
-    await page.route('http://just-paws.test/' + f, r => r.fulfill({ body: fs.readFileSync(path.join(__dirname, '..', f), 'utf8'), contentType: 'application/javascript' }));
-  await page.goto('http://just-paws.test/?sleep=1', { waitUntil: 'domcontentloaded', timeout: 90000 });
-  await page.waitForFunction(() => window.JP && window.JP.dbg, null, { timeout: 60000 });
-  await page.click('#start');
+  // bedtime follows the Danish clock (20:00 to 06:00), so each page gets a fixed Danish hour
+  const open = async (hour) => {
+    const page = await browser.newPage({ viewport: { width: 1100, height: 700 } });
+    page.on('pageerror', e => errors.push(e.message));
+    await page.addInitScript(h => { const Real = Intl.DateTimeFormat;
+      Intl.DateTimeFormat = function (l, o) { return o && o.timeZone === 'Europe/Copenhagen' ? { format: () => String(h) } : new Real(l, o); }; }, hour);
+    await page.route('**fonts.g*/**', r => r.abort());
+    await page.route(u => u.pathname === '/', r => r.fulfill({ body: html, contentType: 'text/html' }));
+    for (const f of ['animations.js', 'perf.js'])
+      await page.route('http://just-paws.test/' + f, r => r.fulfill({ body: fs.readFileSync(path.join(__dirname, '..', f), 'utf8'), contentType: 'application/javascript' }));
+    await page.goto('http://just-paws.test/', { waitUntil: 'domcontentloaded', timeout: 90000 });
+    await page.waitForFunction(() => window.JP && window.JP.dbg, null, { timeout: 60000 });
+    await page.click('#start');
+    return page;
+  };
+  const page = await open(12);   // noon in Denmark: daytime, normal game
 
   const r = await page.evaluate(() => {
     const d = JP.dbg, P = d.P, H = d.heli, out = {};
@@ -98,8 +105,7 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     key('keydown', 'KeyK'); key('keyup', 'KeyK'); out.bigMap.k = bm();
     document.getElementById('map').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); out.bigMap.tap = bm();
     document.getElementById('bigmap').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); out.bigMap.tapClose = bm();
-    // bedtime: the Kitty-Bots are lying down asleep, not hovering
-    out.bed = Object.assign(d.bedtime(), { botsDown: d.bots.every(b => !b.alive || (b.sleepY !== undefined && Math.abs(b.pos.y - b.sleepY) < 0.1)) });
+    out.day = d.bedtime();
     // online: another player's car, sent 15x a second with uneven network delay, moves evenly on our screen
     P.mode = 'air'; const M = d.MP, x0 = d.car.pos.x + 40, z0 = d.car.pos.z, send = [], spd = [], turn = [];
     for (let i = 0, j = 7; i <= 45; i++) { j = (j * 9301 + 49297) % 233280; const t = i / 15; send.push({ at: 0.05 + t + 0.04 * j / 233280, k: t * 1000, s: [x0 + 20 * t, 2, z0, 0, 7, 20, 0, 0, 0.6 * t, 0] }); }
@@ -160,6 +166,21 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
   full.afterReload = await page.evaluate(() => !!document.fullscreenElement);
   await page.click('#start');
   full.afterTap = await page.waitForFunction(() => !!document.fullscreenElement, null, { timeout: 5000 }).then(() => true, () => false);
+  // 21:00 in Denmark: bedtime. Everyone sleeps, Scout too, and Scout can't be moved
+  const night = await open(21);
+  r.bed = await night.evaluate(() => {
+    const d = JP.dbg, P = d.P, key = (type, code) => dispatchEvent(new KeyboardEvent(type, { code }));
+    d.step(30); const p0 = P.pos.clone();
+    for (const k of ['KeyW', 'Space', 'KeyE', 'KeyF', 'KeyJ', 'KeyR']) { key('keydown', k); d.step(20); key('keyup', k); d.step(5); }
+    const moved = P.pos.distanceTo(p0);
+    // the ride menu only offers a bed; it parachutes in and Scout sleeps in it
+    key('keydown', 'KeyB'); key('keyup', 'KeyB');
+    const menu = { open: !document.getElementById('order').hidden, items: document.getElementById('rides').children.length };
+    key('keydown', 'Digit1'); key('keyup', 'Digit1'); menu.closed = document.getElementById('order').hidden; d.step(400);
+    menu.inBed = Math.hypot(P.pos.x - d.bed.pos.x, P.pos.z - d.bed.pos.z) < 0.5 && P.pos.y > d.bed.pos.y + 0.5 && d.bed.g.visible;
+    return Object.assign(d.bedtime(), { moved, mode: P.mode, menu,
+      botsDown: d.bots.every(b => !b.alive || (b.sleepY !== undefined && Math.abs(b.pos.y - b.sleepY) < 0.1)) });
+  });
   await browser.close();
 
   const checks = [
@@ -191,7 +212,9 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     ['ramp side is a wall', hq.ramp.y < 1, hq.ramp],
     ['digger drives, scoops, lifts and tips', r.dig.mode === 'dig' && r.dig.drove > 3 && r.dig.loaded === 1 && r.dig.lifted > 3 && r.dig.tipped && r.dig.dirt && r.dig.out !== 'dig', r.dig],
     ['big map folds out and back', r.bigMap.tab && r.bigMap.drawn && !r.bigMap.k && r.bigMap.tap && !r.bigMap.tapClose, r.bigMap],
-    ['bedtime: Kitty-Bots asleep on the ground', r.bed.on && r.bed.botsDown, r.bed],
+    ['daytime at noon Danish time', !r.day.on, r.day],
+    ['bedtime at 21:00: Kitty-Bots and Scout asleep, Scout stays put', r.bed.on && r.bed.style === 'night' && r.bed.botsDown && r.bed.hero === 1 && r.bed.moved < 0.01 && r.bed.mode === 'ground', r.bed],
+    ['bedtime: the menu only orders a bed, and Scout sleeps in it', r.bed.menu.open && r.bed.menu.items === 1 && r.bed.menu.closed && r.bed.menu.inBed, r.bed.menu],
     ['online car moves smoothly', r.mpSmooth.minSpeed > 17 && r.mpSmooth.maxSpeed < 23 && r.mpSmooth.minTurn > 0.5 && r.mpSmooth.maxTurn < 0.7, r.mpSmooth],
     ['back to fullscreen on the first tap after a reload', full.before && !full.afterReload && full.afterTap, full],
     ['airship follows the online captain', r.shipSync.off < 3 && r.shipSync.dy < 2 && r.shipSync.dyaw < 0.2 && r.shipSync.mode !== 'ship', r.shipSync],
