@@ -26,6 +26,8 @@ body.touch #hint{bottom:auto;top:calc(34% + env(safe-area-inset-top,0px));font-s
 #map{top:calc(10px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));width:150px;height:150px;border-radius:18px;border:3px solid var(--navy);box-shadow:0 3px 0 rgba(0,0,0,.2);background:#2fa8dc}
 #corner{top:calc(170px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));display:flex;gap:6px;pointer-events:auto}
 #corner button{width:40px;height:40px;border-radius:12px;border:2px solid rgba(255,255,255,.2);background:var(--navy-a);color:var(--cream);font:800 18px 'Baloo 2',system-ui,sans-serif;cursor:pointer}
+#under{inset:0;z-index:1;background:radial-gradient(ellipse at 50% 0%,rgba(120,220,255,.18),rgba(10,70,130,.38))}
+#corner button.on{background:var(--gold);color:var(--navy)}
 #cross{left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:3px solid rgba(255,255,255,.75);box-shadow:0 0 0 2px rgba(22,36,74,.35)}
 #cross::after{content:"";position:absolute;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:#fff}
 #cross.ok{border-color:var(--gold);transform:scale(1.15)}
@@ -74,20 +76,21 @@ body.touch #hint{bottom:auto;top:calc(34% + env(safe-area-inset-top,0px));font-s
 <div id="stats" class="hud">
   <div class="brand">JUST PAWS</div>
   <div class="pills">
-    <div class="pill"><b id="sChick">0</b>/6 <small>CHICKENS</small></div>
-    <div class="pill"><b id="sBots">0</b>/<span id="sBotsT">14</span> <small>KITTY-BOTS</small></div>
-    <div class="pill"><b id="sChaos">0</b> <small>CHAOS</small></div>
+    <div class="pill"><b id="sChick">0</b>/6 <small data-i18n="hudChick">CHICKENS</small></div>
+    <div class="pill"><b id="sBots">0</b>/<span id="sBotsT">14</span> <small data-i18n="hudBots">KITTY-BOTS</small></div>
+    <div class="pill"><b id="sChaos">0</b> <small data-i18n="hudChaos">CHAOS</small></div>
   </div>
 </div>
 <canvas id="map" class="hud" width="300" height="300"></canvas>
-<div id="corner" class="hud"><button id="bRespawn" title="Back to Pup HQ (R)" aria-label="Back to Pup HQ">↺</button><button id="bMute" title="Sound (M)" aria-label="Toggle sound">♪</button><button id="bStyle" title="Switch look (V)" aria-label="Switch visual style">◐</button></div>
+<div id="corner" class="hud"><button id="bRespawn" data-i18n-title="tRespawn">↺</button><button id="bMute" data-i18n-title="tMute">♪</button><button id="bStyle" data-i18n-title="tStyle">◐</button><button id="bFull" data-i18n-title="tFull">⛶</button><button id="bLang" data-i18n-title="tLang" style="font-size:13px">EN</button></div>
 <div id="cross" class="hud"></div>
 <div id="hint" class="hud" hidden></div>
+<div id="under" class="hud" hidden></div>
 <div id="toast" class="hud"></div>
-<div id="mode" class="hud"><div class="pill" id="modeTxt">On paws</div><div id="fuel" hidden><i id="fuelBar"></i></div></div>
+<div id="mode" class="hud"><div class="pill" id="modeTxt"></div><div id="fuel" hidden><i id="fuelBar"></i></div></div>
 <div id="touch" class="hud" hidden>
   <div id="joy"><div id="knob"></div></div>
-  <div id="joyhint">◀ DRAG HERE TO MOVE<br>DRAG RIGHT SIDE TO LOOK ▶</div>
+  <div id="joyhint" data-i18n="joyhint">◀ DRAG HERE TO MOVE<br>DRAG RIGHT SIDE TO LOOK ▶</div>
   <div id="btns">
     <button id="tJet">JET</button><button id="tWing">WINGS</button><button id="tCar">CAR</button>
     <button id="tJump">JUMP</button><button id="tHook">HOOK</button>
@@ -97,13 +100,13 @@ body.touch #hint{bottom:auto;top:calc(34% + env(safe-area-inset-top,0px));font-s
 <div id="intro" class="overlay">
   <div class="card">
     <h1>JUST <span>PAWS</span></h1>
-    <p class="tag">Mayor Grumbleton has flooded Adventure Bay with Kitty-Bots, and the town chickens have fled to the highest rooftops. Grab your pup pack, Scout.</p>
-    <ul>
+    <p class="tag" data-i18n="introTag">Mayor Grumbleton has flooded Adventure Bay with Kitty-Bots, and the town chickens have fled to the highest rooftops. Grab your gear pack, Scout the cat.</p>
+    <ul data-i18n="introList">
       <li>Rescue <b>6 chickens</b> stuck up high (follow the yellow beams).</li>
       <li>Bust all <b>Kitty-Bots</b>: hook them, ram them or fly into them.</li>
       <li>Knock stuff over for <b>chaos points</b>.</li>
     </ul>
-    <div class="keys" id="keysDesk">
+    <div class="keys" id="keysDesk" data-i18n="keysDesk">
       <kbd>WASD</kbd><span>Run (Shift to sprint) · drive</span>
       <kbd>Mouse</kbd><span>Look (click to lock the mouse)</span>
       <kbd>Click / F</kbd><span>Grappling hook at the crosshair</span>
@@ -113,7 +116,7 @@ body.touch #hint{bottom:auto;top:calc(34% + env(safe-area-inset-top,0px));font-s
       <kbd>E</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (Space up, Shift down)</span>
       <kbd>W / S</kbd><span>In the air: dive / climb · A D turn</span>
     </div>
-    <div class="keys" id="keysTouch" hidden>
+    <div class="keys" id="keysTouch" data-i18n="keysTouch" hidden>
       <kbd>Left thumb</kbd><span>Move · drive · steer in the air</span>
       <kbd>Right thumb</kbd><span>Drag to look and aim</span>
       <kbd>HOOK</kbd><span>Grappling hook at the crosshair</span>
@@ -121,15 +124,16 @@ body.touch #hint{bottom:auto;top:calc(34% + env(safe-area-inset-top,0px));font-s
       <kbd>JET</kbd><span>Hold for jetpack (refuels on the ground)</span>
       <kbd>CAR</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (hold UP / DOWN)</span>
     </div>
-    <button class="go" id="start">Start the rescue</button>
-    <p class="fine">A fan-made prototype. Hook + parachute = slingshot.</p>
+    <div class="keys" id="keysPad" data-i18n="keysPad" hidden></div>
+    <button class="go" id="start" data-i18n="start">Start the rescue</button>
+    <p class="fine" data-i18n="fine">A fan-made prototype. Hook + parachute = slingshot.</p>
   </div>
 </div>
 <div id="win" class="overlay" hidden>
   <div class="card">
     <h1>BAY <span>SAVED!</span></h1>
-    <p class="tag">Every chicken is safe and Grumbleton's Kitty-Bots are scrap. Chaos score: <b id="winChaos">0</b>.</p>
-    <button class="go" id="keep">Keep playing</button>
+    <p class="tag" data-i18n="winTag">Every chicken is safe and Grumbleton's Kitty-Bots are scrap. Chaos score: <b id="winChaos">0</b>.</p>
+    <button class="go" id="keep" data-i18n="keep">Keep playing</button>
   </div>
 </div>
 
@@ -142,6 +146,79 @@ body.touch #hint{bottom:auto;top:calc(34% + env(safe-area-inset-top,0px));font-s
 const $=id=>document.getElementById(id);
 const V3=THREE.Vector3;
 const isTouch=matchMedia('(pointer:coarse)').matches||('ontouchstart' in window);
+// ---- language: Danish / English, picked from the browser, switchable (button in the corner) ----
+const LANG={
+en:{hudChick:'CHICKENS',hudBots:'KITTY-BOTS',hudChaos:'CHAOS',
+ tRespawn:'Back to Pup HQ (R)',tMute:'Sound (M)',tStyle:'Switch look (V)',tFull:'Fullscreen',tLang:'Dansk',
+ joyhint:'◀ DRAG HERE TO MOVE<br>DRAG RIGHT SIDE TO LOOK ▶',
+ introTag:'Mayor Grumbleton has flooded Adventure Bay with Kitty-Bots, and the town chickens have fled to the highest rooftops. Grab your gear pack, Scout the cat.',
+ introList:'<li>Rescue <b>6 chickens</b> stuck up high (follow the yellow beams).</li><li>Bust all <b>Kitty-Bots</b>: hook them, ram them or fly into them.</li><li>Knock stuff over for <b>chaos points</b>.</li>',
+ keysDesk:'<kbd>WASD</kbd><span>Run (Shift to sprint) · drive</span><kbd>Mouse</kbd><span>Look (click to lock the mouse)</span><kbd>Click / F</kbd><span>Grappling hook at the crosshair</span><kbd>Space</kbd><span>Jump, then parachute, then wingsuit</span><kbd>Q · C</kbd><span>Wingsuit on/off · cut parachute</span><kbd>Hold J</kbd><span>Jetpack (refuels on the ground)</span><kbd>E</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (Space up, Shift down)</span><kbd>W / S</kbd><span>In the air: dive / climb · A D turn</span><kbd>J · C</kbd><span>In the water: water jets · dive (Space up)</span>',
+ keysTouch:'<kbd>Left thumb</kbd><span>Move · drive · steer in the air</span><kbd>Right thumb</kbd><span>Drag to look and aim</span><kbd>HOOK</kbd><span>Grappling hook at the crosshair</span><kbd>JUMP</kbd><span>Jump, then parachute, then wingsuit</span><kbd>JET</kbd><span>Hold for jetpack (refuels on the ground)</span><kbd>CAR</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (hold UP / DOWN)</span><kbd>JET · DIVE</kbd><span>In the water: water jets · dive</span>',
+ keysPad:'<kbd>Left stick</kbd><span>Move · drive · steer (click to sprint)</span><kbd>Right stick</kbd><span>Look and aim</span><kbd>A / ✕</kbd><span>Jump, then parachute, then wingsuit</span><kbd>X / □ · RT</kbd><span>Grappling hook at the crosshair</span><kbd>B / ○</kbd><span>Wingsuit on/off</span><kbd>Hold LT</kbd><span>Jetpack</span><kbd>Y / △</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (A up, B down)</span><kbd>RB · Start</kbd><span>Cut parachute · back to Pup HQ</span><kbd>LT · B</kbd><span>In the water: water jets · dive (A up)</span>',
+ start:'Start the rescue',fine:'A fan-made prototype. Hook + parachute = slingshot.',
+ winTag:'Every chicken is safe and Grumbleton\'s Kitty-Bots are scrap. Chaos score: <b id="winChaos">0</b>.',keep:'Keep playing',
+ m_ground:'On paws',m_air:'Airborne',m_chute:'Parachute',m_wing:'Wingsuit',m_grapple:'Grappling',m_swim:'Paddling',m_car:'Pup Cruiser',m_heli:'Pup Copter',m_jet:'Jetpack',m_dive:'Diving',
+ s_bold:'Saturday Morning',s_golden:'Golden Hour',s_pastel:'Pastel Toy',lookSwitched:'look switched (V / ◐)',
+ fsNo:'Fullscreen',fsNo2:'not allowed here',padOn:'Controller connected',padHint:'A jump · X hook · Y car · LT jetpack',
+ jumpFirst:'Jump first!',thenWings:'then WINGS',geronimo:'Geronimo!',
+ chuteT:'CHUTE to open the parachute',chuteK:'Space: parachute',chuteP:'A: parachute',
+ copter:'Pup Copter!',liftT:'hold UP to lift off',liftK:'hold Space to lift off · Shift to sink',liftP:'hold A to lift off · B to sink',
+ carFar:'Cruiser too far',carFar2:'find the blue car on the map',hopFirst:'Hop out first',hopT:'CAR button',hopK:'E',hopP:'Y',
+ botBusted:'Kitty-Bot busted!',chickSaved:'Chicken rescued!',of:'of',bonk:'Bonk!',bonk2:'nice landing, Scout',
+ splash:'Splash!',splash2:'the Cruiser got towed back to HQ',ready:'Gear pack ready!',ready2:'hook the Kitty-Bots, find the chickens',
+ h_heliT:'UP / DOWN: altitude · CAR: jump out',h_heliK:'Space up · Shift down · WASD fly · E jump out',h_heliP:'A up · B down · left stick fly · Y jump out',
+ h_carT:'CAR: hop out',h_carK:'E: hop out · Space: hop',h_carP:'Y: hop out · A: hop',
+ h_flyT:'CAR: fly the Pup Copter',h_flyK:'E: fly the Pup Copter',h_flyP:'Y: fly the Pup Copter',
+ h_driveT:'CAR: drive the Pup Cruiser',h_driveK:'E: drive the Pup Cruiser',h_driveP:'Y: drive the Pup Cruiser',
+ lowFuel:'Low fuel!',h_airT:'JUMP: parachute · JET: jetpack',h_airK:'Space: parachute · hold J: jetpack',h_airP:'A: parachute · hold LT: jetpack',
+ h_chuteT:'JUMP: wingsuit · HOOK to slingshot',h_chuteK:'Space: wingsuit · hook to slingshot',h_chuteP:'A: wingsuit · RT: hook to slingshot',
+ h_wingT:'Stick up: dive · down: climb',h_wingK:'W dive · S climb · A/D turn',h_wingP:'Stick up: dive · down: climb',
+ h_swimT:'JET: water jets · DIVE: go under · JUMP: out',h_swimK:'hold J: water jets · hold C: dive · Space: jump out',h_swimP:'hold LT: water jets · hold B: dive · A: jump out',
+ h_diveT:'UP / DIVE · JET: water jets',h_diveK:'Space up · C down · hold J: water jets',h_diveP:'A up · B down · hold LT: water jets',splashIn:'Splash!',jets:'Water jets!',
+ b_DIVE:'DIVE',b_JUMP:'JUMP',b_CHUTE:'CHUTE',b_WINGS:'WINGS',b_HOP:'HOP',b_UP:'UP',b_DOWN:'DOWN',b_FOLD:'FOLD',b_JET:'JET',b_CAR:'CAR',b_HOOK:'HOOK'},
+da:{hudChick:'HØNS',hudBots:'KATTEBOTTER',hudChaos:'KAOS',
+ tRespawn:'Tilbage til Hvalpe-HQ (R)',tMute:'Lyd (M)',tStyle:'Skift stil (V)',tFull:'Fuld skærm',tLang:'English',
+ joyhint:'◀ TRÆK HER FOR AT GÅ<br>TRÆK I HØJRE SIDE FOR AT KIGGE ▶',
+ introTag:'Borgmester Brokkenborg har fyldt Adventure Bay med kattebotter, og byens høns er flygtet op på de højeste tage. Tag din udstyrstaske på, katten Scout.',
+ introList:'<li>Red <b>6 høns</b>, der sidder højt oppe (følg de gule lysstråler).</li><li>Stop alle <b>kattebotter</b>: fang dem med krogen, ram dem eller flyv ind i dem.</li><li>Vælt ting for at få <b>kaospoint</b>.</li>',
+ keysDesk:'<kbd>WASD</kbd><span>Løb (Shift for at spurte) · kør</span><kbd>Mus</kbd><span>Kig (klik for at låse musen)</span><kbd>Klik / F</kbd><span>Gribekrog mod sigtekornet</span><kbd>Mellemrum</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>Q · C</kbd><span>Wingsuit til/fra · slip faldskærmen</span><kbd>Hold J</kbd><span>Jetpack (tankes op på jorden)</span><kbd>E</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (Mellemrum op, Shift ned)</span><kbd>W / S</kbd><span>I luften: dyk / stig · A D drej</span><kbd>J · C</kbd><span>I vandet: vand-jets · dyk (Mellemrum op)</span>',
+ keysTouch:'<kbd>Venstre tommel</kbd><span>Gå · kør · styr i luften</span><kbd>Højre tommel</kbd><span>Træk for at kigge og sigte</span><kbd>KROG</kbd><span>Gribekrog mod sigtekornet</span><kbd>HOP</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>JET</kbd><span>Hold for jetpack (tankes op på jorden)</span><kbd>BIL</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (hold OP / NED)</span><kbd>JET · DYK</kbd><span>I vandet: vand-jets · dyk</span>',
+ keysPad:'<kbd>Venstre stik</kbd><span>Gå · kør · styr (tryk ind for at spurte)</span><kbd>Højre stik</kbd><span>Kig og sigt</span><kbd>A / ✕</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>X / □ · RT</kbd><span>Gribekrog mod sigtekornet</span><kbd>B / ○</kbd><span>Wingsuit til/fra</span><kbd>Hold LT</kbd><span>Jetpack</span><kbd>Y / △</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (A op, B ned)</span><kbd>RB · Start</kbd><span>Slip faldskærmen · tilbage til Hvalpe-HQ</span><kbd>LT · B</kbd><span>I vandet: vand-jets · dyk (A op)</span>',
+ start:'Start redningen',fine:'En fan-lavet prototype. Krog + faldskærm = slangebøsse.',
+ winTag:'Alle høns er i sikkerhed, og Brokkenborgs kattebotter er skrot. Kaospoint: <b id="winChaos">0</b>.',keep:'Spil videre',
+ m_ground:'På poterne',m_air:'I luften',m_chute:'Faldskærm',m_wing:'Wingsuit',m_grapple:'Gribekrog',m_swim:'Svømmer',m_car:'Hvalpebilen',m_heli:'Hvalpekopteren',m_jet:'Jetpack',m_dive:'Dykker',
+ s_bold:'Lørdagsmorgen',s_golden:'Gyldne time',s_pastel:'Pastel-legetøj',lookSwitched:'stil skiftet (V / ◐)',
+ fsNo:'Fuld skærm',fsNo2:'ikke tilladt her',padOn:'Controller forbundet',padHint:'A hop · X krog · Y bil · LT jetpack',
+ jumpFirst:'Hop først!',thenWings:'så WINGS',geronimo:'Geronimo!',
+ chuteT:'FALDSKÆRM for at folde den ud',chuteK:'Mellemrum: faldskærm',chuteP:'A: faldskærm',
+ copter:'Hvalpekopteren!',liftT:'hold OP for at lette',liftK:'hold Mellemrum for at lette · Shift for at synke',liftP:'hold A for at lette · B for at synke',
+ carFar:'Bilen er for langt væk',carFar2:'find den blå bil på kortet',hopFirst:'Hop ud først',hopT:'BIL-knappen',hopK:'E',hopP:'Y',
+ botBusted:'Kattebot stoppet!',chickSaved:'Høne reddet!',of:'af',bonk:'Bonk!',bonk2:'flot landing, Scout',
+ splash:'Plask!',splash2:'bilen blev slæbt tilbage til HQ',ready:'Tasken er klar, Scout!',ready2:'fang kattebotterne, find hønsene',
+ h_heliT:'OP / NED: højde · BIL: hop ud',h_heliK:'Mellemrum op · Shift ned · WASD flyv · E hop ud',h_heliP:'A op · B ned · venstre stik flyv · Y hop ud',
+ h_carT:'BIL: hop ud',h_carK:'E: hop ud · Mellemrum: hop',h_carP:'Y: hop ud · A: hop',
+ h_flyT:'BIL: flyv Hvalpekopteren',h_flyK:'E: flyv Hvalpekopteren',h_flyP:'Y: flyv Hvalpekopteren',
+ h_driveT:'BIL: kør Hvalpebilen',h_driveK:'E: kør Hvalpebilen',h_driveP:'Y: kør Hvalpebilen',
+ lowFuel:'Lidt brændstof!',h_airT:'HOP: faldskærm · JET: jetpack',h_airK:'Mellemrum: faldskærm · hold J: jetpack',h_airP:'A: faldskærm · hold LT: jetpack',
+ h_chuteT:'HOP: wingsuit · KROG for slangebøsse',h_chuteK:'Mellemrum: wingsuit · krog for slangebøsse',h_chuteP:'A: wingsuit · RT: krog for slangebøsse',
+ h_wingT:'Stik op: dyk · ned: stig',h_wingK:'W dyk · S stig · A/D drej',h_wingP:'Stik op: dyk · ned: stig',
+ h_swimT:'JET: vand-jets · DYK: ned under · HOP: op',h_swimK:'hold J: vand-jets · hold C: dyk · Mellemrum: hop op',h_swimP:'hold LT: vand-jets · hold B: dyk · A: hop op',
+ h_diveT:'OP / DYK · JET: vand-jets',h_diveK:'Mellemrum op · C ned · hold J: vand-jets',h_diveP:'A op · B ned · hold LT: vand-jets',
+ b_DIVE:'DYK',b_JUMP:'HOP',b_CHUTE:'SKÆRM',b_WINGS:'WINGS',b_HOP:'UD',b_UP:'OP',b_DOWN:'NED',b_FOLD:'FOLD',b_JET:'JET',b_CAR:'BIL',b_HOOK:'KROG',
+ 'Town Hall tower':'rådhustårnet','water tower':'vandtårnet','Pup HQ roof':'taget på Hvalpe-HQ','bridge tower':'brotårnet','lighthouse':'fyrtårnet','Jake-ish Mountain peak':'bjergtoppen'}};
+let lang=(()=>{try{const l=localStorage.getItem('jpLang');if(l==='da'||l==='en')return l}catch(e){}return /^da|^nb|^no/i.test(navigator.language||'')?'da':'en'})();
+const T=k=>{const d=LANG[lang];return d[k]!==undefined?d[k]:LANG.en[k]!==undefined?LANG.en[k]:k};
+// hint for the current input device: touch (T), keyboard (K) or gamepad (P)
+const TD=k=>T(k+(gpad.on?'P':isTouch?'T':'K'));
+function applyLang(){
+  document.documentElement.lang=lang;
+  document.querySelectorAll('[data-i18n]').forEach(e=>e.innerHTML=T(e.dataset.i18n));
+  document.querySelectorAll('[data-i18n-title]').forEach(e=>{e.title=T(e.dataset.i18nTitle);e.setAttribute('aria-label',T(e.dataset.i18nTitle))});
+  $('bLang').textContent=lang==='da'?'EN':'DA';
+  $('modeTxt').textContent=T('m_'+P.mode);
+  for(const id of ['tJet','tCar','tHook'])$(id).textContent=T('b_'+{tJet:'JET',tCar:'CAR',tHook:'HOOK'}[id]);
+}
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const lerp=(a,b,t)=>a+(b-a)*t;
 const smooth=t=>{t=clamp(t,0,1);return t*t*(3-2*t)};
@@ -250,7 +327,7 @@ const clockTex=canvasTex(128,128,(g)=>{g.fillStyle='#fff8e8';g.beginPath();g.arc
   }
   geo.setAttribute('color',new THREE.BufferAttribute(col,3));geo.computeVertexNormals();
   const t=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({vertexColors:true}));t.receiveShadow=true;scene.add(t);
-  const sea=new THREE.Mesh(new THREE.PlaneGeometry(4000,4000),new THREE.MeshLambertMaterial({color:0x2fa8dc,transparent:true,opacity:0.84}));
+  const sea=new THREE.Mesh(new THREE.PlaneGeometry(4000,4000),new THREE.MeshLambertMaterial({color:0x2fa8dc,transparent:true,opacity:0.84,side:THREE.DoubleSide}));
   sea.rotation.x=-Math.PI/2;sea.position.y=0;scene.add(sea);
 }
 
@@ -489,10 +566,60 @@ const clouds=[];
 }
 
 // ================= characters =================
+// sculpted pup torso: deep chest, narrow waist, tucked belly, rounded haunches (not a barrel).
+// Built from a unit sphere (radius 1, so the anim rig's r=0.5 swap leaves it alone); cream chest/belly via vertex colours.
+const pupBodyMat=new THREE.MeshLambertMaterial({color:0xffffff,vertexColors:true});
+const pupBodyCache={};
+function pupBodyGeo(fur,stripe){
+  const key=fur+':'+(stripe||0);if(pupBodyCache[key])return pupBodyCache[key];
+  const g=new THREE.SphereGeometry(1,32,24),p=g.attributes.position,L=0.66;
+  // profile along the body, u=-1 rump .. u=+1 chest: half-width, top line, bottom line
+  const U=[-1,-0.6,-0.15,0.3,0.7,1],W=[0.3,0.33,0.25,0.34,0.34,0.3],T=[1.08,1.13,1.12,1.17,1.2,1.18],B=[0.66,0.6,0.7,0.5,0.46,0.56];
+  const f=(A,u)=>{for(let i=1;i<U.length;i++)if(u<=U[i]){const k=(u-U[i-1])/(U[i]-U[i-1]),e=k*k*(3-2*k);return A[i-1]+(A[i]-A[i-1])*e}return A[A.length-1]};
+  const fc=new THREE.Color(fur),cr=new THREE.Color(0xfff1dc),sc=new THREE.Color(stripe||fur),col=[];
+  for(let i=0;i<p.count;i++){
+    const x=p.getX(i),y=p.getY(i),u=p.getZ(i),t=f(T,u),b=f(B,u);
+    p.setXYZ(i,x*f(W,u),(t+b)/2+y*(t-b)/2,u*L);
+    const cream=(y<-0.42&&u>-0.55)||(u>0.62&&y<0.35);
+    const striped=stripe&&!cream&&y>-0.15&&Math.sin(u*15+Math.abs(x)*2.5)>0.45;
+    const c=cream?cr:striped?sc:fc;col.push(c.r,c.g,c.b);
+  }
+  g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.computeVertexNormals();
+  if(stripe){p.needsUpdate=true;for(let i=0;i<p.count;i++)p.setX(i,p.getX(i)*0.88)}   // cats are a touch slimmer
+  g.computeVertexNormals();return pupBodyCache[key]=g;
+}
+// the hero is a cat: tabby, pointy ears, whiskers, long curly tail (same part layout as makePup so the anim rig fits)
+function makeCat(fur,stripe,gear){
+  const g=new THREE.Group(),M=c=>mat(c),S=(r,w=14,h=10)=>new THREE.SphereGeometry(r,w,h);
+  mesh(pupBodyGeo(fur,stripe),pupBodyMat,0,0,0,g);
+  const head=new THREE.Group();head.position.set(0,1.32,0.55);g.add(head);
+  const skull=mesh(S(0.42,18,14),M(fur),0,0,0,head);skull.scale.set(1.08,0.94,0.96);
+  for(const x of [-0.1,0,0.1]){const st=mesh(S(0.07,8,6),M(stripe),x,0.25,0.29,head);st.scale.set(0.45,1.5,0.35);st.rotation.x=-0.8}
+  const mz=mesh(S(0.19,14,10),M(0xfff1dc),0,-0.12,0.32,head);mz.scale.set(1.25,0.75,0.8);
+  const nose=mesh(new THREE.ConeGeometry(0.055,0.06,3),M(0xff8fb1),0,-0.04,0.45,head);nose.rotation.x=Math.PI/2+0.3;nose.rotation.z=Math.PI;
+  for(const s of [-1,1]){
+    mesh(S(0.115,12,8),M(0xd9f07a),s*0.17,0.06,0.33,head);
+    const pu=mesh(S(0.062,10,8),M(0x1a1a1a),s*0.175,0.06,0.42,head);pu.scale.set(0.45,1.15,0.6);
+    const ear=mesh(new THREE.ConeGeometry(0.17,0.34,4),M(fur),s*0.25,0.38,-0.02,head);ear.rotation.z=-s*0.22;ear.rotation.y=Math.PI/4;
+    const inner=mesh(new THREE.ConeGeometry(0.1,0.22,4),M(0xffb3c7),0,-0.04,0.05,ear);inner.castShadow=false;
+    for(const k of [-1,0,1]){const w=mesh(new THREE.BoxGeometry(0.34,0.012,0.012),M(0x3a3a3a),s*0.3,-0.11+k*0.035,0.36,head);w.rotation.z=s*k*0.18;w.rotation.y=-s*0.25;w.castShadow=false}
+  }
+  const collar=mesh(new THREE.TorusGeometry(0.3,0.06,6,16),M(gear),0,1.06,0.45,g);collar.rotation.x=Math.PI/2.4;
+  mesh(new THREE.SphereGeometry(0.07,8,6),M(0xffc93c),0,0.93,0.72,g);
+  const pack=mesh(new THREE.BoxGeometry(0.56,0.4,0.48),M(gear),0,1.16,-0.1,g);
+  mesh(new THREE.CylinderGeometry(0.11,0.11,0.08,10),M(0xffc93c),0,1.16,0.15,g).rotation.x=Math.PI/2;
+  const legs=[];for(const [x,z] of [[-0.22,0.38],[0.22,0.38],[-0.22,-0.38],[0.22,-0.38]]){const p=new THREE.Group();p.position.set(x,0.55,z);g.add(p);mesh(new THREE.CylinderGeometry(0.09,0.08,0.52,8),M(fur),0,-0.27,0,p);mesh(S(0.11,8,6),M(0xfff1dc),0,-0.52,0.04,p);legs.push(p)}
+  const tail=new THREE.Group();tail.position.set(0,0.98,-0.6);g.add(tail);
+  {const c=new THREE.CatmullRomCurve3([new V3(0,0,0),new V3(0,0.1,-0.35),new V3(0,0.45,-0.55),new V3(0,0.85,-0.45),new V3(0,1.0,-0.2)]);
+   mesh(new THREE.TubeGeometry(c,20,0.065,8,false),M(fur),0,0,0,tail);mesh(S(0.075,8,6),M(stripe),0,1.0,-0.2,tail)}
+  const wings=new THREE.Group();g.add(wings);wings.visible=false;
+  for(const s of [-1,1]){const w=mesh(new THREE.BoxGeometry(1.5,0.05,0.9),M(gear),s*0.95,0.95,-0.05,wings);w.rotation.z=s*0.06;mesh(new THREE.BoxGeometry(0.3,0.06,0.92),M(0xffc93c),s*1.6,0.95,-0.05,wings)}
+  return {g,legs,tail,head,wings,pack};
+}
+const HERO=[0xf2a14e,0xc4652a,0x2e5fb8];   // ginger tabby, blue gear
 function makePup(fur,gear,hat){
   const g=new THREE.Group(),M=c=>mat(c),S=(r,w=14,h=10)=>new THREE.SphereGeometry(r,w,h);
-  const body=mesh(S(0.5),M(fur),0,0.78,0,g);body.scale.set(0.95,0.85,1.35);
-  const belly=mesh(S(0.4),M(0xfff1dc),0,0.66,0.12,g);belly.scale.set(0.8,0.7,1.2);
+  const body=mesh(pupBodyGeo(fur),pupBodyMat,0,0,0,g);
   const head=new THREE.Group();head.position.set(0,1.32,0.55);g.add(head);
   mesh(S(0.44),M(fur),0,0,0,head);
   const sn=mesh(S(0.22),M(0xfff1dc),0,-0.1,0.33,head);sn.scale.set(1.1,0.8,1.2);
@@ -511,7 +638,7 @@ function makePup(fur,gear,hat){
   for(const s of [-1,1]){const w=mesh(new THREE.BoxGeometry(1.5,0.05,0.9),M(gear),s*0.95,0.95,-0.05,wings);w.rotation.z=s*0.06;mesh(new THREE.BoxGeometry(0.3,0.06,0.92),M(0xffc93c),s*1.6,0.95,-0.05,wings)}
   return {g,legs,tail,head,wings,pack};
 }
-const pup=makePup(0xc68a4c,0x2e5fb8,0x2e5fb8);scene.add(pup.g);
+const pup=makeCat(...HERO);scene.add(pup.g);
 const jetFx=[];
 for(const s of [-1,1]){
   mesh(new THREE.CylinderGeometry(0.13,0.16,0.55,10),0x9aa3b5,s*0.22,1.1,-0.42,pup.g);
@@ -547,7 +674,7 @@ const car={g:new THREE.Group(),pos:new V3(176,0,102),heading:Math.atan2(-22,-38)
   const paw=new THREE.Mesh(new THREE.PlaneGeometry(1.2,1.2),new THREE.MeshLambertMaterial({map:pawTex,transparent:true}));paw.rotation.x=-Math.PI/2;paw.position.set(0,1.41,1.3);g.add(paw);
   for(const s of [-1,1]){mesh(new THREE.BoxGeometry(0.3,0.25,0.1),new THREE.MeshBasicMaterial({color:0xfff7c2}),s*0.8,1.05,2.21,g)}
   for(const [x,z] of [[-1.2,1.4],[1.2,1.4],[-1.2,-1.4],[1.2,-1.4]]){const w=new THREE.Group();w.position.set(x,0.55,z);g.add(w);const t=mesh(new THREE.CylinderGeometry(0.55,0.55,0.45,14),0x222222,0,0,0,w);t.rotation.z=Math.PI/2;mesh(new THREE.CylinderGeometry(0.28,0.28,0.47,10),0xdddddd,0,0,0,w).rotation.z=Math.PI/2;car.wheels.push(w)}
-  const drv=makePup(0xc68a4c,0x2e5fb8,0x2e5fb8);ANIM.rigPup(drv);drv.g.scale.setScalar(0.9);drv.g.position.set(0,0.9,-0.5);g.add(drv.g);drv.g.visible=false;car.driver=drv;
+  const drv=makeCat(...HERO);ANIM.rigPup(drv);drv.g.scale.setScalar(0.9);drv.g.position.set(0,0.9,-0.5);g.add(drv.g);drv.g.visible=false;car.driver=drv;
   scene.add(g);
 }
 ANIM.rigCar(car);
@@ -583,7 +710,7 @@ const PAD={x:LOOK.x+26,z:LOOK.z-22};
   for(const a of [0,Math.PI/2]){const b=mesh(new THREE.BoxGeometry(9.5,0.07,0.45),0x3d4458,0,0.05,0,rot);b.rotation.y=a}
   const paw=new THREE.Mesh(new THREE.PlaneGeometry(1.3,1.3),new THREE.MeshLambertMaterial({map:pawTex,transparent:true}));
   for(const s of [-1,1]){const p=paw.clone();p.position.set(s*1.62,2.0,-0.4);p.rotation.y=s*Math.PI/2;g.add(p)}
-  const pl=makePup(0xc68a4c,0x2e5fb8,0x2e5fb8);ANIM.rigPup(pl);pl.g.scale.setScalar(0.85);pl.g.position.set(0,1.3,0.5);g.add(pl.g);pl.g.visible=false;heli.pilot=pl;
+  const pl=makeCat(...HERO);ANIM.rigPup(pl);pl.g.scale.setScalar(0.85);pl.g.position.set(0,1.3,0.5);g.add(pl.g);pl.g.visible=false;heli.pilot=pl;
   g.rotation.order='YXZ';scene.add(g);
 }
 function resetHeli(){heli.pos.set(PAD.x,PAD.y,PAD.z);heli.vel.set(0,0,0);heli.yaw=Math.atan2(TOWN.x-PAD.x,TOWN.z-PAD.z);heli.landed=true}
@@ -694,7 +821,7 @@ function initAudio(){if(ac)return;try{ac=new (window.AudioContext||window.webkit
 function tone(f,d,type='square',v=0.07,slide=0,delay=0){if(!ac||muted)return;const t=ac.currentTime+delay,o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(slide,t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(0.001,t+d);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+d+0.02)}
 const sfx={jump:()=>tone(380,.14,'square',.04,720),zip:()=>tone(1100,.22,'sawtooth',.035,260),chute:()=>tone(180,.35,'triangle',.08,420),wing:()=>tone(500,.3,'triangle',.06,1000),
   pop:()=>{tone(170,.35,'square',.07,50);tone(700,.18,'triangle',.05,1500,.05)},knock:()=>tone(220,.09,'square',.04,120),bonk:()=>tone(150,.25,'square',.07,70),
-  rescue:()=>[523,659,784,1046].forEach((f,i)=>tone(f,.2,'triangle',.08,0,i*.09)),woof:()=>{tone(320,.07,'sawtooth',.06,200);tone(300,.09,'sawtooth',.06,170,.12)},splash:()=>tone(900,.4,'sawtooth',.03,120)};
+  rescue:()=>[523,659,784,1046].forEach((f,i)=>tone(f,.2,'triangle',.08,0,i*.09)),woof:()=>{tone(320,.07,'sawtooth',.06,200);tone(300,.09,'sawtooth',.06,170,.12)},meow:()=>{tone(520,.16,'triangle',.06,820);tone(820,.26,'triangle',.05,430,.14)},splash:()=>tone(900,.4,'sawtooth',.03,120)};
 
 // ================= game state & HUD =================
 const S={chick:0,bots:0,chaos:0,won:false,running:false};
@@ -705,7 +832,6 @@ const P={pos:new V3(LOOK.x-10,0,LOOK.z-24),vel:new V3(),mode:'ground',airT:0,hoo
 P.pos.y=ground(P.pos.x,P.pos.z);
 const SPAWN_YAW=Math.atan2(TOWN.x-LOOK.x,TOWN.z-LOOK.z);
 const cam={yaw:SPAWN_YAW,pitch:0.28,dist:7,lastLook:-10};
-const modeNames={ground:'On paws',air:'Airborne',chute:'Parachute',wing:'Wingsuit',grapple:'Grappling',swim:'Paddling',car:'Pup Cruiser',heli:'Pup Copter',jet:'Jetpack'};
 
 // ================= input =================
 const keys={};
@@ -745,12 +871,52 @@ canvas.addEventListener('pointermove',e=>{
 function endPtr(e){if(e.pointerType==='mouse'){dragging=false;return}if(e.pointerId===joy.id){joy.id=null;joy.x=joy.y=0;$('joy').style.display='none'}if(e.pointerId===look.id)look.id=null}
 canvas.addEventListener('pointerup',endPtr);canvas.addEventListener('pointercancel',endPtr);
 function btn(id,fn){const b=$(id);b.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();initAudio();fn()});b.addEventListener('contextmenu',e=>e.preventDefault())}
-btn('tJump',()=>{if(P.mode==='heli')hold.up=true;else actJump()});btn('tHook',()=>actGrapple());btn('tWing',()=>{if(P.mode==='heli')hold.down=true;else actWing()});
+btn('tJump',()=>{if(P.mode==='heli'||P.mode==='dive')hold.up=true;else actJump()});btn('tHook',()=>actGrapple());btn('tWing',()=>{if(P.mode==='heli'||P.mode==='swim'||P.mode==='dive')hold.down=true;else actWing()});
 btn('tJet',()=>{hold.jet=true});
 for(const [id,k] of [['tJump','up'],['tWing','down'],['tJet','jet']])for(const ev of ['pointerup','pointercancel','pointerleave'])$(id).addEventListener(ev,()=>{hold[k]=false});btn('tCar',()=>actCar());
 $('bRespawn').addEventListener('click',()=>respawn());$('bStyle').addEventListener('click',()=>cycleStyle());$('bMute').addEventListener('click',()=>toggleMute());
+// fullscreen: hidden where the browser (or an embedding iframe) doesn't allow it, e.g. iPhone Safari
+{const d=document,el=d.documentElement,bf=$('bFull');
+ const can=d.fullscreenEnabled||d.webkitFullscreenEnabled,cur=()=>d.fullscreenElement||d.webkitFullscreenElement;
+ if(!can)bf.hidden=true;
+ bf.addEventListener('click',()=>{if(cur())(d.exitFullscreen||d.webkitExitFullscreen).call(d);else{const r=(el.requestFullscreen||el.webkitRequestFullscreen).call(el,{navigationUI:'hide'});if(r&&r.catch)r.catch(()=>toast(T('fsNo'),T('fsNo2')))}});
+ const sync=()=>{bf.classList.toggle('on',!!cur());bf.setAttribute('aria-pressed',!!cur())};
+ d.addEventListener('fullscreenchange',sync);d.addEventListener('webkitfullscreenchange',sync);}
 function toggleMute(){muted=!muted;$('bMute').textContent=muted?'✕':'♪';if(engine)engine.g.gain.value=0}
+// ---- gamepad (standard mapping: Xbox / PlayStation / MFi over Bluetooth, incl. iPad Safari) ----
+// A/✕ jump (heli: up) · B/○ parachute-wingsuit (heli: down) · X/□ or RT grapple · Y/△ car/copter
+// LT or LB jetpack (hold) · RB cut loose · L3 sprint · left stick move · right stick camera · Start respawn · Select look
+const gpad={on:false,x:0,y:0,sprint:false,prev:[]};
+function pollPad(dt){
+  const pads=navigator.getGamepads?navigator.getGamepads():[];let g=null;
+  for(const p of pads)if(p&&p.connected){g=p;break}
+  if(!g){if(gpad.on){gpad.on=false;gpad.x=gpad.y=0}return}
+  const dz=v=>Math.abs(v)<0.18?0:(v-Math.sign(v)*0.18)/0.82;
+  const B=i=>!!(g.buttons[i]&&(g.buttons[i].pressed||g.buttons[i].value>0.5));
+  const now=g.buttons.map((_,i)=>B(i)),was=gpad.prev,hit=i=>now[i]&&!was[i],rel=i=>!now[i]&&was[i];
+  gpad.x=dz(g.axes[0]||0);gpad.y=-dz(g.axes[1]||0);gpad.sprint=now[10];
+  const rx=dz(g.axes[2]||0),ry=dz(g.axes[3]||0);
+  if(rx||ry)lookBy(rx*dt*900,ry*dt*650);
+  if(!gpad.on&&(now.some(b=>b)||gpad.x||gpad.y)){gpad.on=true;$('joyhint').hidden=true;$('keysPad').hidden=false;$('keysDesk').hidden=$('keysTouch').hidden=true;lastHint='';if(S.running)toast(T('padOn'),T('padHint'))}
+  if(!S.running){if(hit(0)||hit(9)){if(!$('intro').hidden)$('start').click()}}
+  else if(!$('win').hidden){if(hit(0))$('keep').click()}
+  else{
+    if(hit(0)){if(P.mode==='heli'||P.mode==='dive')hold.up=true;else actJump()}
+    if(rel(0))hold.up=false;
+    if(hit(1)){if(P.mode==='heli'||P.mode==='swim'||P.mode==='dive')hold.down=true;else actWing()}
+    if(rel(1))hold.down=false;
+    if(hit(2)||hit(7))actGrapple();
+    if(hit(3))actCar();
+    if(hit(5))actCut();
+    if(hit(6)||hit(4))hold.jet=true;
+    if((rel(6)||rel(4))&&!now[6]&&!now[4])hold.jet=false;
+    if(hit(9))respawn();
+    if(hit(8))cycleStyle();
+  }
+  gpad.prev=now;
+}
 function moveInput(){
+  if(gpad.on&&(gpad.x||gpad.y)){const l=Math.hypot(gpad.x,gpad.y);return l>1?{x:gpad.x/l,y:gpad.y/l,mag:1}:{x:gpad.x,y:gpad.y,mag:l}}
   if(joy.id!==null)return{x:joy.x,y:joy.y,mag:Math.hypot(joy.x,joy.y)};
   const x=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0),y=(keys.KeyW||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0);
   const l=Math.hypot(x,y);return l>1?{x:x/l,y:y/l,mag:1}:{x,y,mag:l};
@@ -775,7 +941,7 @@ function actWing(){
   if(P.mode==='air'||P.mode==='chute')startWing();
   else if(P.mode==='grapple'){endGrapple(false);startWing()}
   else if(P.mode==='wing')toAir();
-  else if(P.mode==='ground')toast('Jump first!','then WINGS');
+  else if(P.mode==='ground')toast(T('jumpFirst'),T('thenWings'));
 }
 function actCut(){if(P.mode==='chute'||P.mode==='wing')toAir()}
 function actCar(){
@@ -783,12 +949,12 @@ function actCar(){
     heli.pilot.g.visible=false;pup.g.visible=true;cam.dist=9;if(engine)engine.g.gain.value=0;
     const rx=-Math.cos(heli.yaw),rz=Math.sin(heli.yaw);
     if(heli.landed){P.pos.set(heli.pos.x+rx*3.6,heli.pos.y+1,heli.pos.z+rz*3.6);P.vel.set(0,3,0)}
-    else{P.pos.set(heli.pos.x+rx*2,heli.pos.y-1.2,heli.pos.z+rz*2);P.vel.copy(heli.vel);P.vel.y=Math.min(P.vel.y,0);toast('Geronimo!',isTouch?'CHUTE to open the parachute':'Space: parachute')}
+    else{P.pos.set(heli.pos.x+rx*2,heli.pos.y-1.2,heli.pos.z+rz*2);P.vel.copy(heli.vel);P.vel.y=Math.min(P.vel.y,0);toast(T('geronimo'),TD('chute'))}
     toAir();return;
   }
   if(P.mode!=='car'&&P.mode!=='grapple'&&P.pos.distanceTo(heli.pos)<6.5&&P.pos.distanceTo(heli.pos)<P.pos.distanceTo(car.pos)){
-    if(P.mode==='chute'||P.mode==='wing')toAir();P.mode='heli';pup.g.visible=false;heli.pilot.g.visible=true;sfx.woof();
-    toast('Pup Copter!',isTouch?'hold UP to lift off':'hold Space to lift off · Shift to sink');return;
+    if(P.mode==='chute'||P.mode==='wing')toAir();P.mode='heli';pup.g.visible=false;heli.pilot.g.visible=true;sfx.meow();
+    toast(T('copter'),TD('lift'));return;
   }
   if(P.mode==='car'){
     const rx=-Math.cos(car.heading),rz=Math.sin(car.heading);
@@ -796,8 +962,8 @@ function actCar(){
     toAir();pup.g.visible=true;car.driver.g.visible=false;cam.dist=9;if(engine)engine.g.gain.value=0;return;
   }
   if(P.mode==='grapple')return;
-  if(P.pos.distanceTo(car.pos)<5.5){if(P.mode==='chute'||P.mode==='wing')toAir();P.mode='car';pup.g.visible=false;car.driver.g.visible=true;sfx.woof()}
-  else toast('Cruiser too far','find the blue car on the map');
+  if(P.pos.distanceTo(car.pos)<5.5){if(P.mode==='chute'||P.mode==='wing')toAir();P.mode='car';pup.g.visible=false;car.driver.g.visible=true;sfx.meow()}
+  else toast(T('carFar'),T('carFar2'));
 }
 const ray=new THREE.Raycaster(),tmpDir=new V3(),aim={ok:false,point:new V3(),ent:null,dist:0};
 function rayTerrain(o,d,maxT){
@@ -824,7 +990,7 @@ function computeAim(){
 }
 let ropeFlash=0;const ropeEnd=new V3();
 function actGrapple(){
-  if(P.mode==='car'||P.mode==='heli'){toast('Hop out first',isTouch?'CAR button':'E');return}
+  if(P.mode==='car'||P.mode==='heli'){toast(T('hopFirst'),TD('hop'));return}
   computeAim();
   if(!aim.ok){sfx.bonk();return}
   sfx.zip();
@@ -850,12 +1016,12 @@ function knock(p,v,big){
 function hitBot(b,v){
   if(!b.alive)return;b.alive=false;b.falling=true;b.vel.copy(v);b.spin.set(R(-6,6),R(-6,6),R(-6,6));b.t=0;
   S.bots++;$('sBots').textContent=S.bots;addChaos(100);sfx.pop();burst(b.pos,[0x7b4bd6,0xffe14d,0xffffff],14,8);
-  toast('Kitty-Bot busted!',`${S.bots} of ${bots.length}`);checkWin();
+  toast(T('botBusted'),`${S.bots} ${T('of')} ${bots.length}`);checkWin();
 }
 function rescue(c){
   c.rescued=true;c.t=0;S.chick++;$('sChick').textContent=S.chick;addChaos(50);sfx.rescue();
   c.beam.visible=false;c.ring.visible=false;burst(c.pos,[0xffe14d,0xffffff,0xe8413c],22,7);
-  toast('Chicken rescued!',`${S.chick} of ${chickens.length} · ${c.name}`);checkWin();
+  toast(T('chickSaved'),`${S.chick} ${T('of')} ${chickens.length} · ${T(c.name)}`);checkWin();
 }
 function checkWin(){if(!S.won&&S.chick===chickens.length&&S.bots===bots.length){S.won=true;setTimeout(()=>{$('winChaos').textContent=S.chaos;$('win').hidden=false;if(document.pointerLockElement)document.exitPointerLock()},1600)}}
 function respawn(){
@@ -896,7 +1062,7 @@ function updatePlayer(dt){
   if(P.mode==='heli'){updateHeli(dt,inp,true);P.pos.copy(heli.pos);return}
   const sY=Math.sin(cam.yaw),cY=Math.cos(cam.yaw);
   const jetHeld=keys.KeyJ||hold.jet;
-  if(jetHeld&&P.fuel>2&&['ground','air','chute','wing','swim'].includes(P.mode)){toAir();P.mode='jet';if(P.vel.y<0)P.vel.y*=0.4}
+  if(jetHeld&&P.fuel>2&&['ground','air','chute','wing'].includes(P.mode)){toAir();P.mode='jet';if(P.vel.y<0)P.vel.y*=0.4}
   if(P.mode==='jet'&&(!jetHeld||P.fuel<=0)){toAir();if(engine)engine.g.gain.value=0}
   switch(P.mode){
     case'jet':{
@@ -907,13 +1073,29 @@ function updatePlayer(dt){
       if(frameN%3===0)burst(new V3(P.pos.x,P.pos.y+0.2,P.pos.z),[0xffa82e,0xffe14d,0xdddddd],1,3);
       if(engine&&!muted){engine.o.frequency.value=150+Math.random()*30;engine.g.gain.value=0.025}
       break;}
-    case'ground':case'air':case'swim':{
-      const sprint=keys.ShiftLeft||keys.ShiftRight||(joy.id!==null&&inp.mag>0.97);
-      const spd=P.mode==='swim'?5.5:(sprint?16:9);
+    case'swim':case'dive':{
+      // swimming: paddle at the surface, hold dive to go under; water jets (jet button) = fast, no fuel
+      const up=keys.Space||hold.up,down=keys.KeyC||hold.down,boost=jetHeld;
+      if(P.mode==='swim'&&down){P.mode='dive';P.vel.y=-5;sfx.splash();burst(new V3(P.pos.x,0.2,P.pos.z),0xffffff,8,4)}
+      const spd=boost?26:(keys.ShiftLeft||keys.ShiftRight||gpad.sprint?10:7);
+      const mx=sY*inp.y-cY*inp.x,mz=cY*inp.y+sY*inp.x,k=boost?3:6;
+      let fx=mx,fz=mz;if(boost&&Math.hypot(mx,mz)<0.1){fx=Math.sin(P.face);fz=Math.cos(P.face)}   // jets push forward even without steering
+      P.vel.x=lerp(P.vel.x,fx*spd,Math.min(1,k*dt));P.vel.z=lerp(P.vel.z,fz*spd,Math.min(1,k*dt));
+      if(P.mode==='swim')P.vel.y=0;
+      else{const vt=(up?6:0)-(down?6:0)+(up||down?0:2.2);P.vel.y=lerp(P.vel.y,vt*(boost?1.6:1),Math.min(1,3*dt))}
+      if(Math.hypot(fx,fz)>0.1)P.face=lerpAngle(P.face,Math.atan2(fx,fz),Math.min(1,(boost?5:10)*dt));
+      if(boost){if(P.jetT===undefined||P.jetT<0)toast(T('jets'),'');P.jetT=0.3;
+        const b=new V3(P.pos.x-Math.sin(P.face)*1.1,P.mode==='swim'?0.15:P.pos.y+0.6,P.pos.z-Math.cos(P.face)*1.1);if(frameN%2===0)burst(b,[0xffffff,0xc9f1ff,0x8fdcff],2,4)}
+      else if(P.jetT!==undefined)P.jetT-=dt;
+      if(P.mode==='dive'&&frameN%9===0)burst(new V3(P.pos.x,P.pos.y+1.1,P.pos.z),[0xe8fbff,0xbfeeff],1,1.5);
+      break;}
+    case'ground':case'air':{
+      const sprint=keys.ShiftLeft||keys.ShiftRight||gpad.sprint||(joy.id!==null&&inp.mag>0.97);
+      const spd=sprint?16:9;
       const mx=sY*inp.y-cY*inp.x,mz=cY*inp.y+sY*inp.x;
       const k=P.mode==='air'?2.2:12;
       P.vel.x=lerp(P.vel.x,mx*spd,Math.min(1,k*dt));P.vel.z=lerp(P.vel.z,mz*spd,Math.min(1,k*dt));
-      if(P.mode==='swim')P.vel.y=0;else P.vel.y-=32*dt;
+      P.vel.y-=32*dt;
       if(Math.hypot(mx,mz)>0.1)P.face=lerpAngle(P.face,Math.atan2(mx,mz),Math.min(1,12*dt));
       break;}
     case'chute':{
@@ -949,13 +1131,16 @@ function updatePlayer(dt){
   if(P.mode==='ground'&&!grounded&&P.vel.y<=0&&P.pos.y-g<0.55&&P.pos.y-g>0){P.pos.y=g;grounded=true}
   if(P.mode==='ground'&&!grounded&&P.vel.y<=0){const rh=roofH(P.pos.x,P.pos.z);if(P.pos.y-rh<0.8&&P.pos.y-rh>0){P.pos.y=rh;grounded=true}}
   // water
-  if(g<-0.3&&P.pos.y<-0.55&&P.mode!=='grapple'){
+  if(P.mode==='dive'){
+    if(g>-1.2){P.mode=grounded?'ground':'air'}                                   // swam into the shallows
+    else if(P.pos.y>-0.55&&!(keys.KeyC||hold.down)){P.pos.y=-0.55;P.vel.y=0;P.mode='swim';burst(new V3(P.pos.x,0.2,P.pos.z),0xffffff,6,3)}
+  }else if(g<-0.3&&P.pos.y<-0.55&&P.mode!=='grapple'){
     P.pos.y=-0.55;if(P.vel.y<0)P.vel.y=0;
     if(P.mode!=='swim'){if(P.mode!=='ground'&&P.mode!=='air'||P.vel.length()>6)sfx.splash();burst(new V3(P.pos.x,0.2,P.pos.z),0xffffff,10,5);toAir();P.mode='swim'}
   }else if(P.mode==='swim'&&(g>-0.55||P.pos.y>-0.3))P.mode=grounded?'ground':'air';
   if(P.mode!=='jet')P.fuel=Math.min(100,P.fuel+(grounded?40:8)*dt);
   if(grounded){
-    if(P.mode==='air'||P.mode==='chute'||P.mode==='wing'){if(P.mode==='wing'&&P.wingSpeed>36){sfx.bonk();toast('Bonk!','nice landing, Scout')}toAir();P.mode='ground'}
+    if(P.mode==='air'||P.mode==='chute'||P.mode==='wing'){if(P.mode==='wing'&&P.wingSpeed>36){sfx.bonk();toast(T('bonk'),T('bonk2'))}toAir();P.mode='ground'}
     P.airT=0;
   }else if(P.mode==='ground'){P.airT+=dt;if(P.airT>0.15)P.mode='air'}
   if(P.mode==='wing'&&wall){sfx.bonk();P.vel.multiplyScalar(-0.25);toAir()}
@@ -987,7 +1172,7 @@ function updateCar(dt,inp){
   const sup=support(car.pos.x,car.pos.z,car.pos.y,0.5);
   if(car.onGround){if(sup<car.pos.y-0.9)car.onGround=false;else{car.vy=clamp((sup-car.pos.y)/dt,-30,30);car.pos.y=sup}}
   if(!car.onGround){car.vy-=30*dt;car.pos.y+=car.vy*dt;if(car.pos.y<=sup){if(car.vy<-14){sfx.bonk();burst(car.pos.clone(),0xd9c7a0,10,5)}car.pos.y=sup;car.onGround=true;car.vy=0}}
-  if(car.pos.y<-0.6){sfx.splash();burst(new V3(car.pos.x,0.3,car.pos.z),0xffffff,20,8);toast('Splash!','the Cruiser got towed back to HQ');resetCar()}
+  if(car.pos.y<-0.6){sfx.splash();burst(new V3(car.pos.x,0.3,car.pos.z),0xffffff,20,8);toast(T('splash'),T('splash2'));resetCar()}
   // visuals
   const hf=ground(car.pos.x+fx*1.8,car.pos.z+fz*1.8),hb=ground(car.pos.x-fx*1.8,car.pos.z-fz*1.8);
   const tp=car.onGround?Math.atan2(hf-hb,3.6):clamp(car.vy*0.03,-0.5,0.5);
@@ -1109,15 +1294,14 @@ function draw(){
   renderer.setRenderTarget(null);renderer.render(postScene,postCam);
 }
 const startStyle=(location.hash||'').slice(1);let styleName='golden';
-const styleLabels={bold:'Saturday Morning',golden:'Golden Hour',pastel:'Pastel Toy'};
-function cycleStyle(){const k=Object.keys(STYLES);styleName=k[(k.indexOf(styleName)+1)%k.length];setStyle(styleName);toast(styleLabels[styleName],'look switched (V / ◐)')}
+function cycleStyle(){const k=Object.keys(STYLES);styleName=k[(k.indexOf(styleName)+1)%k.length];setStyle(styleName);toast(T('s_'+styleName),T('lookSwitched'))}
 if(STYLES[startStyle])styleName=startStyle;setStyle(styleName);
 const PERF=JPPerf.init(THREE,renderer,{toonMats,maxPR:Math.min(devicePixelRatio,isTouch?1.25:1.5),onResize:pr=>{renderer.setPixelRatio(pr);resize();makeRT()}});
 renderer.shadowMap.autoUpdate=false;
 PERF.mergeStatic(scene,[...noInk,...flags,...radar,...chickens.map(c=>c.ring),hookBall]);
 for(const p of props)PERF.mergeGroup(p.g);for(const b of bots)PERF.mergeGroup(b.g,[b.prop]);for(const c of clouds)PERF.mergeGroup(c);
 // hooks for concept shots
-const JP=window.JP={setStyle,fixed:null,world:{LG,LOOK,TOWN,BX},dbg:{P,heli,car,props,bots,chickens,S,roofH,roofs:roofGeo,step(n){for(let i=0;i<n;i++){nowT+=1/60;update(1/60,nowT)}}},
+const JP=window.JP={setStyle,fixed:null,world:{LG,LOOK,TOWN,BX},dbg:{P,heli,car,props,bots,chickens,S,gpad,keys,hold,ground,roofH,roofs:roofGeo,step(n){for(let i=0;i<n;i++){nowT+=1/60;update(1/60,nowT)}}},
   shot(o){
     JP.fixed=o;
     if(o.pup){P.pos.set(...o.pup.pos);P.face=o.pup.face??0;chute.visible=o.pup.mode==='chute';pup.wings.visible=o.pup.mode==='wing';pup.g.rotation.x=o.pup.mode==='wing'?0.75:0;
@@ -1136,7 +1320,8 @@ function update(dt,t){
   pup.g.rotation.y=P.face;
   const hs=Math.hypot(P.vel.x,P.vel.z);
   for(const f of jetFx){f.visible=P.mode==='jet';f.scale.set(1,0.7+Math.random()*0.6,1)}
-  ANIM.pup(pup,P,dt,t,{chute});
+  ANIM.pup(pup,P.mode==='dive'?Object.assign(Object.create(P),{mode:'swim'}):P,dt,t,{chute});
+  {const hs=Math.hypot(P.vel.x,P.vel.z),want=P.mode==='dive'?clamp(-Math.atan2(P.vel.y,Math.max(hs,2))*0.9,-1,1):0;pup.g.rotation.x=lerp(pup.g.rotation.x,want,Math.min(1,6*dt))}
   // rope
   if(P.mode==='grapple'||ropeFlash>0){
     ropeFlash-=dt;const a=ropeGeo.attributes.position;const e=P.mode==='grapple'?P.hook:ropeEnd;
@@ -1178,12 +1363,19 @@ function ambient(dt,t){
   for(const f of flags)f.rotation.y=Math.sin(t*3)*0.25;
   for(const r of radar)r.rotation.z+=dt*0.6;
 }
+// underwater look: dense blue haze in the post pass + a tint overlay
+let isUnder=false;
+function underwater(u){
+  if(u===isUnder)return;isUnder=u;$('under').hidden=!u;
+  if(u){postU.hazeD.value=0.045;postU.hazeH.value=1e6;postU.haze.value.set(0x1d6f9c);postU.hazeTop.value.set(0x2b93c4);postU.glow.value.set(0x7fdcff)}
+  else setStyle(styleName);
+}
 function updateCamera(dt){
   const inHeli=P.mode==='heli',inCar=P.mode==='car'||inHeli,tgt=tc.copy(inHeli?heli.pos:inCar?car.pos:P.pos);tgt.y+=inHeli?2.8:inCar?2.2:1.5;
   if(inHeli&&nowT-cam.lastLook>1.2){cam.yaw=lerpAngle(cam.yaw,heli.yaw,Math.min(1,1.8*dt));cam.pitch=lerp(cam.pitch,0.32,Math.min(1,1.5*dt))}
   if(P.mode==='car'&&nowT-cam.lastLook>1.2){cam.yaw=lerpAngle(cam.yaw,car.heading+(car.speed<-2?Math.PI:0),Math.min(1,2.2*dt));cam.pitch=lerp(cam.pitch,0.22,Math.min(1,2*dt))}
   if((P.mode==='wing'||P.mode==='chute')&&nowT-cam.lastLook>1.2)cam.pitch=lerp(cam.pitch,P.mode==='wing'?0.12:0.3,Math.min(1,1.5*dt));
-  const want={ground:7,swim:7,air:8,grapple:8.5,chute:10,wing:10.5,car:12,heli:17,jet:9}[P.mode];
+  const want={dive:7,ground:7,swim:7,air:8,grapple:8.5,chute:10,wing:10.5,car:12,heli:17,jet:9}[P.mode];
   cam.dist=lerp(cam.dist,want,Math.min(1,3*dt));
   const cp=Math.cos(cam.pitch),sp=Math.sin(cam.pitch),fx=Math.sin(cam.yaw),fz=Math.cos(cam.yaw),rx=-fz,rz=fx,sh=inCar?0:0.95;
   camera.position.set(tgt.x-fx*cam.dist*cp+rx*sh,tgt.y+cam.dist*sp,tgt.z-fz*cam.dist*cp+rz*sh);
@@ -1193,7 +1385,9 @@ function updateCamera(dt){
      if(hit){f=Math.max(0.15,(i-1)/10);break}}
    {const c=cam.pull??1;cam.pull=f<c?f:lerp(c,f,Math.min(1,2.5*dt))}
    const k=cam.pull;camera.position.set(lerp(bx,cx,k),lerp(by,cy,k),lerp(bz,cz,k));}
-  const gy=Math.max(ground(camera.position.x,camera.position.z),0)+0.7;if(camera.position.y<gy)camera.position.y=gy;
+  const gc=ground(camera.position.x,camera.position.z),gy=(P.mode==='dive'?gc:Math.max(gc,0))+0.7;if(camera.position.y<gy)camera.position.y=gy;
+  if(P.mode==='dive'&&camera.position.y>-0.4&&camera.position.y<0.5)camera.position.y=-0.4;       // never straddle the surface
+  underwater(camera.position.y<0);
   camera.lookAt(tgt.x+rx*sh,tgt.y,tgt.z+rz*sh);
   const fov=68+(P.mode==='wing'?(P.wingSpeed-20)*0.28:0)+(P.mode==='car'?Math.abs(car.speed)*0.25:0)+(P.mode==='grapple'?6:0);
   if(Math.abs(camera.fov-fov)>0.1){camera.fov=lerp(camera.fov,fov,Math.min(1,4*dt));camera.updateProjectionMatrix()}
@@ -1221,25 +1415,27 @@ function drawMap(){
 let lastHint='',lastMode='',lastJump='';
 function hud(dt){
   if(toastT>0){toastT-=dt;if(toastT<=0)$('toast').classList.remove('show')}
-  if(P.mode!==lastMode){lastMode=P.mode;$('modeTxt').textContent=modeNames[P.mode]}
+  if(P.mode!==lastMode){lastMode=P.mode;$('modeTxt').textContent=T('m_'+P.mode)}
   {const show=P.fuel<99.5||P.mode==='jet';$('fuel').hidden=!show;if(show)$('fuelBar').style.width=P.fuel.toFixed(0)+'%'}
   let h='';
-  if(P.mode==='heli')h=isTouch?'UP / DOWN: altitude · CAR: jump out':'Space up · Shift down · WASD fly · E jump out';
-  else if(P.mode==='car')h=isTouch?'CAR: hop out':'E: hop out · Space: hop';
-  else if(P.pos.distanceTo(heli.pos)<6.5&&P.mode!=='grapple')h=isTouch?'CAR: fly the Pup Copter':'E: fly the Pup Copter';
-  else if(P.pos.distanceTo(car.pos)<5.5&&P.mode!=='grapple')h=isTouch?'CAR: drive the Pup Cruiser':'E: drive the Pup Cruiser';
-  else if(P.mode==='jet')h=P.fuel<25?'Low fuel!':'';
-  else if(P.mode==='air'&&P.pos.y-ground(P.pos.x,P.pos.z)>8)h=isTouch?'JUMP: parachute · JET: jetpack':'Space: parachute · hold J: jetpack';
-  else if(P.mode==='chute')h=isTouch?'JUMP: wingsuit · HOOK to slingshot':'Space: wingsuit · hook to slingshot';
-  else if(P.mode==='wing')h=isTouch?'Stick up: dive · down: climb':'W dive · S climb · A/D turn';
+  if(P.mode==='heli')h=TD('h_heli');
+  else if(P.mode==='car')h=TD('h_car');
+  else if(P.pos.distanceTo(heli.pos)<6.5&&P.mode!=='grapple')h=TD('h_fly');
+  else if(P.pos.distanceTo(car.pos)<5.5&&P.mode!=='grapple')h=TD('h_drive');
+  else if(P.mode==='jet')h=P.fuel<25?T('lowFuel'):'';
+  else if(P.mode==='air'&&P.pos.y-ground(P.pos.x,P.pos.z)>8)h=TD('h_air');
+  else if(P.mode==='chute')h=TD('h_chute');
+  else if(P.mode==='wing')h=TD('h_wing');
+  else if(P.mode==='swim')h=TD('h_swim');
+  else if(P.mode==='dive')h=TD('h_dive');
   if(h!==lastHint){lastHint=h;$('hint').textContent=h;$('hint').hidden=!h}
-  if(isTouch){const j={ground:'JUMP',swim:'JUMP',air:'CHUTE',chute:'WINGS',wing:'CHUTE',grapple:'CHUTE',car:'HOP',heli:'UP'}[P.mode];if(j!==lastJump){lastJump=j;$('tJump').textContent=j;$('tWing').textContent=P.mode==='heli'?'DOWN':P.mode==='wing'?'FOLD':'WINGS'}
+  if(isTouch){const j={ground:'JUMP',swim:'JUMP',dive:'UP',air:'CHUTE',chute:'WINGS',wing:'CHUTE',grapple:'CHUTE',car:'HOP',heli:'UP'}[P.mode];if(j!==lastJump){lastJump=j;$('tJump').textContent=T('b_'+j);$('tWing').textContent=T('b_'+(P.mode==='heli'?'DOWN':P.mode==='swim'||P.mode==='dive'?'DIVE':P.mode==='wing'?'FOLD':'WINGS'))}
     $('tCar').classList.toggle('dim',!(P.mode==='car'||P.mode==='heli'||P.pos.distanceTo(car.pos)<5.5||P.pos.distanceTo(heli.pos)<6.5))}
 }
 function frame(now){
   const dt=Math.min(0.05,(now-last)/1000);last=now;nowT=now/1000;frameN++;
   const t=nowT;
-  ambient(dt,t);
+  ambient(dt,t);pollPad(dt);
   if(S.running){
     update(dt,t);updateCamera(dt);
     if(frameN%4===0&&P.mode!=='car'&&P.mode!=='heli')computeAim();
@@ -1258,10 +1454,12 @@ function frame(now){
   requestAnimationFrame(frame);
 }
 if(isTouch){document.body.classList.add('touch');$('keysDesk').hidden=true;$('keysTouch').hidden=false}
+applyLang();
+$('bLang').addEventListener('click',()=>{lang=lang==='da'?'en':'da';try{localStorage.setItem('jpLang',lang)}catch(e){}applyLang();lastHint=lastMode=lastJump='';if(S.running)toast(lang==='da'?'Dansk':'English','')});
 $('start').addEventListener('click',()=>{
   initAudio();$('intro').hidden=true;S.running=true;$('touch').hidden=!isTouch;
   if(!isTouch){try{const r=canvas.requestPointerLock();if(r&&r.catch)r.catch(()=>{})}catch(e){}}
-  canvas.focus();sfx.woof();toast('Pup pack ready!','hook the Kitty-Bots, find the chickens');
+  canvas.focus();sfx.meow();toast(T('ready'),T('ready2'));
 });
 $('keep').addEventListener('click',()=>{$('win').hidden=true;canvas.focus()});
 car.g.rotation.order='YXZ';
