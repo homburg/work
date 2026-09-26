@@ -548,7 +548,34 @@ function init(THREE, scene, opts){
     return Math.sin(t * (opt.bobHz || 1.6) * TAU) * (opt.bob || 0.08);   // add to group.position.y
   }
 
-  return { rigPup, pup, npc, rigCar, car: carAnim, heli, bot, chicken, rotor, hover, dust, tickPuffs, spring, sstep };
+  // Sleeping pup/cat: lie down flat (front paws forward, back legs tucked back), chin down,
+  // eyes shut, tail swung round, slow breathing. Call after pup()/npc(); k 0..1 blends over that pose.
+  const SLEEP_HIP = [-1.4, -1.4, 1.35, 1.35], SLEEP_KNEE = [0.15, 0.15, -0.25, -0.25];
+  function sleep(p, k, dt, t){
+    const a = p.anim; if(!a) return;
+    if(k <= 0){ if(a.slept){ a.slept = false; p.head.rotation.z = 0; p.tail.rotation.y = 0; } return; }
+    a.slept = true;
+    if(a.slPh === undefined) a.slPh = Math.random() * 6;
+    const br = Math.sin(t * 1.6 + a.slPh);
+    for(let i = 0; i < 4; i++){
+      p.legs[i].rotation.x = lerp(p.legs[i].rotation.x, SLEEP_HIP[i], k);
+      a.knees[i].rotation.x = lerp(a.knees[i].rotation.x, SLEEP_KNEE[i], k);
+    }
+    a.sq.position.y = lerp(a.sq.position.y, -0.42, k);
+    a.sq.scale.set(lerp(a.sq.scale.x, 1 + br * 0.025, k), lerp(a.sq.scale.y, 1 + br * 0.03, k), lerp(a.sq.scale.z, 1, k));
+    a.rot.rotation.x = lerp(a.rot.rotation.x, 0.04, k);
+    a.rot.rotation.z = lerp(a.rot.rotation.z, 0.1, k);
+    p.head.rotation.x = lerp(p.head.rotation.x, 0.5 + br * 0.03, k);
+    p.head.rotation.y = lerp(p.head.rotation.y, 0.35, k);
+    p.head.rotation.z = 0.25 * k;
+    p.tail.rotation.x = lerp(p.tail.rotation.x, -1.15, k);
+    p.tail.rotation.z = lerp(p.tail.rotation.z, 0, k);
+    p.tail.rotation.y = 1.2 * k;
+    for(const e of a.ears) e.piv.rotation.x = lerp(e.piv.rotation.x, e.bx - 0.35, k);
+    for(const e of a.eyes) e.scale.y = lerp(e.scale.y, 0.1, k);
+  }
+
+  return { rigPup, pup, npc, sleep, rigCar, car: carAnim, heli, bot, chicken, rotor, hover, dust, tickPuffs, spring, sstep };
 }
 window.JPAnim = { init };
 })();

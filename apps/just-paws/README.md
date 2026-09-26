@@ -13,6 +13,8 @@ Play: https://claude.ai/artifact/5UT89YJF74HdhmNKqgFBeL (private Claude Artifact
 - Toon renderer: cel shading, screen-space ink outlines, sky dome, colour grading. Three looks: Golden Hour (default), Saturday Morning, Pastel Toy (switch with V or the ◐ button)
 - Squash-and-stretch pup rig (trot/gallop, landings, chute/wingsuit poses), car suspension, copter hover
 - Keyboard/mouse and touch controls
+- Bedtime (on now): every animal lies down to sleep with floating Zs (pups, chickens, Kitty-Bots flop down, Scout dozes off after standing still ~3 s), night look with moon and stars, soft lullaby. Switch off with `BEDTIME_ON=false` at the top of the script; `?sleep=0` / `?sleep=1` overrides it for one visit
+- New deploys load by themselves on the title screen or when the game comes back from the background; mid-game the ⟳ button lights up
 
 ## Files
 - `index.html`: the whole game in one file. three.js r128 is loaded from cdnjs.
