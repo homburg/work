@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Just Paws</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Baloo+2:wght@600;800&display=swap">
@@ -210,10 +212,12 @@ da:{hudChick:'HØNS',hudBots:'KATTEBOTTER',hudChaos:'KAOS',
 let lang=(()=>{try{const l=localStorage.getItem('jpLang');if(l==='da'||l==='en')return l}catch(e){}return /^da|^nb|^no/i.test(navigator.language||'')?'da':'en'})();
 const T=k=>{const d=LANG[lang];return d[k]!==undefined?d[k]:LANG.en[k]!==undefined?LANG.en[k]:k};
 // hint for the current input device: touch (T), keyboard (K) or gamepad (P)
-const TD=k=>T(k+(gpad.on?'P':isTouch?'T':'K'));
+const TD=k=>gpad.on?PL(T(k+'P')):T(k+(isTouch?'T':'K'));
+// Nintendo pads (Switch Pro, Joy-Con) have A/B and X/Y swapped vs Xbox: relabel pad hints to match what's printed on the buttons
+const PL=s=>gpad.nin?s.replace(/\b[ABXY]\b/g,c=>({A:'B',B:'A',X:'Y',Y:'X'})[c]):s;
 function applyLang(){
   document.documentElement.lang=lang;
-  document.querySelectorAll('[data-i18n]').forEach(e=>e.innerHTML=T(e.dataset.i18n));
+  document.querySelectorAll('[data-i18n]').forEach(e=>e.innerHTML=e.id==='keysPad'?PL(T('keysPad')):T(e.dataset.i18n));
   document.querySelectorAll('[data-i18n-title]').forEach(e=>{e.title=T(e.dataset.i18nTitle);e.setAttribute('aria-label',T(e.dataset.i18nTitle))});
   $('bLang').textContent=lang==='da'?'EN':'DA';
   $('modeTxt').textContent=T('m_'+P.mode);
@@ -881,23 +885,29 @@ $('bRespawn').addEventListener('click',()=>respawn());$('bStyle').addEventListen
  if(!can)bf.hidden=true;
  bf.addEventListener('click',()=>{if(cur())(d.exitFullscreen||d.webkitExitFullscreen).call(d);else{const r=(el.requestFullscreen||el.webkitRequestFullscreen).call(el,{navigationUI:'hide'});if(r&&r.catch)r.catch(()=>toast(T('fsNo'),T('fsNo2')))}});
  const sync=()=>{bf.classList.toggle('on',!!cur());bf.setAttribute('aria-pressed',!!cur())};
- d.addEventListener('fullscreenchange',sync);d.addEventListener('webkitfullscreenchange',sync);}
+ // iPad Safari reports the new size late after entering/leaving fullscreen, so re-measure once it settles
+ const settle=()=>{sync();for(const ms of [120,400])setTimeout(()=>dispatchEvent(new Event('resize')),ms)};
+ d.addEventListener('fullscreenchange',settle);d.addEventListener('webkitfullscreenchange',settle);}
 function toggleMute(){muted=!muted;$('bMute').textContent=muted?'✕':'♪';if(engine)engine.g.gain.value=0}
 // ---- gamepad (standard mapping: Xbox / PlayStation / MFi over Bluetooth, incl. iPad Safari) ----
 // A/✕ jump (heli: up) · B/○ parachute-wingsuit (heli: down) · X/□ or RT grapple · Y/△ car/copter
 // LT or LB jetpack (hold) · RB cut loose · L3 sprint · left stick move · right stick camera · Start respawn · Select look
-const gpad={on:false,x:0,y:0,sprint:false,prev:[]};
+const gpad={on:false,nin:false,x:0,y:0,sprint:false,prev:[]};
 function pollPad(dt){
   const pads=navigator.getGamepads?navigator.getGamepads():[];let g=null;
   for(const p of pads)if(p&&p.connected){g=p;break}
   if(!g){if(gpad.on){gpad.on=false;gpad.x=gpad.y=0}return}
   const dz=v=>Math.abs(v)<0.18?0:(v-Math.sign(v)*0.18)/0.82;
-  const B=i=>!!(g.buttons[i]&&(g.buttons[i].pressed||g.buttons[i].value>0.5));
+  // Safari/iPadOS maps a Switch Pro pad by label (index 0 = the A on the right), so jump would land on A.
+  // Swap the face buttons back to positions: bottom (B) jumps, right (A) is wings/dive, left (Y) hooks, top (X) car.
+  const nin=/nintendo|pro controller|joy-?con|057e/i.test(g.id)&&/apple/i.test(navigator.vendor||'');
+  if(nin!==gpad.nin){gpad.nin=nin;$('keysPad').innerHTML=PL(T('keysPad'));lastHint=''}
+  const B=i=>{const j=nin&&i<4?[1,0,3,2][i]:i;return !!(g.buttons[j]&&(g.buttons[j].pressed||g.buttons[j].value>0.5))};
   const now=g.buttons.map((_,i)=>B(i)),was=gpad.prev,hit=i=>now[i]&&!was[i],rel=i=>!now[i]&&was[i];
   gpad.x=dz(g.axes[0]||0);gpad.y=-dz(g.axes[1]||0);gpad.sprint=now[10];
   const rx=dz(g.axes[2]||0),ry=dz(g.axes[3]||0);
   if(rx||ry)lookBy(rx*dt*900,ry*dt*650);
-  if(!gpad.on&&(now.some(b=>b)||gpad.x||gpad.y)){gpad.on=true;$('joyhint').hidden=true;$('keysPad').hidden=false;$('keysDesk').hidden=$('keysTouch').hidden=true;lastHint='';if(S.running)toast(T('padOn'),T('padHint'))}
+  if(!gpad.on&&(now.some(b=>b)||gpad.x||gpad.y)){gpad.on=true;$('joyhint').hidden=true;$('keysPad').hidden=false;$('keysDesk').hidden=$('keysTouch').hidden=true;lastHint='';if(S.running)toast(T('padOn'),PL(T('padHint')))}
   if(!S.running){if(hit(0)||hit(9)){if(!$('intro').hidden)$('start').click()}}
   else if(!$('win').hidden){if(hit(0))$('keep').click()}
   else{
