@@ -64,6 +64,13 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     out.dig = { mode: dmode, drove, loaded, lifted, tipped, dirt: G.dirt };
     key('keydown', 'KeyE'); key('keyup', 'KeyE'); d.step(10); out.dig.out = P.mode;
     for (let i = 0; i < 3; i++) { key('keydown', 'KeyV'); key('keyup', 'KeyV'); d.step(2); }
+    // online: another player at the Sky Whale's wheel moves our copy of it, and the wheel is taken
+    const Sh = d.ship; d.MP.id = 'me';
+    const tx = Sh.pos.x + 30, tz = Sh.pos.z + 20, ty = Sh.baseY + 12, tyaw = Sh.yaw + 1;
+    for (let i = 0; i < 12; i++) { d.mpPeer({ id: 'captain', n: 'Luna', c: 2, s: [tx, ty, tz, 0, 12, 0, 0, 0, tyaw, 0] }, true); d.step(15); }
+    out.shipSync = { off: Math.hypot(Sh.pos.x - tx, Sh.pos.z - tz), dy: Math.abs(Sh.baseY - ty), dyaw: Math.abs(Math.atan2(Math.sin(Sh.yaw - tyaw), Math.cos(Sh.yaw - tyaw))) };
+    P.mode = 'air'; P.pos.set(Sh.pos.x, Sh.pos.y + Sh.deckY + 1, Sh.pos.z); P.vel.set(0, 0, 0); d.mpPeer({ id: 'captain', s: [tx, ty, tz, 0, 12, 0, 0, 0, tyaw, 0] }, true); d.step(5);
+    key('keydown', 'KeyE'); key('keyup', 'KeyE'); out.shipSync.mode = P.mode;
     return out;
   });
   await browser.close();
@@ -79,6 +86,7 @@ const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewp
     ['kitty-bot busted by touch', r.bot.busted >= 1 && !r.bot.alive, r.bot],
     ['chicken rescued by touch', r.chicken.rescued && r.chicken.count === 1, r.chicken],
     ['digger drives, scoops, lifts and tips', r.dig.mode === 'dig' && r.dig.drove > 3 && r.dig.loaded === 1 && r.dig.lifted > 3 && r.dig.tipped && r.dig.dirt && r.dig.out !== 'dig', r.dig],
+    ['airship follows the online captain', r.shipSync.off < 3 && r.shipSync.dy < 2 && r.shipSync.dyaw < 0.2 && r.shipSync.mode !== 'ship', r.shipSync],
   ];
   let fail = 0;
   for (const [name, ok, info] of checks) { console.log(`${ok ? 'PASS' : 'FAIL'} ${name}`, ok ? '' : JSON.stringify(info)); if (!ok) fail++; }
