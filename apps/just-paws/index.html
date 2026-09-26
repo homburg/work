@@ -63,6 +63,8 @@ body.touch #mode{left:calc(16px + env(safe-area-inset-left,0px));transform:none;
 .go{width:100%;border:0;border-radius:16px;background:var(--gold);color:var(--navy);font:400 26px 'Lilita One',sans-serif;padding:10px;cursor:pointer;box-shadow:0 5px 0 var(--navy);letter-spacing:.03em}
 .go:focus-visible,#corner button:focus-visible{outline:3px solid var(--red);outline-offset:3px}
 .go:active{transform:translateY(3px);box-shadow:0 2px 0 var(--navy)}
+#fresh{display:block;margin:10px auto 0;border:0;background:none;color:var(--navy);font:700 14px 'Baloo 2',system-ui,sans-serif;text-decoration:underline;cursor:pointer;opacity:.75}
+#fresh[hidden]{display:none}
 .fine{font-size:12px;opacity:.65;margin:12px 0 0;text-align:center}
 @media (max-width:520px){
   #map{width:104px;height:104px;border-radius:14px}
@@ -127,6 +129,7 @@ body.touch #mode{left:calc(16px + env(safe-area-inset-left,0px));transform:none;
     </div>
     <div class="keys" id="keysPad" data-i18n="keysPad" hidden></div>
     <button class="go" id="start" data-i18n="start">Start the rescue</button>
+    <button id="fresh" data-i18n="fresh" hidden>Start over</button>
     <p class="fine" data-i18n="fine">A fan-made prototype. Hook + parachute = slingshot. Sounds: Kenney.nl &amp; OpenGameArt (CC0).</p>
   </div>
 </div>
@@ -158,7 +161,7 @@ en:{hudChick:'CHICKENS',hudBots:'KITTY-BOTS',hudChaos:'CHAOS',
  keysTouch:'<kbd>Left thumb</kbd><span>Move · drive · steer in the air</span><kbd>Right thumb</kbd><span>Drag to look and aim</span><kbd>HOOK</kbd><span>Grappling hook at the crosshair</span><kbd>JUMP</kbd><span>Jump, then parachute, then wingsuit</span><kbd>JET</kbd><span>Hold for jetpack (refuels on the ground)</span><kbd>CAR</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (hold UP / DOWN)</span><kbd>JET · DIVE</kbd><span>In the water: water jets · dive</span>',
  keysPad:'<kbd>Left stick</kbd><span>Move · drive · steer (click to sprint)</span><kbd>Right stick</kbd><span>Look and aim</span><kbd>A / ✕</kbd><span>Jump, then parachute, then wingsuit</span><kbd>X / □ · RT</kbd><span>Grappling hook at the crosshair</span><kbd>B / ○</kbd><span>Wingsuit on/off</span><kbd>Hold LT</kbd><span>Jetpack</span><kbd>Y / △</kbd><span>Hop in/out: Pup Cruiser or Pup Copter (A up, B down)</span><kbd>RB · Start</kbd><span>Cut parachute · back to Pup HQ</span><kbd>LT · B</kbd><span>In the water: water jets · dive (A up)</span>',
  start:'Start the rescue',fine:'A fan-made prototype. Hook + parachute = slingshot. Sounds: Kenney.nl & OpenGameArt (CC0).',
- winTag:'Every chicken is safe and Grumbleton\'s Kitty-Bots are scrap. Chaos score: <b id="winChaos">0</b>.',keep:'Keep playing',
+ winTag:'Every chicken is safe and Grumbleton\'s Kitty-Bots are scrap. Chaos score: <b id="winChaos">0</b>.',keep:'Keep playing',cont:'Continue the rescue',fresh:'Start over',welcome:'Welcome back!',welcome2:'your rescue was saved',
  m_ground:'On paws',m_air:'Airborne',m_chute:'Parachute',m_wing:'Wingsuit',m_grapple:'Grappling',m_swim:'Paddling',m_car:'Pup Cruiser',m_heli:'Pup Copter',m_jet:'Jetpack',m_dive:'Diving',m_boat:'Speedboat',
  s_bold:'Saturday Morning',s_golden:'Golden Hour',s_pastel:'Pastel Toy',lookSwitched:'look switched (V / ◐)',
  fsNo:'Fullscreen',fsNo2:'not allowed here',padOn:'Controller connected',padHint:'A jump · X hook · Y car · LT jetpack',
@@ -190,7 +193,7 @@ da:{hudChick:'HØNS',hudBots:'KATTEBOTTER',hudChaos:'KAOS',
  keysTouch:'<kbd>Venstre tommel</kbd><span>Gå · kør · styr i luften</span><kbd>Højre tommel</kbd><span>Træk for at kigge og sigte</span><kbd>KROG</kbd><span>Gribekrog mod sigtekornet</span><kbd>HOP</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>JET</kbd><span>Hold for jetpack (tankes op på jorden)</span><kbd>BIL</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (hold OP / NED)</span><kbd>JET · DYK</kbd><span>I vandet: vand-jets · dyk</span>',
  keysPad:'<kbd>Venstre stik</kbd><span>Gå · kør · styr (tryk ind for at spurte)</span><kbd>Højre stik</kbd><span>Kig og sigt</span><kbd>A / ✕</kbd><span>Hop, så faldskærm, så wingsuit</span><kbd>X / □ · RT</kbd><span>Gribekrog mod sigtekornet</span><kbd>B / ○</kbd><span>Wingsuit til/fra</span><kbd>Hold LT</kbd><span>Jetpack</span><kbd>Y / △</kbd><span>Ind/ud: Hvalpebilen eller Hvalpekopteren (A op, B ned)</span><kbd>RB · Start</kbd><span>Slip faldskærmen · tilbage til Hvalpe-HQ</span><kbd>LT · B</kbd><span>I vandet: vand-jets · dyk (A op)</span>',
  start:'Start redningen',fine:'En fan-lavet prototype. Krog + faldskærm = slangebøsse. Lyde: Kenney.nl & OpenGameArt (CC0).',
- winTag:'Alle høns er i sikkerhed, og Brokkenborgs kattebotter er skrot. Kaospoint: <b id="winChaos">0</b>.',keep:'Spil videre',
+ winTag:'Alle høns er i sikkerhed, og Brokkenborgs kattebotter er skrot. Kaospoint: <b id="winChaos">0</b>.',keep:'Spil videre',cont:'Fortsæt redningen',fresh:'Start forfra',welcome:'Velkommen tilbage!',welcome2:'din redning blev gemt',
  m_ground:'På poterne',m_air:'I luften',m_chute:'Faldskærm',m_wing:'Wingsuit',m_grapple:'Gribekrog',m_swim:'Svømmer',m_car:'Hvalpebilen',m_heli:'Hvalpekopteren',m_jet:'Jetpack',m_dive:'Dykker',m_boat:'Speedbåden',
  s_bold:'Lørdagsmorgen',s_golden:'Gyldne time',s_pastel:'Pastel-legetøj',lookSwitched:'stil skiftet (V / ◐)',
  fsNo:'Fuld skærm',fsNo2:'ikke tilladt her',padOn:'Controller forbundet',padHint:'A hop · X krog · Y bil · LT jetpack',
@@ -1611,10 +1614,40 @@ $('bLang').addEventListener('click',()=>{lang=lang==='da'?'en':'da';try{localSto
 $('start').addEventListener('click',()=>{
   initAudio();$('intro').hidden=true;S.running=true;$('touch').hidden=!isTouch;
   if(!isTouch){try{const r=canvas.requestPointerLock();if(r&&r.catch)r.catch(()=>{})}catch(e){}}
-  canvas.focus();sfx.meow();toast(T('ready'),T('ready2'));
+  canvas.focus();sfx.meow();if(restored)toast(T('welcome'),T('welcome2'));else toast(T('ready'),T('ready2'));saveGame();
 });
 $('keep').addEventListener('click',()=>{$('win').hidden=true;canvas.focus()});
 car.g.rotation.order='YXZ';
+// ================= save / restore: progress, position, vehicles and look survive a refresh =================
+const SAVE_KEY='jpSave1',r2=v=>Math.round(v*100)/100;
+function saveGame(){if(!S.running)return;try{
+  const veh=P.mode==='car'?car.pos:P.mode==='heli'?heli.pos:P.mode==='boat'?boat.pos:P.pos;
+  localStorage.setItem(SAVE_KEY,JSON.stringify({v:1,t:Date.now(),chick:chickens.map(c=>c.rescued?1:0),bots:bots.map(b=>b.alive?0:1),chaos:S.chaos,won:S.won,
+    p:[veh.x,veh.y+(veh===P.pos?0:2.5),veh.z].map(r2),yaw:r2(cam.yaw),face:r2(P.face),fuel:Math.round(P.fuel),style:styleName,ship:r2(ship.ang),
+    car:[car.pos.x,car.pos.z,car.heading].map(r2),heli:heli.landed&&P.mode!=='heli'?[heli.pos.x,heli.pos.y,heli.pos.z,heli.yaw].map(r2):null,
+    boat:P.mode==='boat'?null:[boat.pos.x,boat.pos.z,boat.heading].map(r2)}))}catch(e){}}
+let restored=false;
+function loadGame(){let d=null;try{d=JSON.parse(localStorage.getItem(SAVE_KEY))}catch(e){}
+  if(!d||d.v!==1||!Array.isArray(d.chick)||d.chick.length!==chickens.length||!Array.isArray(d.bots)||d.bots.length!==bots.length)return false;
+  const ok=a=>Array.isArray(a)&&a.every(Number.isFinite);
+  chickens.forEach((c,i)=>{if(d.chick[i]){c.rescued=true;c.g.visible=false;c.beam.visible=false;c.ring.visible=false;S.chick++}});
+  bots.forEach((b,i)=>{if(d.bots[i]){b.alive=false;b.falling=false;b.g.visible=false;S.bots++}});
+  S.chaos=d.chaos|0;S.won=!!d.won;$('sChick').textContent=S.chick;$('sBots').textContent=S.bots;$('sChaos').textContent=S.chaos;
+  if(Number.isFinite(d.ship))ship.ang=d.ship;
+  if(ok(d.car)&&d.car.length===3&&ground(d.car[0],d.car[1])>-0.6){car.pos.set(d.car[0],ground(d.car[0],d.car[1]),d.car[1]);car.heading=d.car[2]}
+  if(ok(d.heli)&&d.heli.length===4){heli.pos.set(d.heli[0],d.heli[1],d.heli[2]);heli.yaw=d.heli[3]}
+  if(ok(d.boat)&&d.boat.length===3&&ground(d.boat[0],d.boat[1])<-0.9){boat.pos.x=d.boat[0];boat.pos.z=d.boat[1];boat.heading=d.boat[2]}
+  if(ok(d.p)&&d.p.length===3){updateShip(0,nowT);const gy=ground(d.p[0],d.p[2]);P.pos.set(d.p[0],Math.max(d.p[1],gy)+0.3,d.p[2]);P.vel.set(0,0,0);P.mode='air';P.hook=null;
+    if(Number.isFinite(d.yaw))cam.yaw=d.yaw;if(Number.isFinite(d.face))P.face=d.face}
+  if(Number.isFinite(d.fuel))P.fuel=clamp(d.fuel,0,100);
+  if(d.style&&STYLES[d.style]&&!STYLES[(location.hash||'').slice(1)]){styleName=d.style;setStyle(styleName)}
+  return true}
+restored=loadGame();
+if(restored){$('start').dataset.i18n='cont';$('fresh').hidden=false;applyLang()}
+$('fresh').addEventListener('click',()=>{try{localStorage.removeItem(SAVE_KEY)}catch(e){}location.reload()});
+setInterval(saveGame,3000);
+addEventListener('pagehide',saveGame);document.addEventListener('visibilitychange',()=>{if(document.hidden)saveGame()});
+JP.dbg.saveGame=saveGame;JP.dbg.loadGame=loadGame;
 requestAnimationFrame(frame);
 })();
 </script>
