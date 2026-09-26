@@ -215,7 +215,7 @@ en:{hudChick:'CHICKENS',night:'Good night! 🌙',night2:'all the animals are asl
  h_heliT:'UP / DOWN: altitude · look to turn · CAR: jump out',h_heliK:'Space up · Shift down · WASD fly · mouse turns · E jump out',h_heliP:'RT up · LT down · left stick fly · right stick turns · Y jump out',
  h_boatT:'CAR: hop out · JUMP: jump the waves',h_rideT:'CAR or JUMP: hop off',h_rideK:'E or Space: hop off',h_rideP:'Y or A: hop off',rideOn:'Hopped in with',rideOn2:'enjoy the ride',rideGot:'hopped in!',rideGot2:'you have a passenger',h_boatK:'E: hop out · WASD: steer · Space: jump the waves',h_boatP:'Y: hop out · A: jump the waves',
  h_sailT:'CAR: drive the Speedboat',h_sailK:'E: drive the Speedboat',h_sailP:'Y: drive the Speedboat',
- aboard:'All aboard the Sky Whale!',aboard2:'E / Y / CAR: take the wheel',boat:'Speedboat!',boat2:'full throttle across the bay',boatBlock:'Too shallow!',
+ slide:'Wheee!',slide2:'down the Pup HQ slide',liftUp:'Going up!',liftUp2:'next stop: the lookout',liftDn:'Going down!',liftDn2:'ground floor, Pup HQ',aboard:'All aboard the Sky Whale!',aboard2:'E / Y / CAR: take the wheel',boat:'Speedboat!',boat2:'full throttle across the bay',boatBlock:'Too shallow!',
  h_carT:'CAR: hop out',h_carK:'E: hop out · Space: hop',h_carP:'Y: hop out · A: hop',
  h_flyT:'CAR: fly the Pup Copter',h_flyK:'E: fly the Pup Copter',h_flyP:'Y: fly the Pup Copter',
  h_driveT:'CAR: drive the Pup Cruiser',h_driveK:'E: drive the Pup Cruiser',h_driveP:'Y: drive the Pup Cruiser',
@@ -253,7 +253,7 @@ da:{hudChick:'HØNS',night:'Godnat! 🌙',night2:'alle dyrene sover. Sssh…',ni
  h_heliT:'OP / NED: højde · kig for at dreje · BIL: hop ud',h_heliK:'Mellemrum op · Shift ned · WASD flyv · musen drejer · E hop ud',h_heliP:'RT op · LT ned · venstre stik flyv · højre stik drejer · Y hop ud',
  h_boatT:'BIL: hop ud · HOP: hop over bølgerne',h_rideT:'BIL eller HOP: hop af',h_rideK:'E eller Mellemrum: hop af',h_rideP:'Y eller A: hop af',rideOn:'Du kører med',rideOn2:'nyd turen',rideGot:'hoppede ind!',rideGot2:'du har en passager',h_boatK:'E: hop ud · WASD: styr · Mellemrum: hop over bølgerne',h_boatP:'Y: hop ud · A: hop over bølgerne',
  h_sailT:'BIL: sejl Speedbåden',h_sailK:'E: sejl Speedbåden',h_sailP:'Y: sejl Speedbåden',
- aboard:'Velkommen ombord på Himmelhvalen!',aboard2:'E / Y / BIL: tag rattet',boat:'Speedbåd!',boat2:'fuld fart over bugten',boatBlock:'For lavt vand!',
+ slide:'Wiii!',slide2:'ned ad Hvalpe-HQ-rutsjebanen',liftUp:'Op vi kører!',liftUp2:'næste stop: udkigstårnet',liftDn:'Ned igen!',liftDn2:'stueetagen, Hvalpe-HQ',aboard:'Velkommen ombord på Himmelhvalen!',aboard2:'E / Y / BIL: tag rattet',boat:'Speedbåd!',boat2:'fuld fart over bugten',boatBlock:'For lavt vand!',
  h_carT:'BIL: hop ud',h_carK:'E: hop ud · Mellemrum: hop',h_carP:'Y: hop ud · A: hop',
  h_flyT:'BIL: flyv Hvalpekopteren',h_flyK:'E: flyv Hvalpekopteren',h_flyP:'Y: flyv Hvalpekopteren',
  h_driveT:'BIL: kør Hvalpebilen',h_driveK:'E: kør Hvalpebilen',h_driveP:'Y: kør Hvalpebilen',
@@ -300,7 +300,7 @@ const BAY={x:70,z:250,r:120}, TOWN={x:-10,z:-20,r:95}, MTN={x:-230,z:-220}, LOOK
 const SITE={x:44,z:80};   // digger building site
 const riverX=z=>-140+20*Math.sin(z/60);
 const BRIDGE_Z=-40, BX=riverX(BRIDGE_Z), DECK=5;
-const pads=[{x:BX-42,z:BRIDGE_Z,r:16,h:5},{x:BX+42,z:BRIDGE_Z,r:16,h:5}];
+const pads=[{x:BX-42,z:BRIDGE_Z,r:16,h:5},{x:BX+42,z:BRIDGE_Z,r:16,h:5},{x:LOOK.x,z:LOOK.z,r:13,h:19.3}];
 function terrain(x,z){
   let land=smooth((370-Math.hypot(x*0.9,z))/50);
   land*=smooth((Math.hypot(x-BAY.x,z-BAY.z)-BAY.r)/35);
@@ -356,8 +356,54 @@ function roofH(x,z){
   }
   return best;
 }
+// colliders: axis-aligned boxes {min,max}; yaw-rotated boxes add {c,h,cs,sn}; upright cylinders add {cyl,x,z,r}.
+// min/max is always the world AABB (broadphase). off:true disables one (elevator doors, a car being driven); nocam: camera sees through it
 function addBox(minx,miny,minz,maxx,maxy,maxz){const b={min:new V3(minx,miny,minz),max:new V3(maxx,maxy,maxz)};boxes.push(b);return b}
-function solid(mesh){mesh.updateMatrixWorld(true);const b=new THREE.Box3().setFromObject(mesh);boxes.push({min:b.min,max:b.max});statics.push(mesh);return mesh}
+function addCyl(x,z,r,y0,y1){const b={cyl:true,x,z,r,min:new V3(x-r,y0,z-r),max:new V3(x+r,y1,z+r)};boxes.push(b);return b}
+function addObb(cx,cy,cz,hx,hy,hz,yaw){const b={min:new V3(),max:new V3(),c:new V3(),h:new V3(hx,hy,hz),cs:1,sn:0};placeObb(b,cx,cy,cz,yaw);boxes.push(b);return b}
+function placeObb(b,cx,cy,cz,yaw){const cs=Math.cos(yaw),sn=Math.sin(yaw),ex=Math.abs(cs)*b.h.x+Math.abs(sn)*b.h.z,ez=Math.abs(sn)*b.h.x+Math.abs(cs)*b.h.z;
+  b.c.set(cx,cy,cz);b.cs=cs;b.sn=sn;b.min.set(cx-ex,cy-b.h.y,cz-ez);b.max.set(cx+ex,cy+b.h.y,cz+ez)}
+// round wall from ri to ro as n rotated box segments; gaps [{a,half,y0,y1}] leave doorways (wall stays below y0 and above y1)
+function ringWall(x,z,ri,ro,y0,y1,n,gaps=[],a0=gaps.length?gaps[0].a:0){
+  const out=[],hw=ro*Math.tan(Math.PI/n)+0.02,rm=(ri+ro)/2,seg=(a,b0,b1)=>{if(b1-b0>0.01)out.push(addObb(x+Math.sin(a)*rm,(b0+b1)/2,z+Math.cos(a)*rm,hw,(b1-b0)/2,(ro-ri)/2,a))};
+  for(let i=0;i<n;i++){const a=a0+(i+0.5)/n*Math.PI*2,g=gaps.find(g=>Math.abs(Math.atan2(Math.sin(a-g.a),Math.cos(a-g.a)))<g.half);
+    if(g){seg(a,y0,Math.max(y0,g.y0));seg(a,Math.min(y1,g.y1),y1)}else seg(a,y0,y1)}
+  return out;
+}
+function solid(mesh){mesh.updateMatrixWorld(true);const b=new THREE.Box3().setFromObject(mesh),box={min:b.min,max:b.max},p=mesh.geometry.parameters;
+  if(mesh.geometry.type==='CylinderGeometry'&&mesh.parent===scene&&!mesh.rotation.x&&!mesh.rotation.z)Object.assign(box,{cyl:true,x:mesh.position.x,z:mesh.position.z,r:Math.max(p.radiusTop,p.radiusBottom)});
+  boxes.push(box);statics.push(mesh);return mesh}
+// colliders near (x,z) (within 6): a coarse grid of the static ones plus every moving one (dyn), rebuilt whenever colliders are added
+const GRID=16,grid=new Map(),dynBoxes=[];let gridN=-1;
+function nearBoxes(x,z){
+  if(gridN!==boxes.length){grid.clear();dynBoxes.length=0;
+    for(const b of boxes){if(b.dyn){dynBoxes.push(b);continue}
+      for(let i=Math.floor((b.min.x-6)/GRID);i<=Math.floor((b.max.x+6)/GRID);i++)for(let j=Math.floor((b.min.z-6)/GRID);j<=Math.floor((b.max.z+6)/GRID);j++){const k=i*4096+j;let c=grid.get(k);if(!c)grid.set(k,c=[]);c.push(b)}}
+    for(const c of grid.values())c.push(...dynBoxes);gridN=boxes.length}
+  return grid.get(Math.floor(x/GRID)*4096+Math.floor(z/GRID))||dynBoxes;
+}
+// does collider b cover (x,z), grown by rad?
+function overXZ(b,x,z,rad){
+  if(b.cyl)return Math.hypot(x-b.x,z-b.z)<=b.r+rad;
+  if(b.h){const dx=x-b.c.x,dz=z-b.c.z;return Math.abs(dx*b.cs-dz*b.sn)<=b.h.x+rad&&Math.abs(dx*b.sn+dz*b.cs)<=b.h.z+rad}
+  return x>=b.min.x-rad&&x<=b.max.x+rad&&z>=b.min.z-rad&&z<=b.max.z+rad;
+}
+// nearest point of collider b to (x,z) in the ground plane -> o
+function nearXZ(b,x,z,o){
+  if(b.cyl){const dx=x-b.x,dz=z-b.z,d=Math.hypot(dx,dz),k=d>b.r?b.r/d:1;o.x=b.x+dx*k;o.z=b.z+dz*k;return o}
+  if(b.h){const dx=x-b.c.x,dz=z-b.c.z,lx=clamp(dx*b.cs-dz*b.sn,-b.h.x,b.h.x),lz=clamp(dx*b.sn+dz*b.cs,-b.h.z,b.h.z);o.x=b.c.x+lx*b.cs+lz*b.sn;o.z=b.c.z-lx*b.sn+lz*b.cs;return o}
+  o.x=clamp(x,b.min.x,b.max.x);o.z=clamp(z,b.min.z,b.max.z);return o;
+}
+// (x,z) is inside b: shortest way out sideways -> o = outward normal, returns the depth
+function exitXZ(b,x,z,o){
+  if(b.cyl){const dx=x-b.x,dz=z-b.z,d=Math.hypot(dx,dz);if(d<1e-6){o.x=0;o.z=1}else{o.x=dx/d;o.z=dz/d}return b.r-d}
+  let lx=x,lz=z,mx=b.min.x,Mx=b.max.x,mz=b.min.z,Mz=b.max.z;
+  if(b.h){const dx=x-b.c.x,dz=z-b.c.z;lx=dx*b.cs-dz*b.sn;lz=dx*b.sn+dz*b.cs;mx=-b.h.x;Mx=b.h.x;mz=-b.h.z;Mz=b.h.z}
+  const f=[lx-mx,Mx-lx,lz-mz,Mz-lz];let k=0;for(let i=1;i<4;i++)if(f[i]<f[k])k=i;
+  let nx=k===0?-1:k===1?1:0,nz=k===2?-1:k===3?1:0;
+  if(b.h){const wx=nx*b.cs+nz*b.sn,wz=-nx*b.sn+nz*b.cs;nx=wx;nz=wz}
+  o.x=nx;o.z=nz;return f[k];
+}
 function mesh(geo,m,x=0,y=0,z=0,parent=scene){const o=new THREE.Mesh(geo,typeof m==='number'?mat(m):m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
 
 // ---------- textures
@@ -478,18 +524,18 @@ function plaza(cx,cz){
   const basin=mesh(new THREE.CylinderGeometry(5,5.4,1.2,28),0xd9d2c3,cx,4.6,cz);solid(basin);
   const water=mesh(new THREE.CylinderGeometry(4.5,4.5,0.2,28),new THREE.MeshLambertMaterial({color:0x5ecbf0,emissive:0x0b3b52}),cx,5.15,cz);water.castShadow=false;
   const col=mesh(new THREE.CylinderGeometry(0.8,1.1,4,12),0xd9d2c3,cx,6,cz);solid(col);
-  const bowl=mesh(new THREE.CylinderGeometry(2.2,0.8,0.8,20),0xd9d2c3,cx,8.2,cz);statics.push(bowl);
+  const bowl=mesh(new THREE.CylinderGeometry(2.2,0.8,0.8,20),0xd9d2c3,cx,8.2,cz);solid(bowl);
   const spray=mesh(new THREE.ConeGeometry(1.8,2.2,16,1,true),new THREE.MeshLambertMaterial({color:0xbfeeff,transparent:true,opacity:0.6,emissive:0x2a6680}),cx,9.6,cz);spray.rotation.x=Math.PI;spray.castShadow=false;
   for(let k=0;k<4;k++){const a=k/4*Math.PI*2+Math.PI/4,bx=cx+Math.sin(a)*11,bz=cz+Math.cos(a)*11;const b=mesh(new THREE.BoxGeometry(3.2,0.3,1),0x9a6b43,bx,4.9,bz);b.rotation.y=a+Math.PI/2}
   const s=signMesh('WELCOME TO ADVENTURE BAY','#e8413c','#fff8e8',12,3);s.position.set(cx,7.5,cz+16);
   const post=mesh(new THREE.BoxGeometry(12.6,3.6,0.5),0x16244a,cx,7.5,cz+15.7);solid(post);s.position.z=cz+15.98;scene.add(s);
-  mesh(new THREE.BoxGeometry(0.5,4,0.5),0x16244a,cx-5.5,4.8,cz+15.7);mesh(new THREE.BoxGeometry(0.5,4,0.5),0x16244a,cx+5.5,4.8,cz+15.7);
+  solid(mesh(new THREE.BoxGeometry(0.5,4,0.5),0x16244a,cx-5.5,4.8,cz+15.7));solid(mesh(new THREE.BoxGeometry(0.5,4,0.5),0x16244a,cx+5.5,4.8,cz+15.7));
 }
 function townHall(cx,cz){
   const W=30,D=18,H=12,base=4,fz=cz+D/2;
   building(cx,cz,W,D,H,0xf6e7cb,{top:0xcfc4ad});
   for(let k=0;k<6;k++){const c=mesh(new THREE.CylinderGeometry(0.7,0.8,H-1,12),0xfff8e8,cx-12.5+k*5,base+(H-1)/2,fz+1.4);solid(c)}
-  mesh(new THREE.BoxGeometry(W+1,1.4,4),0xe9dcc0,cx,base+H-0.3,fz+1);
+  solid(mesh(new THREE.BoxGeometry(W+1,1.4,4),0xe9dcc0,cx,base+H-0.3,fz+1));
   const st=mesh(new THREE.BoxGeometry(14,0.8,3),0xd9d2c3,cx,base+0.4,fz+1.8);solid(st);
   const s=signMesh('TOWN HALL','#16244a','#ffc93c',10,2.5);s.position.set(cx,base+H-0.3,fz+3.02);scene.add(s);
   const tw=mesh(new THREE.BoxGeometry(7,14,7),0xf6e7cb,cx,base+H+7,cz);solid(tw);
@@ -502,11 +548,11 @@ function townHall(cx,cz){
 }
 function waterTower(x,z){
   const base=4,lh=17;
-  for(const [dx,dz] of [[-3,-3],[3,-3],[-3,3],[3,3]]){const l=mesh(new THREE.CylinderGeometry(0.35,0.45,lh,6),0x8a8f99,x+dx,base+lh/2,z+dz);statics.push(l)}
+  for(const [dx,dz] of [[-3,-3],[3,-3],[-3,3],[3,3]]){const l=mesh(new THREE.CylinderGeometry(0.35,0.45,lh,6),0x8a8f99,x+dx,base+lh/2,z+dz);solid(l)}
   mesh(new THREE.BoxGeometry(6.6,0.3,0.3),0x8a8f99,x,base+8,z-3);mesh(new THREE.BoxGeometry(6.6,0.3,0.3),0x8a8f99,x,base+8,z+3);
   const tank=mesh(new THREE.CylinderGeometry(5,5,6,24),0x8cc7e8,x,base+lh+3,z);solid(tank);
   const band=mesh(new THREE.CylinderGeometry(5.05,5.05,1,24),0xe8413c,x,base+lh+3,z);band.castShadow=false;
-  const lid=mesh(new THREE.CylinderGeometry(5.3,5.3,0.4,24),0xe9e4d8,x,base+lh+6.2,z);statics.push(lid);addBox(x-4,base+lh+6,z-4,x+4,base+lh+6.4,z+4);
+  const lid=mesh(new THREE.CylinderGeometry(5.3,5.3,0.4,24),0xe9e4d8,x,base+lh+6.2,z);solid(lid);
   chickSpots.push({x:x,y:base+lh+6.4,z:z,name:'water tower'});
 }
 // houses outside town
@@ -520,24 +566,69 @@ for(const [hx,hz] of houseSpots){
 building(-150,120,18,12,8,0xc0392b,{base:terrain(-150,120)-1,roof:0xf6e7cb,sign:'FARM',signBg:'#fff8e8',signFg:'#c0392b',face:1});
 
 // ================= Lookout (Pup HQ) =================
+// walk in through the front door, ride the glass elevator up to the lookout, step out on the balcony, take the slide down
 const LG=terrain(LOOK.x,LOOK.z);
+const HQ={door:Math.PI};HQ.deckA=HQ.door+Math.round((Math.atan2(TOWN.x-LOOK.x,TOWN.z-LOOK.z)-HQ.door)/(Math.PI/8))*Math.PI/8;   // balcony door faces town, snapped to the elevator's wall segments
+function annulusGeo(ri,ro,h,seg=40){const sh=new THREE.Shape();sh.absarc(0,0,ro,0,Math.PI*2,false);const ho=new THREE.Path();ho.absarc(0,0,ri,0,Math.PI*2,true);sh.holes.push(ho);
+  const g=new THREE.ExtrudeGeometry(sh,{depth:h,bevelEnabled:false,curveSegments:seg});g.rotateX(-Math.PI/2);return g}
+const elev={y:0,lo:0,hi:0,v:0,dir:0,ride:0,stay:false,doors:[]};
 {
-  const x=LOOK.x,z=LOOK.z,g=LG-1.2;
-  const baseM=mesh(new THREE.CylinderGeometry(10,10.5,9.2,36),0xfff8e8,x,g+4.6,z);statics.push(baseM);addBox(x-7.6,g,z-7.6,x+7.6,g+9.2,z+7.6);
+  const x=LOOK.x,z=LOOK.z,g=LG-1.2,FY=LG+0.15,PF=g+43.7,CE=g+49.7,dA=HQ.door,tA=HQ.deckA;Object.assign(HQ,{g,FY,PF,CE});
+  const at=(a,r,y)=>[x+Math.sin(a)*r,y,z+Math.cos(a)*r];
+  // ground floor: round wall with a doorway, wooden floor, ceiling that doubles as the roof terrace
+  const dH=Math.PI/18,wallM=new THREE.MeshLambertMaterial({color:0xfff8e8}),inM=new THREE.MeshLambertMaterial({color:0xf3e6cc,side:THREE.BackSide});
+  statics.push(mesh(new THREE.CylinderGeometry(10,10.5,9.2,36,1,true,dA+dH,Math.PI*2-2*dH),wallM,x,g+4.6,z));
+  mesh(new THREE.CylinderGeometry(9.4,9.4,9.2,36,1,true,dA+dH,Math.PI*2-2*dH),inM,x,g+4.6,z).castShadow=false;
+  const lh=g+9.2-(FY+5.4);statics.push(mesh(new THREE.CylinderGeometry(10,10.13,lh,4,1,true,dA-dH,2*dH),wallM,x,g+9.2-lh/2,z));
+  mesh(new THREE.CylinderGeometry(9.4,9.4,lh,4,1,true,dA-dH,2*dH),inM,x,g+9.2-lh/2,z).castShadow=false;
+  ringWall(x,z,9.4,10.5,g,g+8.8,36,[{a:dA,half:dH,y0:g,y1:FY+5.4}]);
+  for(const s of [-1,1]){const p=at(dA+s*dH,9.95,FY+2.7),post=mesh(new THREE.BoxGeometry(0.5,5.4,1.3),0x2e4a7d,...p);post.rotation.y=dA+s*dH}
+  {const p=at(dA,9.95*Math.cos(dH),FY+5.6),top=mesh(new THREE.BoxGeometry(2*9.95*Math.sin(dH)+0.5,0.5,1.3),0x2e4a7d,...p);top.rotation.y=dA}
   mesh(new THREE.CylinderGeometry(10.08,10.08,1.6,36),0xe8413c,x,g+7.6,z).castShadow=false;
-  const door=mesh(new THREE.BoxGeometry(5,5,0.4),0x2e4a7d,x,g+2.5,z-10.1);door.castShadow=false;
-  const paw=new THREE.Mesh(new THREE.PlaneGeometry(4,4),new THREE.MeshLambertMaterial({map:pawTex,transparent:true}));paw.position.set(x,g+7.2,z-10.5);paw.rotation.y=Math.PI;scene.add(paw);
-  const sh=mesh(new THREE.CylinderGeometry(3.2,3.6,34,20),0xeeeeea,x,g+9.2+17,z);statics.push(sh);addBox(x-2.5,g+9.2,z-2.5,x+2.5,g+43.2,z+2.5);
-  const pod=mesh(new THREE.CylinderGeometry(8.5,7,6.5,32),new THREE.MeshLambertMaterial({color:0x8fdcff,emissive:0x1b5f86,transparent:true,opacity:0.9}),x,g+46.5,z);statics.push(pod);
-  mesh(new THREE.CylinderGeometry(7,7,0.6,32),0xfff8e8,x,g+43.4,z);
-  const roof=mesh(new THREE.CylinderGeometry(9.2,9.2,1.2,32),0xe8413c,x,g+50.3,z);statics.push(roof);
-  addBox(x-6.5,g+43,z-6.5,x+6.5,g+50.9,z+6.5);
+  const paw=new THREE.Mesh(new THREE.PlaneGeometry(4,4),new THREE.MeshLambertMaterial({map:pawTex,transparent:true}));paw.position.set(x,g+7.6,z-10.5);paw.rotation.y=Math.PI;scene.add(paw);
+  solid(mesh(new THREE.CylinderGeometry(9.45,9.45,FY-g,36),0xe9c48f,x,(g+FY)/2,z));boxes[boxes.length-1].map=true;
+  const fp=new THREE.Mesh(new THREE.PlaneGeometry(3.6,3.6),new THREE.MeshLambertMaterial({map:pawTex,transparent:true}));fp.rotation.x=-Math.PI/2;fp.position.set(...at(dA,6.4,FY+0.02));fp.rotation.z=dA;scene.add(fp);
+  statics.push(mesh(annulusGeo(3.5,10,0.4),0xfff8e8,x,g+8.8,z));ringWall(x,z,3.5,10.5,g+8.8,g+9.2,24);
+  {const sc=signMesh('PUP HQ','#16244a','#ffc93c',6,1.5);sc.position.set(...at(0,9.3,FY+4.4));sc.rotation.y=Math.PI;scene.add(sc)}
+  [[0xe8413c,1.1],[0x2e5fb8,1.5],[0xf5d33b,4.8],[0x3aa35b,5.2]].forEach(([c,a])=>{const cu=mesh(new THREE.CylinderGeometry(1.3,1.4,0.45,20),c,...at(a,7.2,FY+0.22));cu.castShadow=false});
+  // glass elevator tube from the ground floor to the lookout, doors at both ends
+  const glass=new THREE.MeshLambertMaterial({color:0xbfeaff,emissive:0x1b5f86,transparent:true,opacity:0.28,side:THREE.DoubleSide,depthWrite:false});
+  const tube=mesh(new THREE.CylinderGeometry(3.3,3.3,CE-FY,28,1,true),glass,x,(FY+CE)/2,z);tube.castShadow=false;tube.receiveShadow=false;statics.push(tube);
+  for(const a of [0,Math.PI/2,2.3,Math.PI*1.5])mesh(new THREE.BoxGeometry(0.3,CE-FY,0.3),0xfff8e8,...at(a,3.35,(FY+CE)/2)).rotation.y=a;
+  for(let y=g+15;y<g+43;y+=7){const t=mesh(new THREE.TorusGeometry(3.4,0.2,6,28),0xfff8e8,x,y,z);t.rotation.x=Math.PI/2}
+  const tH=Math.PI/8;HQ.tubeCols=ringWall(x,z,3.1,3.5,FY,CE,16,[{a:dA,half:tH,y0:FY-1,y1:FY+5.2},{a:tA,half:tH,y0:PF-1,y1:PF+5.2}]);
+  Object.assign(elev,{y:FY,lo:FY,hi:PF});
+  elev.g=new THREE.Group();elev.g.position.set(x,FY,z);scene.add(elev.g);
+  mesh(new THREE.CylinderGeometry(2.9,2.9,0.3,28),0xffc93c,0,-0.15,0,elev.g);mesh(new THREE.CylinderGeometry(2.95,2.95,0.12,28),0xe8413c,0,-0.26,0,elev.g);
+  elev.g.traverse(o=>o.userData.dynamic=true);elev.col=addCyl(x,z,2.9,FY-0.3,FY);elev.col.dyn=true;
+  for(const [a,y] of [[dA,FY],[tA,PF]]){
+    const d={a,y,s:0,col:addObb(...at(a,3.3,y+2.6),1.3,2.6,0.25,a),panels:[]};HQ.tubeCols.push(d.col);d.col.dyn=true;
+    for(const sd of [-1,1]){const pn=mesh(new THREE.BoxGeometry(1.3,5.2,0.12),new THREE.MeshLambertMaterial({color:0xe8413c,transparent:true,opacity:0.8}),0,0,0);pn.castShadow=false;pn.rotation.y=a;pn.userData.dynamic=true;pn.userData.side=sd;d.panels.push(pn)}
+    elev.doors.push(d);
+  }
+  // the lookout: glass room with a door out to a balcony that goes all the way round, and a diving board towards town
+  const pH=Math.PI/16;
+  const pod=mesh(new THREE.CylinderGeometry(8.5,7,6.5,32,1,true,tA+pH,Math.PI*2-2*pH),new THREE.MeshLambertMaterial({color:0x8fdcff,emissive:0x1b5f86,transparent:true,opacity:0.42,side:THREE.DoubleSide,depthWrite:false}),x,g+46.5,z);
+  pod.castShadow=false;statics.push(pod);
+  ringWall(x,z,7,7.6,PF,CE,32,[{a:tA,half:pH,y0:PF-1,y1:CE+1}]).forEach(b=>b.nocam=true);
+  for(const s of [-1,1]){const p=at(tA+s*pH,7.7,(PF+CE)/2),post=mesh(new THREE.BoxGeometry(0.4,CE-PF,0.4),0xfff8e8,...p);post.rotation.order='YXZ';post.rotation.y=tA+s*pH;post.rotation.x=0.22}
+  statics.push(mesh(annulusGeo(3.5,10.5,0.5),0xfff8e8,x,PF-0.5,z));ringWall(x,z,3.5,10.5,PF-0.5,PF,24);
+  mesh(new THREE.CylinderGeometry(10.55,10.55,0.3,40,1,true),0xe8413c,x,PF-0.3,z).castShadow=false;
+  const rH=Math.PI/20;ringWall(x,z,10.1,10.45,PF,PF+1.1,40,[{a:tA,half:rH,y0:PF-1,y1:PF+2}]).forEach(b=>{const w=mesh(new THREE.BoxGeometry(b.h.x*2,b.h.y*2,b.h.z*2),0xe8413c,b.c.x,b.c.y,b.c.z);w.rotation.y=Math.atan2(b.sn,b.cs);statics.push(w)});
+  {const p=at(tA,12.7,PF-0.15),bd=mesh(new THREE.BoxGeometry(1.5,0.3,4.6),0x2e5fb8,...p);bd.rotation.y=tA;statics.push(bd);addObb(...p,0.75,0.15,2.3,tA);const tip=mesh(new THREE.BoxGeometry(1.5,0.2,0.4),0xffc93c,...at(tA,14.8,PF+0.05));tip.rotation.y=tA}
+  solid(mesh(new THREE.CylinderGeometry(9.2,9.2,1.2,32),0xe8413c,x,g+50.3,z));
   mesh(new THREE.SphereGeometry(3,16,10,0,Math.PI*2,0,Math.PI/2),0xfff8e8,x,g+50.9,z);roofGeo.push({sq:false,x,z,hw:3,base:g+50.9,rh:2.6});
   const ant=mesh(new THREE.CylinderGeometry(0.18,0.18,8,6),0xdddddd,x,g+57,z);
   const dish=mesh(new THREE.SphereGeometry(1.6,14,8,0,Math.PI*2,0,Math.PI/2.4),new THREE.MeshLambertMaterial({color:0xffffff,side:THREE.DoubleSide}),x+5,g+52,z+3);dish.rotation.x=-1.1;radar.push(dish);
   const p2=paw.clone();p2.position.set(x,g+50.3,z-9.25);p2.scale.setScalar(0.35);scene.add(p2);
+  // the slide: hop into the yellow hoop in the lookout floor, come out on the roof terrace
   class Helix extends THREE.Curve{getPoint(t,o=new V3()){const a=t*Math.PI*4.2+Math.PI;return o.set(x+Math.sin(a)*5.6,g+42-t*33,z+Math.cos(a)*5.6)}}
-  const slide=mesh(new THREE.TubeGeometry(new Helix(),120,0.9,8,false),0xffc93c,0,0,0);statics.push(slide);
+  HQ.slide=new Helix();HQ.slideLen=HQ.slide.getLength();
+  const slide=mesh(new THREE.TubeGeometry(HQ.slide,120,0.9,8,false),0xffc93c,0,0,0);statics.push(slide);
+  const e0=HQ.slide.getPoint(0);HQ.slideIn=e0;
+  mesh(new THREE.CylinderGeometry(0.9,0.9,PF-e0.y,12,1,true),0xffc93c,e0.x,(PF+e0.y)/2,e0.z).castShadow=false;
+  const hoop=mesh(new THREE.TorusGeometry(1.05,0.22,8,24),0xffc93c,e0.x,PF+0.1,e0.z);hoop.rotation.x=Math.PI/2;
+  const hole=new THREE.Mesh(new THREE.CircleGeometry(0.95,20),mat(0x16244a));hole.rotation.x=-Math.PI/2;hole.position.set(e0.x,PF+0.03,e0.z);scene.add(hole);
   chickSpots.push({x:x+3.5,y:g+50.9,z:z-3.5,name:'Pup HQ roof'});
 }
 // ================= Bridge =================
@@ -551,7 +642,7 @@ const LG=terrain(LOOK.x,LOOK.z);
     for(const s of [-1,1]){const leg=mesh(new THREE.BoxGeometry(1.6,34,1.6),0xd0453a,tx,deckT-10+17,BRIDGE_Z+s*6);solid(leg)}
     top=deckT+24;
     const cb=mesh(new THREE.BoxGeometry(1.8,1.6,13.6),0xd0453a,tx,top,BRIDGE_Z);solid(cb);
-    mesh(new THREE.BoxGeometry(1.8,1.2,13.6),0xd0453a,tx,deckT+12,BRIDGE_Z);
+    solid(mesh(new THREE.BoxGeometry(1.8,1.2,13.6),0xd0453a,tx,deckT+12,BRIDGE_Z));
   }
   const cm=new THREE.LineBasicMaterial({color:0xa8322a});
   for(const s of [-1,1]){
@@ -568,10 +659,9 @@ const LH={x:355,z:0},LHG=terrain(LH.x,LH.z);
 let lhBeam;
 {
   const {x,z}=LH,g=LHG-0.5;
-  for(let k=0;k<6;k++){const r0=4-k*0.2,c=mesh(new THREE.CylinderGeometry(r0-0.2,r0,5,24),k%2?0xfff8e8:0xe8413c,x,g+2.5+k*5,z);statics.push(c)}
-  addBox(x-3,g,z-3,x+3,g+30,z+3);
-  const gal=mesh(new THREE.CylinderGeometry(4.2,4.2,0.5,24),0x16244a,x,g+30.25,z);statics.push(gal);addBox(x-3.8,g+30,z-3.8,x+3.8,g+30.5,z+3.8);
-  const lan=mesh(new THREE.CylinderGeometry(2.3,2.3,3,16),new THREE.MeshLambertMaterial({color:0xfff2a8,emissive:0xffcc33,transparent:true,opacity:0.85}),x,g+32,z);statics.push(lan);addBox(x-1.8,g+30.5,z-1.8,x+1.8,g+33.5,z+1.8);
+  for(let k=0;k<6;k++){const r0=4-k*0.2;solid(mesh(new THREE.CylinderGeometry(r0-0.2,r0,5,24),k%2?0xfff8e8:0xe8413c,x,g+2.5+k*5,z))}
+  const gal=mesh(new THREE.CylinderGeometry(4.2,4.2,0.5,24),0x16244a,x,g+30.25,z);solid(gal);
+  const lan=mesh(new THREE.CylinderGeometry(2.3,2.3,3,16),new THREE.MeshLambertMaterial({color:0xfff2a8,emissive:0xffcc33,transparent:true,opacity:0.85}),x,g+32,z);solid(lan);
   mesh(new THREE.ConeGeometry(2.8,2.4,16),0xe8413c,x,g+34.7,z);roofGeo.push({sq:false,x,z,hw:2.8,base:g+33.5,rh:2.4});
   const bg=new THREE.ConeGeometry(3,40,16,1,true);bg.translate(0,-20,0);bg.rotateZ(Math.PI/2);
   lhBeam=new THREE.Mesh(bg,new THREE.MeshBasicMaterial({color:0xfff6c0,transparent:true,opacity:0.18,depthWrite:false,side:THREE.DoubleSide}));lhBeam.position.set(x,g+32,z);scene.add(lhBeam);
@@ -599,10 +689,11 @@ chickSpots[chickSpots.length-1].name='mountain peak';
   const bm=new THREE.InstancedMesh(ballG,Object.assign(new THREE.MeshLambertMaterial({color:0xffffff}),{userData:{flat:true}}),balls.length);
   const pm=new THREE.InstancedMesh(pineG,Object.assign(new THREE.MeshLambertMaterial({color:0xffffff}),{userData:{flat:true}}),pines.length);
   const o=new THREE.Object3D(),c=new THREE.Color();
-  spots.forEach((s,i)=>{o.position.set(s[0],s[1]-0.3,s[2]);o.rotation.y=R(0,6);o.scale.setScalar(R(0.8,1.4));if(Math.hypot(s[0]-SITE.x,s[2]-SITE.z)<18)o.scale.setScalar(0);o.updateMatrix();trunks.setMatrixAt(i,o.matrix)});
-  balls.forEach((s,i)=>{o.position.set(s[0],s[1]-0.3,s[2]);o.rotation.y=R(0,6);o.scale.setScalar(R(0.8,1.4));if(Math.hypot(s[0]-SITE.x,s[2]-SITE.z)<18)o.scale.setScalar(0);o.updateMatrix();bm.setMatrixAt(i,o.matrix);bm.setColorAt(i,c.setHSL(R(0.24,0.33),R(0.45,0.6),R(0.36,0.48)))});
-  pines.forEach((s,i)=>{o.position.set(s[0],s[1]-0.3,s[2]);o.rotation.y=R(0,6);o.scale.setScalar(R(0.8,1.3));o.updateMatrix();pm.setMatrixAt(i,o.matrix);pm.setColorAt(i,c.setHSL(R(0.36,0.42),R(0.35,0.5),R(0.26,0.34)))});
+  spots.forEach((s,i)=>{o.position.set(s[0],s[1]-0.3,s[2]);o.rotation.y=R(0,6);o.scale.setScalar(R(0.8,1.4));if(Math.hypot(s[0]-SITE.x,s[2]-SITE.z)<18)o.scale.setScalar(0);o.updateMatrix();trunks.setMatrixAt(i,o.matrix);s.k=o.scale.x});
+  balls.forEach((s,i)=>{o.position.set(s[0],s[1]-0.3,s[2]);o.rotation.y=R(0,6);o.scale.setScalar(R(0.8,1.4));if(Math.hypot(s[0]-SITE.x,s[2]-SITE.z)<18)o.scale.setScalar(0);o.updateMatrix();bm.setMatrixAt(i,o.matrix);s.top=s[1]-0.3+6.4*o.scale.x;bm.setColorAt(i,c.setHSL(R(0.24,0.33),R(0.45,0.6),R(0.36,0.48)))});
+  pines.forEach((s,i)=>{o.position.set(s[0],s[1]-0.3,s[2]);o.rotation.y=R(0,6);o.scale.setScalar(R(0.8,1.3));o.updateMatrix();pm.setMatrixAt(i,o.matrix);s.top=s[1]-0.3+8*o.scale.x;pm.setColorAt(i,c.setHSL(R(0.36,0.42),R(0.35,0.5),R(0.26,0.34)))});
   for(const m of [trunks,bm,pm]){m.castShadow=true;m.receiveShadow=true;scene.add(m)}
+  for(const s of spots)if(s.k>0)addCyl(s[0],s[2],0.45*s.k,s[1]-1,s.top).tree=true;
 }
 // far scenery: islands and ranges across the sea, so the horizon has layers that haze away
 {
@@ -757,7 +848,7 @@ const PAD={x:LOOK.x+26,z:LOOK.z-22};
   let hi=-Infinity,lo=Infinity;for(let a=0;a<8;a++){const h=terrain(PAD.x+Math.sin(a/8*6.283)*7,PAD.z+Math.cos(a/8*6.283)*7);hi=Math.max(hi,h);lo=Math.min(lo,h)}
   hi=Math.max(hi,terrain(PAD.x,PAD.z));PAD.y=hi+0.5;
   const ph=PAD.y-lo+1.5;
-  mesh(new THREE.CylinderGeometry(7,7.4,ph,32),0x9aa3b5,PAD.x,PAD.y-ph/2,PAD.z);addBox(PAD.x-5.6,lo-1,PAD.z-5.6,PAD.x+5.6,PAD.y,PAD.z+5.6);
+  mesh(new THREE.CylinderGeometry(7,7.4,ph,32),0x9aa3b5,PAD.x,PAD.y-ph/2,PAD.z);addCyl(PAD.x,PAD.z,7.2,lo-1,PAD.y);
   const hT=canvasTex(256,256,(g)=>{g.fillStyle='#3d4458';g.beginPath();g.arc(128,128,124,0,7);g.fill();g.strokeStyle='#ffc93c';g.lineWidth=10;g.beginPath();g.arc(128,128,104,0,7);g.stroke();g.fillStyle='#fff8e8';g.fillRect(78,60,26,136);g.fillRect(152,60,26,136);g.fillRect(78,115,100,26)});
   const top=new THREE.Mesh(new THREE.CircleGeometry(6.9,32),new THREE.MeshLambertMaterial({map:hT}));top.rotation.x=-Math.PI/2;top.position.set(PAD.x,PAD.y+0.03,PAD.z);top.receiveShadow=true;scene.add(top);
 }
@@ -875,7 +966,7 @@ function updateBoat(dt,inp,driven){
     if(engine&&!muted){engine.o.frequency.value=80+spd*5;engine.g.gain.value=0.03}}
 }
 function boatVisual(){boat.g.position.copy(boat.pos);boat.g.rotation.y=boat.heading;boat.g.rotation.x=lerp(boat.g.rotation.x,-clamp(boat.speed*0.012,-0.1,0.32)-clamp(boat.vy*0.03,-0.3,0.3),0.15);boat.g.rotation.z=Math.sin(nowT*1.7)*0.03}
-function heliFloor(x,z,y){return Math.max(support(x,z,y,1),0)}
+function heliFloor(x,z,y){return Math.max(support(x,z,y,1,heli),0)}
 function updateHeli(dt,inp,piloted){
   const up=piloted&&(keys.Space||hold.up)?1:0,dn=piloted&&(keys.ShiftLeft||keys.ShiftRight||keys.KeyC||hold.down)?1:0;
   heli.spin=lerp(heli.spin,piloted?1:0,Math.min(1,(piloted?1.5:0.4)*dt));
@@ -891,7 +982,7 @@ function updateHeli(dt,inp,piloted){
   heli.pos.addScaledVector(heli.vel,dt);
   if(heli.pos.y>300){heli.pos.y=300;heli.vel.y=Math.min(0,heli.vel.y)}
   const v0=heli.vel.length();
-  tc.set(heli.pos.x,heli.pos.y+1.7,heli.pos.z);collideSphere(tc,1.7,heli.vel);heli.pos.set(tc.x,tc.y-1.7,tc.z);
+  tc.set(heli.pos.x,heli.pos.y+1.7,heli.pos.z);collideSphere(tc,1.7,heli.vel,heli);heli.pos.set(tc.x,tc.y-1.7,tc.z);
   const fl=heliFloor(heli.pos.x,heli.pos.z,heli.pos.y);
   if(heli.crash&&(heli.pos.y<=fl+0.3||v0-heli.vel.length()>8)){explodeHeli();return}
   if(heli.pos.y<=fl+0.02){heli.pos.y=fl;if(heli.vel.y<-10){sfx.bonk();burst(heli.pos.clone(),0xd9c7a0,10,5)}heli.vel.y=Math.max(0,heli.vel.y);heli.landed=true;heli.vel.x*=1-5*dt;heli.vel.z*=1-5*dt}
@@ -1075,9 +1166,9 @@ function updateDig(dt,inp,driven){
   const fx=Math.sin(dig.heading),fz=Math.cos(dig.heading);
   dig.pos.x+=fx*dig.speed*dt;dig.pos.z+=fz*dig.speed*dt;
   const r=2.1;
-  for(const b of boxes){
-    if(b.max.y<=dig.pos.y+1.2||b.min.y>dig.pos.y+3)continue;
-    const px=clamp(dig.pos.x,b.min.x,b.max.x),pz=clamp(dig.pos.z,b.min.z,b.max.z);let dx=dig.pos.x-px,dz=dig.pos.z-pz,d=Math.hypot(dx,dz);
+  for(const b of nearBoxes(dig.pos.x,dig.pos.z)){
+    if(b.off||b.max.y<=dig.pos.y+1.2||b.min.y>dig.pos.y+3||dig.pos.x<b.min.x-r||dig.pos.x>b.max.x+r||dig.pos.z<b.min.z-r||dig.pos.z>b.max.z+r)continue;
+    nearXZ(b,dig.pos.x,dig.pos.z,cQ);const px=cQ.x,pz=cQ.z;let dx=dig.pos.x-px,dz=dig.pos.z-pz,d=Math.hypot(dx,dz);
     if(d>=r)continue;
     if(d<1e-6){dig.pos.x-=fx*r;dig.pos.z-=fz*r}else{dig.pos.x+=dx/d*(r-d);dig.pos.z+=dz/d*(r-d)}
     if(Math.abs(dig.speed)>5)sfx.bonk();dig.speed*=-0.2;
@@ -1367,7 +1458,7 @@ function computeAim(){
   camera.updateMatrixWorld();camera.getWorldDirection(tmpDir);
   const o=camera.position,maxT=150;
   aimTargets.length=0;for(const s of statics)aimTargets.push(s);for(const b of bots)if(b.alive)aimTargets.push(b.g);for(const p of props)aimTargets.push(p.g);aimTargets.push(ship.g);
-  ray.set(o,tmpDir);ray.far=maxT;
+  ray.set(o,tmpDir);ray.far=maxT;ray.camera=camera;   // sprites (online name tags) need the camera to raycast
   const hits=ray.intersectObjects(aimTargets,true);
   let t=Infinity,ent=null;
   aim.ship=false;
@@ -1417,8 +1508,46 @@ function rescue(c){
   toast(T('chickSaved'),`${S.chick} ${T('of')} ${chickens.length} · ${T(c.name)}`);checkWin();
 }
 function checkWin(){if(!S.won&&S.chick===chickens.length&&S.bots===bots.length){S.won=true;setTimeout(()=>{$('winChaos').textContent=S.chaos;$('win').hidden=false;if(document.pointerLockElement)document.exitPointerLock()},1600)}}
+// parked car and copter are solid (you can climb on them); off while you drive or fly them
+const carCols=[addObb(0,0,0,1.2,0.45,2.2,0),addObb(0,0,0,1.05,0.5,0.95,0)],heliCol=addObb(0,0,0,1.45,1.3,1.9,0);
+carCols.forEach(b=>{b.o=car;b.nocam=b.dyn=true});heliCol.o=heli;heliCol.nocam=heliCol.dyn=true;
+function vehCols(){
+  const h=car.heading,fx=Math.sin(h),fz=Math.cos(h);
+  placeObb(carCols[0],car.pos.x,car.pos.y+0.95,car.pos.z,h);placeObb(carCols[1],car.pos.x-fx*0.35,car.pos.y+1.85,car.pos.z-fz*0.35,h);
+  for(const b of carCols)b.off=P.mode==='car';
+  placeObb(heliCol,heli.pos.x+Math.sin(heli.yaw)*0.2,heli.pos.y+1.9,heli.pos.z+Math.cos(heli.yaw)*0.2,heli.yaw);heliCol.off=P.mode==='heli';
+}
+// Pup HQ: the elevator comes when called and carries whoever stands on it; the doors only open where it is parked
+function hqUpdate(dt){
+  const e=elev,pr=Math.hypot(P.pos.x-LOOK.x,P.pos.z-LOOK.z),free=(P.mode==='ground'||P.mode==='air')&&!P.slide;
+  const on=free&&pr<2.4&&Math.abs(P.pos.y-e.y)<0.4,up=e.y<(e.lo+e.hi)/2;
+  if(!e.dir){
+    if(on){if(!e.stay&&(e.ride+=dt)>0.5){e.dir=up?1:-1;e.ride=0;toast(T(up?'liftUp':'liftDn'),T(up?'liftUp2':'liftDn2'))}}
+    else{e.ride=0;e.stay=false;const other=up?e.hi:e.lo;if(free&&pr<7&&Math.abs(P.pos.y-other)<2.5)e.dir=up?1:-1}
+    if(e.dir)sfx.zip();
+  }
+  if(e.dir){const to=e.dir>0?e.hi:e.lo,rem=Math.abs(to-e.y);e.v=Math.min(e.v+14*dt,13,1+rem*2.2);
+    const dy=Math.min(rem,e.v*dt)*e.dir;e.y+=dy;if(on)P.pos.y+=dy;
+    if(rem-Math.abs(dy)<1e-4){e.y=to;e.dir=0;e.v=0;e.stay=on}}
+  e.col.min.y=e.y-0.3;e.col.max.y=e.y;e.g.position.y=e.y;
+  for(const b of HQ.tubeCols)b.nocam=pr<3.1;   // glass: the camera may look in, but stays out of the shaft unless you ride
+  for(const d of e.doors){
+    const open=!e.dir&&Math.abs(e.y-d.y)<0.01;d.s=clamp(d.s+(open?2.5:-2.5)*dt,0,1);d.col.off=d.s>0.35;
+    const cs=Math.cos(d.a),sn=Math.sin(d.a);
+    const w=1-0.85*d.s;
+    for(const pn of d.panels){const o=pn.userData.side*1.3*(1-w/2);pn.scale.x=w;pn.position.set(LOOK.x+Math.sin(d.a)*3.05+cs*o,d.y+2.6,LOOK.z+Math.cos(d.a)*3.05-sn*o)}
+  }
+  const si=HQ.slideIn;
+  if(free&&!P.slide&&Math.abs(P.pos.y-HQ.PF)<0.6&&Math.hypot(P.pos.x-si.x,P.pos.z-si.z)<1.0){P.slide={t:0,v:8};toAir();sfx.zip();toast(T('slide'),T('slide2'))}
+}
+function slideStep(dt){
+  const s=P.slide;s.v=Math.min(24,s.v+12*dt);s.t+=s.v*dt/HQ.slideLen;
+  const tg=HQ.slide.getTangent(Math.min(1,s.t));
+  if(s.t>=1){const e=HQ.slide.getPoint(1);P.pos.set(e.x,HQ.g+9.3,e.z);P.vel.set(tg.x*s.v,3,tg.z*s.v);P.slide=null;return false}
+  HQ.slide.getPoint(s.t,tc);P.pos.set(tc.x,tc.y-0.75,tc.z);P.vel.copy(tg).multiplyScalar(s.v);P.face=Math.atan2(tg.x,tg.z);return true;
+}
 function respawn(){if(BEDTIME)return;
-  finishDrops();
+  P.slide=null;finishDrops();
   if(P.mode==='car'||P.mode==='heli'||P.mode==='boat'||P.mode==='dig')actCar();
   if(P.mode==='ride')rideOff();
   if(P.mode==='ship')actCar();
@@ -1431,26 +1560,26 @@ function respawn(){if(BEDTIME)return;
 function resetCar(){car.pos.set(CAR_HOME.x,0,CAR_HOME.z);car.pos.y=ground(car.pos.x,car.pos.z);car.heading=CAR_HOME.h;car.speed=0;car.vy=0;car.onGround=true}
 
 // ================= physics =================
-const cN=new V3();
-function collideSphere(c,r,vel){
+const cN=new V3(),cQ={x:0,z:0};
+function collideSphere(c,r,vel,skip){
   let onGround=false,wall=false;
-  for(const b of boxes){
-    if(c.x<b.min.x-r||c.x>b.max.x+r||c.y<b.min.y-r||c.y>b.max.y+r||c.z<b.min.z-r||c.z>b.max.z+r)continue;
-    const px=clamp(c.x,b.min.x,b.max.x),py=clamp(c.y,b.min.y,b.max.y),pz=clamp(c.z,b.min.z,b.max.z);
-    let dx=c.x-px,dy=c.y-py,dz=c.z-pz;const d2=dx*dx+dy*dy+dz*dz;
+  for(const b of nearBoxes(c.x,c.z)){
+    if(b.off||skip&&b.o===skip||c.x<b.min.x-r||c.x>b.max.x+r||c.y<b.min.y-r||c.y>b.max.y+r||c.z<b.min.z-r||c.z>b.max.z+r)continue;
+    nearXZ(b,c.x,c.z,cQ);const py=clamp(c.y,b.min.y,b.max.y);
+    let dx=c.x-cQ.x,dy=c.y-py,dz=c.z-cQ.z;const d2=dx*dx+dy*dy+dz*dz;
     if(d2>=r*r)continue;
     if(d2<1e-9){
-      const f=[c.x-b.min.x,b.max.x-c.x,c.y-b.min.y,b.max.y-c.y,c.z-b.min.z,b.max.z-c.z];let k=0;for(let i=1;i<6;i++)if(f[i]<f[k])k=i;
-      cN.set(k===0?-1:k===1?1:0,k===2?-1:k===3?1:0,k===4?-1:k===5?1:0);c.addScaledVector(cN,f[k]+r);
+      const side=exitXZ(b,c.x,c.z,cQ),up=b.max.y-c.y,dn=c.y-b.min.y;
+      if(side<=up&&side<=dn){cN.set(cQ.x,0,cQ.z);c.addScaledVector(cN,side+r)}else if(up<=dn){cN.set(0,1,0);c.y+=up+r}else{cN.set(0,-1,0);c.y-=dn+r}
     }else{const d=Math.sqrt(d2);cN.set(dx/d,dy/d,dz/d);c.addScaledVector(cN,r-d)}
     const vn=vel.dot(cN);if(vn<0)vel.addScaledVector(cN,-vn);
     if(cN.y>0.6)onGround=true;else if(Math.abs(cN.y)<0.5)wall=true;
   }
   return {onGround,wall};
 }
-function support(x,z,y,rad=0){
+function support(x,z,y,rad=0,skip){
   let s=ground(x,z);{const r=roofH(x,z);if(r<=y+1.3&&r>s)s=r}
-  for(const b of boxes){if(b.max.y<=y+1.3&&b.max.y>s&&x>=b.min.x-rad&&x<=b.max.x+rad&&z>=b.min.z-rad&&z<=b.max.z+rad)s=b.max.y}
+  for(const b of nearBoxes(x,z)){if(!b.off&&b.max.y<=y+1.3&&b.max.y>s&&(!skip||b.o!==skip)&&x>=b.min.x-rad&&x<=b.max.x+rad&&z>=b.min.z-rad&&z<=b.max.z+rad&&overXZ(b,x,z,rad))s=b.max.y}
   return s;
 }
 const tc=new V3();
@@ -1462,6 +1591,7 @@ function updatePlayer(dt){
     P.pos.x=ship.pos.x+rx*c+rz*sn;P.pos.z=ship.pos.z-rx*sn+rz*c;P.pos.y+=ship.pos.y-shipPrev.pos.y;P.face+=dy;cam.yaw+=dy;
   }
   shipPrev.pos.copy(ship.pos);shipPrev.yaw=ship.yaw;shipPrev.ok=true;P.onShip=false;
+  if(P.slide){if(P.mode==='air'&&slideStep(dt))return;P.slide=null}
   if(P.mode==='ride'){rideUpdate(dt);return}
   if(P.mode==='ship'){P.pos.copy(ship.pilot.g.getWorldPosition(tc));P.vel.set(0,0,0);P.face=ship.yaw;return}
   if(P.mode==='car'){updateCar(dt,inp);P.pos.copy(car.pos);return}
@@ -1529,7 +1659,9 @@ function updatePlayer(dt){
   // integrate
   const n=Math.max(1,Math.ceil(P.vel.length()*dt/0.45)),h=dt/n;let grounded=false,wall=false;
   for(let i=0;i<n;i++){
+    const ox=P.pos.x,oz=P.pos.z;
     P.pos.addScaledVector(P.vel,h);
+    if(rampH(P.pos.x,P.pos.z)>P.pos.y+0.6&&rampH(ox,oz)<=P.pos.y+0.6){P.pos.x=ox;P.pos.z=oz;P.vel.x*=-0.2;P.vel.z*=-0.2;wall=true}
     tc.set(P.pos.x,P.pos.y+0.7,P.pos.z);const r=collideSphere(tc,0.7,P.vel);P.pos.set(tc.x,tc.y-0.7,tc.z);
     if(r.onGround)grounded=true;if(r.wall)wall=true;
     const g=ground(P.pos.x,P.pos.z);if(P.pos.y<=g){P.pos.y=g;if(P.vel.y<0)P.vel.y=0;grounded=true}
@@ -1571,18 +1703,19 @@ function updateCar(dt,inp){
     car.heading-=inp.x*1.9*dt*clamp(car.speed/7,-1,1);
   }
   const fx=Math.sin(car.heading),fz=Math.cos(car.heading);
-  car.pos.x+=fx*car.speed*dt;car.pos.z+=fz*car.speed*dt;
+  {const ox=car.pos.x,oz=car.pos.z;car.pos.x+=fx*car.speed*dt;car.pos.z+=fz*car.speed*dt;
+   if(car.onGround&&rampH(car.pos.x,car.pos.z)>car.pos.y+0.9&&rampH(ox,oz)<=car.pos.y+0.9){car.pos.x=ox;car.pos.z=oz;if(Math.abs(car.speed)>8)sfx.bonk();car.speed*=-0.3}}
   // walls
   const r=1.9;
-  for(const b of boxes){
-    if(b.max.y<=car.pos.y+1.3||b.min.y>car.pos.y+2.4)continue;
-    const px=clamp(car.pos.x,b.min.x,b.max.x),pz=clamp(car.pos.z,b.min.z,b.max.z);let dx=car.pos.x-px,dz=car.pos.z-pz,d=Math.hypot(dx,dz);
+  for(const b of nearBoxes(car.pos.x,car.pos.z)){
+    if(b.off||b.o===car||b.max.y<=car.pos.y+1.3||b.min.y>car.pos.y+2.4||car.pos.x<b.min.x-r||car.pos.x>b.max.x+r||car.pos.z<b.min.z-r||car.pos.z>b.max.z+r)continue;
+    nearXZ(b,car.pos.x,car.pos.z,cQ);const px=cQ.x,pz=cQ.z;let dx=car.pos.x-px,dz=car.pos.z-pz,d=Math.hypot(dx,dz);
     if(d>=r)continue;
     if(d<1e-6){dx=-fx;dz=-fz;d=1;car.pos.x+=dx*r;car.pos.z+=dz*r}else{car.pos.x+=dx/d*(r-d);car.pos.z+=dz/d*(r-d)}
     if(Math.abs(car.speed)>8){sfx.bonk();burst(new V3(px,car.pos.y+1,pz),[0xffffff,0xffc93c],6,4)}
     car.speed*=-0.3;
   }
-  const sup=support(car.pos.x,car.pos.z,car.pos.y,0.5);
+  const sup=support(car.pos.x,car.pos.z,car.pos.y,0.5,car);
   if(car.onGround){if(sup<car.pos.y-0.9)car.onGround=false;else{car.vy=clamp((sup-car.pos.y)/dt,-30,30);car.pos.y=sup}}
   if(!car.onGround){car.vy-=30*dt;car.pos.y+=car.vy*dt;if(car.pos.y<=sup){if(car.vy<-14){sfx.bonk();burst(car.pos.clone(),0xd9c7a0,10,5)}car.pos.y=sup;car.onGround=true;car.vy=0}}
   if(car.pos.y<-0.6){sfx.splash();burst(new V3(car.pos.x,0.3,car.pos.z),0xffffff,20,8);toast(T('splash'),T('splash2'));resetCar()}
@@ -1721,7 +1854,7 @@ renderer.shadowMap.autoUpdate=false;
 PERF.mergeStatic(scene,[...noInk,...flags,...radar,...chickens.map(c=>c.ring),hookBall]);
 for(const p of props)PERF.mergeGroup(p.g);for(const b of bots)PERF.mergeGroup(b.g,[b.prop,...b.eyes]);for(const c of clouds)PERF.mergeGroup(c);
 // hooks for concept shots
-const JP=window.JP={setStyle,fixed:null,world:{LG,LOOK,TOWN,BX},dbg:{P,cam,camera,sfx,sbuf,heliSnd,heli,car,ship,boat,props,bots,chickens,S,gpad,keys,hold,ground,roofH,roofs:roofGeo,step(n){for(let i=0;i<n;i++){nowT+=1/60;update(1/60,nowT)}}},
+const JP=window.JP={setStyle,fixed:null,world:{LG,LOOK,TOWN,BX,HQ,elev,LH,PAD,ramps,boxes},dbg:{P,cam,camera,sfx,sbuf,heliSnd,heli,car,ship,boat,props,bots,chickens,S,gpad,keys,hold,ground,roofH,roofs:roofGeo,step(n){for(let i=0;i<n;i++){nowT+=1/60;update(1/60,nowT)}}},
   shot(o){
     JP.fixed=o;
     if(o.pup){P.pos.set(...o.pup.pos);P.face=o.pup.face??0;chute.visible=o.pup.mode==='chute';pup.wings.visible=o.pup.mode==='wing';pup.g.rotation.x=o.pup.mode==='wing'?0.75:0;
@@ -1736,7 +1869,7 @@ const zTex=(()=>{const c=document.createElement('canvas');c.width=c.height=64;co
   x.lineWidth=8;x.strokeStyle='#23305e';x.strokeText('Z',32,34);x.fillStyle='#fffbe8';x.fillText('Z',32,34);const t=new THREE.CanvasTexture(c);return t})();
 const zzz=[];
 if(BEDTIME){const m=new THREE.SpriteMaterial({map:zTex,transparent:true,depthWrite:false,fog:false});
-  for(let i=0;i<120;i++){const s=new THREE.Sprite(m.clone());s.visible=false;s.renderOrder=5;scene.add(s);noInk.push(s);zzz.push({s,life:0,x:0,y:0,z:0,sc:1,ph:0})}}
+  for(let i=0;i<120;i++){const s=new THREE.Sprite(m.clone());s.raycast=()=>{};s.visible=false;s.renderOrder=5;scene.add(s);noInk.push(s);zzz.push({s,life:0,x:0,y:0,z:0,sc:1,ph:0})}}
 let zI=0;
 function puffZ(x,y,z,sc){const q=zzz[zI++%zzz.length];q.life=2.6;q.x=x;q.y=y;q.z=z;q.sc=sc;q.ph=Math.random()*6;q.s.visible=true}
 function tickZ(dt,t){for(const q of zzz){if(q.life<=0)continue;q.life-=dt;const k=1-q.life/2.6;
@@ -1751,7 +1884,7 @@ function sleepPlayer(){
   const inBed=bed.used&&!dropOf('bed');
   const x=inBed?bed.pos.x-Math.sin(bed.h)*0.25:LOOK.x+33,z=inBed?bed.pos.z-Math.cos(bed.h)*0.25:LOOK.z-14,y=inBed?bed.pos.y+0.92:ground(x,z);
   if(P.mode!=='ground'||Math.abs(P.pos.x-x)>0.01||Math.abs(P.pos.z-z)>0.01){P.hook=null;P.face=inBed?bed.h+Math.PI:Math.PI-0.2}
-  P.pos.set(x,y,z);P.vel.set(0,0,0);P.mode='ground';
+  P.pos.set(x,y,z);P.vel.set(0,0,0);P.mode='ground';P.slide=null;
 }
 // lullaby (Brahms, as a soft music box) on its own gain so mute cuts it at once
 const LULL=[[64,.5],[64,.5],[67,2],[64,.5],[64,.5],[67,2],[64,.5],[67,.5],[72,1],[71,1.5],[69,.5],[69,1],[67,1],[62,.5],[64,.5],[65,1],[62,1],[62,.5],[64,.5],[65,2],[62,.5],[65,.5],[71,.5],[69,.5],[67,1],[71,1],[72,3]];
@@ -1807,7 +1940,7 @@ JP.dbg.bedtime=()=>({on:BEDTIME,hero:heroSleep,style:styleName,dkHour:dkHour()})
 let last=performance.now(),frameN=0;
 function update(dt,t){
   updateShip(dt,t);
-  if(BEDTIME)sleepPlayer();else updatePlayer(dt);
+  vehCols();hqUpdate(dt);if(BEDTIME)sleepPlayer();else updatePlayer(dt);
   updateTethers(dt);updateDrops(dt);
   if(P.mode!=='boat'&&!dropOf('boat'))updateBoat(dt,{x:0,y:0},false);boatVisual();
   if(P.mode!=='dig'&&!dropOf('dig'))updateDig(dt,{x:0,y:0},false);digVisual(dt);
@@ -1876,12 +2009,13 @@ function updateCamera(dt){
   if(inDig&&nowT-cam.lastLook>1.2){cam.yaw=lerpAngle(cam.yaw,dig.heading,Math.min(1,1.8*dt));cam.pitch=lerp(cam.pitch,0.3,Math.min(1,2*dt))}
   if((P.mode==='wing'||P.mode==='chute')&&nowT-cam.lastLook>1.2)cam.pitch=lerp(cam.pitch,P.mode==='wing'?0.12:0.3,Math.min(1,1.5*dt));
   const want={boat:11,dive:7,ground:7,swim:7,air:8,grapple:8.5,chute:10,wing:10.5,car:12,heli:17,jet:9,ride:12,ship:30,dig:12}[P.mode]||8;
-  cam.dist=lerp(cam.dist,want,Math.min(1,3*dt));
+  const hqR=Math.hypot(P.pos.x-LOOK.x,P.pos.z-LOOK.z),indoors=hqR<9.4&&P.pos.y>HQ.FY-1&&(P.pos.y<HQ.g+8.8||P.pos.y>HQ.PF-0.5&&hqR<7&&P.pos.y<HQ.CE);
+  cam.dist=lerp(cam.dist,indoors?Math.min(want,5):want,Math.min(1,3*dt));
   const cp=Math.cos(cam.pitch),sp=Math.sin(cam.pitch),fx=Math.sin(cam.yaw),fz=Math.cos(cam.yaw),rx=-fz,rz=fx,sh=inCar?0:0.95;
   camera.position.set(tgt.x-fx*cam.dist*cp+rx*sh,tgt.y+cam.dist*sp,tgt.z-fz*cam.dist*cp+rz*sh);
   {const cx=camera.position.x,cy=camera.position.y,cz=camera.position.z,bx=tgt.x+rx*sh,by=tgt.y,bz=tgt.z+rz*sh;let f=1;
    for(let i=1;i<=10;i++){const t=i/10,x=lerp(bx,cx,t),y=lerp(by,cy,t),z=lerp(bz,cz,t);let hit=false;
-     for(const b of boxes)if(x>b.min.x-0.3&&x<b.max.x+0.3&&y>b.min.y-0.3&&y<b.max.y+0.3&&z>b.min.z-0.3&&z<b.max.z+0.3){hit=true;break}
+     for(const b of nearBoxes(x,z))if(!b.off&&!b.nocam&&x>b.min.x-0.3&&x<b.max.x+0.3&&y>b.min.y-0.3&&y<b.max.y+0.3&&z>b.min.z-0.3&&z<b.max.z+0.3&&overXZ(b,x,z,0.3)){hit=true;break}
      if(hit){f=Math.max(0.15,(i-1)/10);break}}
    {const c=cam.pull??1;cam.pull=f<c?f:lerp(c,f,Math.min(1,2.5*dt))}
    const k=cam.pull;camera.position.set(lerp(bx,cx,k),lerp(by,cy,k),lerp(bz,cz,k));}
@@ -1941,7 +2075,8 @@ function makeBigBg(){
   for(let i=0;i<roadPts.length;i++){const p=roadPts[i],q=roadPts[i-1];if(q&&Math.hypot(p[0]-q[0],p[1]-q[1])<14)g.lineTo(ux(p[0]),uz(p[1]));else g.moveTo(ux(p[0]),uz(p[1]))}
   g.stroke();
   g.fillStyle='rgba(255,248,232,.9)';g.strokeStyle='rgba(22,36,74,.55)';g.lineWidth=1;
-  for(const b of boxes){const w=b.max.x-b.min.x,d=b.max.z-b.min.z;if(w<2.5||d<2.5||w>60||d>60||b.max.y-b.min.y<2)continue;
+  for(const b of boxes){const w=b.max.x-b.min.x,d=b.max.z-b.min.z;if(b.dyn||b.h||b.tree||w<2.5||d<2.5||w>60||d>60||b.max.y-b.min.y<2&&!b.map)continue;
+    if(b.cyl){g.beginPath();g.arc(ux(b.x),uz(b.z),b.r*sc,0,Math.PI*2);g.fill();g.stroke();continue}
     g.fillRect(ux(b.min.x),uz(b.min.z),w*sc,d*sc);g.strokeRect(ux(b.min.x),uz(b.min.z),w*sc,d*sc)}
   return c;
 }
@@ -2097,7 +2232,7 @@ function updateTethers(dt){
   for(const v of [car,boat]){if(!v.tv)continue;
     if(v===boat){const nx=boat.pos.x+v.tv.x*dt,nz=boat.pos.z+v.tv.z*dt;if(ground(nx,nz)<-0.9){boat.pos.x=nx;boat.pos.z=nz}else v.tv.set(0,0,0)}
     else{car.pos.x+=v.tv.x*dt;car.pos.z+=v.tv.z*dt;
-      if(P.mode!=='car'){const sup=support(car.pos.x,car.pos.z,car.pos.y,0.5);if(!car.onGround){car.vy-=30*dt;car.pos.y+=car.vy*dt;if(car.pos.y<=sup){car.pos.y=sup;car.onGround=true;car.vy=0}}else if(sup<car.pos.y-0.9)car.onGround=false;else car.pos.y=sup;
+      if(P.mode!=='car'){const sup=support(car.pos.x,car.pos.z,car.pos.y,0.5,car);if(!car.onGround){car.vy-=30*dt;car.pos.y+=car.vy*dt;if(car.pos.y<=sup){car.pos.y=sup;car.onGround=true;car.vy=0}}else if(sup<car.pos.y-0.9)car.onGround=false;else car.pos.y=sup;
         if(car.pos.y<-0.6){sfx.splash();resetCar();v.tv.set(0,0,0)}}}
     v.tv.y=0;v.tv.multiplyScalar(Math.max(0,1-(v===car&&!car.onGround?0.3:2.5)*dt))}
   if(tethPending)tethPos(tethPending,tethMark.position);
@@ -2143,7 +2278,7 @@ function makeFlare(){
 // free ground for a vehicle: no building, roof or other vehicle in the way
 function spotFree(x,z,r,self){
   const g=ground(x,z);if(roofH(x,z)>-Infinity)return false;
-  for(const b of boxes)if(b.max.y>g+0.4&&b.min.y<g+14&&x>b.min.x-r&&x<b.max.x+r&&z>b.min.z-r&&z<b.max.z+r)return false;
+  for(const b of nearBoxes(x,z))if(!b.dyn&&b.max.y>g+0.4&&b.min.y<g+14&&x>b.min.x-r&&x<b.max.x+r&&z>b.min.z-r&&z<b.max.z+r)return false;
   for(const o of RIDES)if(o!==self&&Math.hypot(o.v.pos.x-x,o.v.pos.z-z)<r+4)return false;
   return true}
 // where a ride lands: in front of the camera if there's room, else the nearest free spot around you
