@@ -36,7 +36,7 @@ body.touch #mode{left:calc(16px + env(safe-area-inset-left,0px));transform:none;
 #corner button{width:40px;height:40px;border-radius:12px;border:2px solid rgba(255,255,255,.2);background:var(--navy-a);color:var(--cream);font:800 18px 'Baloo 2',system-ui,sans-serif;cursor:pointer}
 #under{inset:0;z-index:1;background:radial-gradient(ellipse at 50% 0%,rgba(120,220,255,.18),rgba(10,70,130,.38))}
 #corner button.on,#corner button.new{background:var(--gold);color:var(--navy)}
-#cross{left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;border:2px solid transparent;transition:border-color .15s,transform .15s}
+#cross{left:50%;top:60%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;border:2px solid transparent;transition:border-color .15s,transform .15s}
 #cross::after{content:"";position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:50%;background:rgba(255,255,255,.5);box-shadow:0 0 0 1px rgba(22,36,74,.2)}
 #cross.ok{border-color:rgba(255,201,60,.7)}
 #cross.ok::after{background:var(--gold)}
@@ -329,7 +329,9 @@ const sun=new THREE.DirectionalLight(0xfff0d0,0.82);
 sun.castShadow=true;const SM=isTouch?1024:2048;sun.shadow.mapSize.set(SM,SM);
 Object.assign(sun.shadow.camera,{left:-70,right:70,top:70,bottom:-70,near:10,far:320});
 sun.shadow.bias=-0.0006;scene.add(sun,sun.target);
-function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
+// the view is shifted up so the camera's aim point (and the crosshair) sits 10% below screen centre, showing more sky ahead
+const AIM_Y=0.1;
+function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.setViewOffset(innerWidth,innerHeight,0,-AIM_Y*innerHeight,innerWidth,innerHeight);camera.updateProjectionMatrix()}
 addEventListener('resize',resize);resize();
 
 const matCache={};
@@ -1703,7 +1705,7 @@ renderer.shadowMap.autoUpdate=false;
 PERF.mergeStatic(scene,[...noInk,...flags,...radar,...chickens.map(c=>c.ring),hookBall]);
 for(const p of props)PERF.mergeGroup(p.g);for(const b of bots)PERF.mergeGroup(b.g,[b.prop]);for(const c of clouds)PERF.mergeGroup(c);
 // hooks for concept shots
-const JP=window.JP={setStyle,fixed:null,world:{LG,LOOK,TOWN,BX},dbg:{P,cam,sfx,sbuf,heliSnd,heli,car,ship,boat,props,bots,chickens,S,gpad,keys,hold,ground,roofH,roofs:roofGeo,step(n){for(let i=0;i<n;i++){nowT+=1/60;update(1/60,nowT)}}},
+const JP=window.JP={setStyle,fixed:null,world:{LG,LOOK,TOWN,BX},dbg:{P,cam,camera,sfx,sbuf,heliSnd,heli,car,ship,boat,props,bots,chickens,S,gpad,keys,hold,ground,roofH,roofs:roofGeo,step(n){for(let i=0;i<n;i++){nowT+=1/60;update(1/60,nowT)}}},
   shot(o){
     JP.fixed=o;
     if(o.pup){P.pos.set(...o.pup.pos);P.face=o.pup.face??0;chute.visible=o.pup.mode==='chute';pup.wings.visible=o.pup.mode==='wing';pup.g.rotation.x=o.pup.mode==='wing'?0.75:0;
